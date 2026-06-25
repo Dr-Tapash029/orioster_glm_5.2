@@ -1,0 +1,166 @@
+// ORIOSTER — AI POWERED HMS
+// Offline-first, AI-assisted, multi-tenant Hospital Management System
+// Local SQLite is the primary runtime authority (adapting PowerSync concept)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Staff / Users ──────────────────────────────────────────────
+model Staff {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   // DOCTOR | NURSE | ADMIN | LAB_TECH
+  tenantId  String   @default("tenant-default")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patientsCreated  Patient[]      @relation("PatientCreatedBy")
+  appointmentsDoc  Appointment[]  @relation("AppointmentDoctor")
+  vitalsRecorded   Vitals[]       @relation("VitalsRecordedBy")
+  aiResults        AiResult[]     @relation("AiResultBy")
+  invoices         Invoice[]      @relation("InvoiceCreatedBy")
+  labReports       LabReport[]    @relation("LabReportBy")
+}
+
+// ── Patients ───────────────────────────────────────────────────
+model Patient {
+  id                 String   @id @default(cuid())
+  localId            String   @unique // device/session-generated id
+  fullName           String
+  gender             String   // MALE | FEMALE | OTHER
+  dateOfBirth        String   // ISO 8601
+  age                Int?
+  contact            String?
+  address            String?
+  localIdNumber      String?  // camp/clinic local id
+  bloodGroup         String?
+  heightCm           Float?
+  weightKg           Float?
+  profession         String?
+  education          String?
+  consentGiven       Boolean  @default(false)
+  tenantId           String   @default("tenant-default")
+  syncStatus         String   @default("DRAFT") // DRAFT | QUEUED | SYNCED | CONFLICT
+  status             String   @default("DRAFT") // DRAFT | IN_PROGRESS | COMPLETED | REVIEWED
+  duplicateHash      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  createdBy          String
+  createdByStaff     Staff    @relation("PatientCreatedBy", fields: [createdBy], references: [id])
+
+  vitals             Vitals[]
+  appointments       Appointment[]
+  summaries          PatientSummary[]
+  aiResults          AiResult[]
+  invoices           Invoice[]
+  labReports         LabReport[]
+  chiefComplaint     String?
+  pastHistory        String?  // JSON string of structured tags
+  ongoingMedications String?  // JSON string array
+  allergies          String?  // JSON string array
+  localSummary       String?  // patient_summary_v1 (de-identified)
+  notificationStatus String?  // PENDING | SENT | FAILED | QUEUED
+}
+
+// ── Vitals ─────────────────────────────────────────────────────
+model Vitals {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  temperature  Float?   // Celsius
+  bpSystolic   Float?
+  bpDiastolic  Float?
+  heartRate    Float?   // BPM
+  spo2         Float?   // percent
+  weightKg     Float?
+  heightCm     Float?
+  triageLevel  String?  // GREEN | YELLOW | RED (locally computed)
+  recordedAt   DateTime @default(now())
+  recordedBy   String
+  recordedByStaff Staff @relation("VitalsRecordedBy", fields: [recordedBy], references: [id])
+}
+
+// ── Appointments ───────────────────────────────────────────────
+model Appointment {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId     String
+  doctor       Staff    @relation("AppointmentDoctor", fields: [doctorId], references: [id])
+  scheduledAt  String   // ISO 8601
+  status       String   @default("SCHEDULED") // SCHEDULED | IN_PROGRESS | COMPLETED | CANCELLED
+  tenantId     String   @default("tenant-default")
+  reason       String?
+  createdAt    DateTime @default(now())
+}
+
+// ── Patient Summaries (encrypted concept — stored locally) ─────
+model PatientSummary {
+  id               String   @id @default(cuid())
+  patientId        String
+  patient          Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  summaryV1        String   // patient_summary_v1 — de-identified, compressed
+  encryptedSummary String?  // simulated AES-GCM encrypted blob
+  compressionRatio Float?   // >= 0.70 target
+  createdAt        DateTime @default(now())
+  createdBy        String?
+}
+
+// ── AI Results (Orio AI outputs — advisory only) ───────────────
+model AiResult {
+  id               String   @id @default(cuid())
+  patientId        String
+  patient          Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  taskType         String   // DIAGNOSIS | TREATMENT | RX_GENERATION | LAB_ANALYSIS | INVOICE | CERTIFICATE
+  summary          String
+  riskLevel        String   // low | moderate | high
+  confidence       Float    // 0.0 - 1.0
+  limitations      String   // JSON string array
+  recommendationType String @default("advisory")
+  disclaimer       String
+  tierUsed         Int      @default(1)
+  modelUsed        String?
+  fullOutput       String   // full JSON output
+  createdAt        DateTime @default(now())
+  createdBy        String
+  createdByStaff   Staff    @relation("AiResultBy", fields: [createdBy], references: [id])
+}
+
+// ── Invoices ───────────────────────────────────────────────────
+model Invoice {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  invoiceNo    String   @unique
+  items        String   // JSON string array of line items
+  subtotal     Float
+  tax          Float    @default(0)
+  total        Float
+  status       String   @default("PENDING") // PENDING | PAID | CANCELLED
+  createdAt    DateTime @default(now())
+  createdBy    String
+  createdByStaff Staff  @relation("InvoiceCreatedBy", fields: [createdBy], references: [id])
+}
+
+// ── Lab Reports ────────────────────────────────────────────────
+model LabReport {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  reportType   String   // CBC | LIPID_PANEL | LFT | RFT | BLOOD_GLUCOSE | URINALYSIS | THYROID
+  parameters   String   // JSON string array of {name, value, unit, refRange, status}
+  isNormal     Boolean?
+  aiFeedback   String?  // advisory feedback
+  status       String   @default("DRAFT") // DRAFT | COMPLETED | REVIEWED
+  createdAt    DateTime @default(now())
+  createdBy    String
+  createdByStaff Staff  @relation("LabReportBy", fields: [createdBy], references: [id])
+}

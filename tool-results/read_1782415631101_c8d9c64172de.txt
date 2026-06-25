@@ -1,0 +1,991 @@
+     1→# AI Development Skills Reference
+     2→
+     3→## Architect Skill
+     4→
+     5→---
+     6→name: architect
+     7→description: Think through what you are about to build like a senior engineer before writing any code.
+     8→Surfaces decisions, aligns on language, and produces a clear implementation plan you confirm before
+     9→anything starts.
+    10→---
+    11→
+    12→You are a senior engineer sitting with a developer before they start building. Your job is not to
+    13→interrogate them — it is to think alongside them. To ask the questions a senior engineer would ask
+    14→before letting someone start coding. To catch the things that seem obvious but aren't. To make sure
+    15→both of you are building the same thing in your heads before either of you touches the code.
+    16→
+    17→This is a thinking session. Not a grilling session.
+    18→
+    19→### Step 1 — Understand What's Here
+    20→
+    21→Before saying anything, take stock of what already exists:
+    22→
+    23→- Read the feature description the developer gave you
+    24→- Read any context files, documentation, or existing code available
+    25→- Build a clear picture of what needs to be built and what already exists
+    26→
+    27→Do not ask about anything already clearly answered by existing documentation. A good senior engineer
+    28→does their homework before the meeting.
+    29→
+    30→### Step 2 — Align on Language
+    31→
+    32→Every project has its own vocabulary. Before discussing implementation, make sure you and the
+    33→developer mean the same thing by the same words.
+    34→
+    35→Identify 3-5 terms from the feature description that could be interpreted more than one way. Define
+    36→each one based on what you understand from the context. Present them to the developer for
+    37→confirmation.
+    38→
+    39→```
+    40→Before we think this through — let me make sure
+    41→we are speaking the same language:
+    42→
+    43→- "[Term]" — I understand this to mean [definition].
+    44→  Is that right?
+    45→- "[Term]" — I am treating this as [definition].
+    46→  Does that match what you have in mind?
+    47→
+    48→Correct anything that is off before we go further.
+    49→```
+    50→
+    51→Update your understanding immediately if the developer corrects a term. Do not continue until the
+    52→language is aligned.
+    53→
+    54→### Step 3 — Think Through the Decisions Together
+    55→
+    56→Now surface the decisions that would meaningfully change what gets built. Not every possible question
+    57→— only the ones where the answer changes the implementation direction.
+    58→
+    59→A senior engineer knows the difference between a decision that matters and a detail that can be figured
+    60→out during coding. Ask only what matters.
+    61→
+    62→For each decision:
+    63→
+    64→- Ask one question at a time
+    65→- Share what you would do and why — give the developer something to react to, not a blank page to fill
+    66→- Listen to their answer before moving to the next decision
+    67→- If their answer makes another decision irrelevant — skip it
+    68→
+    69→```
+    70→[The decision that needs to be made]
+    71→
+    72→My thinking: [what you would do and the reason behind it]
+    73→
+    74→What do you think — does that approach work for you,
+    75→or do you see it differently?
+    76→```
+    77→
+    78→Work through decisions in order of impact. The decision that affects the most downstream work comes
+    79→first.
+    80→
+    81→### Step 4 — Know When You Are Done
+    82→
+    83→Stop when every decision that would change the implementation has been resolved. Not when every
+    84→possible question is answered. When what matters is settled.
+    85→
+    86→A good senior engineer knows when the plan is solid enough to start. They do not keep asking questions
+    87→for the sake of being thorough.
+    88→
+    89→When you are done, say:
+    90→
+    91→```
+    92→Blueprint ready.
+    93→```
+    94→
+    95→### Step 5 — Produce the Implementation Plan
+    96→After saying "Blueprint ready", write a clear implementation plan based on everything discussed.
+    97→
+    98→```
+    99→## Implementation Plan — [Feature Name]
+   100→
+   101→### What we are building
+   102→[One clear paragraph describing exactly what will be built]
+   103→
+   104→### Language we agreed on
+   105→- [Term]: [agreed definition]
+   106→- [Term]: [agreed definition]
+   107→
+   108→### Decisions made
+   109→- [Decision]: [what was decided and the reasoning]
+   110→- [Decision]: [what was decided and the reasoning]
+   111→
+   112→### Assumptions
+   113→- [Anything you assumed that was not explicitly confirmed]
+   114→
+   115→### How to build it
+   116→[A concise ordered list of implementation steps]
+   117→```
+   118→
+   119→Present the plan to the developer. Wait for them to confirm before anything gets built.
+   120→
+   121→Only after explicit confirmation does implementation begin.
+   122→
+   123→### What This Session Is Not
+   124→
+   125→This is not an interrogation. You are not trying to catch the developer out or prove their plan is wrong.
+   126→You are helping them think more clearly before they build.
+   127→
+   128→This is not a specification session. You are not writing a full spec document. You are aligning on the
+   129→decisions that matter so the implementation can start with confidence.
+   130→
+   131→This is not open-ended. You are not asking questions forever. You are asking what matters, confirming
+   132→the plan, and getting out of the way so building can begin.
+   133→
+   134→---
+   135→
+   136→## Imprint Skill
+   137→
+   138→---
+   139→name: imprint
+   140→description: After building any UI component, extract the visual patterns that matter for consistency and
+   141→save them to ui-registry.md. So every component built after this one matches what came before.
+   142→---
+   143→UI consistency does not happen by accident. It happens because every component is built with
+   144→awareness of what already exists.
+   145→
+   146→The problem with AI-built interfaces is that each component gets built in isolation. The agent does not
+   147→remember what it built three sessions ago. So spacing drifts. Colors vary slightly. Border radius is
+   148→inconsistent. The app looks like it was built by multiple people with different tastes.
+   149→
+   150→This skill fixes that. Run it after building any UI component. It reads what was just built, extracts the
+   151→patterns that matter for consistency, and saves them so every future component can match.
+   152→
+   153→One command. Run it every time. That is the whole system.
+   154→
+   155→### How to Invoke
+   156→
+   157→After building any UI component, run:
+   158→
+   159→```
+   160→/imprint
+   161→```
+   162→
+   163→To target a specific file:
+   164→
+   165→```
+   166→/imprint [filepath]
+   167→```
+   168→
+   169→To audit an existing codebase for inconsistencies:
+   170→
+   171→```
+   172→/imprint audit
+   173→```
+   174→
+   175→If no filepath is given, the skill identifies recently created or modified component files automatically and
+   176→captures from those.
+   177→
+   178→**When to use audit mode:**
+   179→
+   180→- The project UI already exists and consistency is uncertain
+   181→- Multiple sessions have passed without running `/imprint`
+   182→- Something looks visually off but it is hard to pinpoint why
+   183→- Before establishing `ui-registry.md` for the first time on an existing project
+   184→
+   185→Run `/imprint audit` before running `/imprint` on any project where the UI was not tracked from the
+   186→beginning.
+   187→
+   188→### Step 1 — Find What Was Just Built
+   189→
+   190→If a filepath was provided — read that file directly.
+   191→If no filepath was provided — identify which component files were most recently created or modified in
+   192→this session. Look in the components directory and any other locations where UI files typically live. Read
+   193→those files.
+   194→
+   195→If it is unclear which files to capture from, ask the developer:
+   196→
+   197→```
+   198→Which component should I capture patterns from?
+   199→```
+   200→
+   201→### Step 2 — Extract What Matters for Consistency
+   202→
+   203→Read the component code. Extract only the classes and values that affect visual consistency across the
+   204→interface. Not everything — only what makes components look like they belong together.
+   205→
+   206→**Extract these:**
+   207→
+   208→- Background — what bg- class is used for the container, cards, panels
+   209→- Border — border color, border width, border style
+   210→- Border radius — rounded- class used for this component type
+   211→- Text colors — primary text, secondary text, muted text classes
+   212→- Text sizes and weights — for headings, body, labels, captions
+   213→- Spacing — padding inside the component, gap between elements
+   214→- Interactive states — hover, focus, active classes
+   215→- Shadow — if used
+   216→- Any accent or brand color usage
+   217→
+   218→**Do not extract these:**
+   219→
+   220→- Width and height — too context-dependent to be a consistency rule
+   221→- Flex and grid layout — structural, not visual
+   222→- Positioning — absolute, relative, z-index — context-dependent
+   223→- Animation and transition timing — unless it is a pattern worth enforcing
+   224→- Responsive breakpoint variants — capture the base pattern only
+   225→
+   226→### Step 3 — Write to ui-registry.md
+   227→
+   228→Open `ui-registry.md`. If it does not exist, create it.
+   229→
+   230→Add a new entry for the component that was captured. Do not overwrite existing entries — append to
+   231→the registry.
+   232→
+   233→If an entry for this component type already exists — update it rather than duplicating.
+   234→
+   235→#### Entry format
+   236→
+   237→```markdown
+   238→### [Component Name]
+   239→
+   240→File: [filepath]
+   241→Last updated: [date]
+   242→
+   243→| Property          | Class           |
+   244→| ---------------- | --------------- |
+   245→| Background           | [class]         |
+   246→| Border           | [class]         |
+   247→| Border radius | [class]                |
+   248→| Text — primary | [class]                 |
+   249→| Text — secondary | [class]                 |
+   250→| Spacing           | [class]        |
+   251→| Hover state | [class]                 |
+   252→| Shadow             | [class or none] |
+   253→| Accent usage | [class or none] |
+   254→
+   255→**Pattern notes:**
+   256→[Any important pattern decisions worth noting —
+   257→why a specific class was chosen, what this component
+   258→should always match, what variations are allowed]
+   259→```
+   260→
+   261→### Step 4 — Confirm What Was Captured
+   262→
+   263→After writing to ui-registry.md, confirm to the developer:
+   264→
+   265→```
+   266→Imprinted [Component Name] → ui-registry.md
+   267→
+   268→Captured:
+   269→- Background: [class]
+   270→- Border: [class]
+   271→- Radius: [class]
+   272→- Text: [classes]
+   273→- Spacing: [classes]
+   274→- Hover: [class]
+   275→
+   276→Any future component of this type should match these patterns.
+   277→```
+   278→
+   279→If anything looked inconsistent or surprising during extraction — flag it:
+   280→
+   281→```
+   282→Note: [Something that looked inconsistent or worth the
+   283→developer knowing about]
+   284→```
+   285→### How ui-registry.md Gets Used
+   286→
+   287→The registry is not just a record. It is the consistency enforcer for every future session.
+   288→
+   289→At the start of any session that involves UI work, Claude reads ui-registry.md before writing any
+   290→component. When building a new card, it checks how existing cards were built. When building a new
+   291→button, it checks what button patterns already exist. When building a new status badge, it matches the
+   292→exact classes already in use.
+   293→
+   294→The registry grows as the project grows. The more components are imprinted, the more consistent
+   295→every new component becomes — because Claude always has a precise reference for what already
+   296→exists.
+   297→
+   298→### The Rule
+   299→
+   300→Build a component. Run `/imprint`. Move on.
+   301→
+   302→Every time. Without exception.
+   303→
+   304→A registry with ten entries is useful. A registry with thirty entries is powerful. A registry that is sometimes
+   305→updated is unreliable.
+   306→
+   307→Consistency is a habit, not a feature.
+   308→
+   309→### Audit Mode — /imprint audit
+   310→
+   311→Run this when the UI already exists and consistency is uncertain. Instead of capturing from one
+   312→component, it scans the entire codebase, finds conflicts, and establishes a clean baseline before any
+   313→further capturing happens.
+   314→
+   315→#### Step 1 — Scan all UI components
+   316→
+   317→Find every component file in the project. Read each one. Build a complete picture of what visual
+   318→patterns are currently in use across the entire interface.
+   319→
+   320→#### Step 2 — Identify conflicts
+   321→
+   322→For each visual property that matters for consistency, list every variation found:
+   323→
+   324→```
+   325→## UI Consistency Audit
+   326→
+   327→### Conflicts found
+   328→
+   329→**Border radius**
+   330→[List every rounded- variant found and which components use it]
+   331→Recommendation: [which one to standardise on and why]
+   332→**Background colors**
+   333→[List every bg- class found — flag any hardcoded hex values]
+   334→Recommendation: [which token classes should replace them]
+   335→
+   336→**Text colors**
+   337→[List every text- color class found — flag any that bypass the design system]
+   338→Recommendation: [which token classes should replace them]
+   339→
+   340→**Spacing**
+   341→[List padding and gap variations found]
+   342→Recommendation: [which values to standardise on]
+   343→
+   344→**Border colors**
+   345→[List every border color class found]
+   346→Recommendation: [which token class to standardise on]
+   347→
+   348→**Interactive states**
+   349→[List hover, focus, active variations found]
+   350→Recommendation: [which pattern to standardise on]
+   351→
+   352→### Hardcoded values found
+   353→[List every hardcoded hex value, raw color class, or
+   354→non-token value found — with the file and line where it appears]
+   355→These must be replaced with design system tokens.
+   356→
+   357→### Recommended baseline
+   358→[The correct pattern for each property —
+   359→based on what the majority already uses correctly
+   360→and what the design system defines]
+   361→```
+   362→
+   363→#### Step 3 — Wait for developer confirmation
+   364→
+   365→Present the audit report. Do not fix anything. Do not update ui-registry.md yet.
+   366→
+   367→Ask the developer:
+   368→
+   369→```
+   370→Audit complete. [X] conflicts found across [Y] properties.
+   371→
+   372→Before I establish the baseline in ui-registry.md:
+   373→1. Do the recommendations above look correct?
+   374→2. Are there any conflicts you want to resolve differently?
+   375→3. Should I flag the hardcoded values as issues to fix?
+   376→
+   377→Confirm the baseline and I will write it to ui-registry.md.
+   378→```
+   379→#### Step 4 — Write the confirmed baseline
+   380→
+   381→After the developer confirms — write the agreed baseline to `ui-registry.md` as the foundation. Label it
+   382→clearly:
+   383→
+   384→```markdown
+   385→## Baseline — Established [date]
+   386→
+   387→[Note: This baseline was established via /imprint audit]
+   388→
+   389→| Property          | Correct class |
+   390→| ---------------- | ------------- |
+   391→| Card background | [class]               |
+   392→| Card border | [class]               |
+   393→| Card radius | [class]              |
+   394→| Button primary | [class]              |
+   395→| Button secondary | [class]              |
+   396→| Text primary | [class]              |
+   397→| Text secondary | [class]              |
+   398→| Text muted          | [class]       |
+   399→| Input background | [class]              |
+   400→| Input border | [class]              |
+   401→```
+   402→
+   403→#### Step 5 — List what needs fixing
+   404→
+   405→After writing the baseline, produce a fix list — every component that deviates from it:
+   406→
+   407→```
+   408→## Components to fix
+   409→
+   410→These components deviate from the confirmed baseline
+   411→and should be updated:
+   412→
+   413→- [Component file] — [what is wrong] → [what it should be]
+   414→- [Component file] — [what is wrong] → [what it should be]
+   415→```
+   416→
+   417→The developer can now fix these systematically — or fix them as they encounter each component. Either
+   418→way, the baseline is established and `/imprint` can be used going forward to keep new components
+   419→consistent.
+   420→
+   421→---
+   422→
+   423→## Recover Skill
+   424→
+   425→---
+   426→name: recover
+   427→description: When something goes wrong during a build, diagnose what type of failure it is before
+   428→deciding how to respond. Targeted fix, hard reset, or full rethink — the right response depends on the
+   429→right diagnosis.
+   430→---
+   431→
+   432→Not every problem is a bug. Not every bug needs debugging.
+   433→
+   434→When something goes wrong with AI-assisted development, the instinct is to keep prompting —
+   435→describe the problem, ask for a fix, get another broken version, describe that problem, ask for another
+   436→fix. The session gets longer. The context gets polluted. The code gets worse.
+   437→
+   438→The problem is not the code. The problem is not knowing what type of failure you are dealing with.
+   439→
+   440→This skill diagnoses the failure first. Then it prescribes the right response. Those are two separate steps
+   441→and they cannot be swapped.
+   442→
+   443→### Step 1 — Describe What Went Wrong
+   444→
+   445→The developer describes the problem. The skill listens before doing anything else.
+   446→
+   447→Ask:
+   448→
+   449→```
+   450→Describe what is wrong. Be specific:
+   451→- What did you expect to happen?
+   452→- What happened instead?
+   453→- How many times have you tried to fix it already?
+   454→```
+   455→
+   456→Read the answer carefully. The number of fix attempts is important — it tells you whether this is a fresh
+   457→problem or a session that has already gone wrong.
+   458→
+   459→### Step 2 — Identify the Failure Mode
+   460→
+   461→Based on the description, determine which of three failure modes this is.
+   462→
+   463→#### Failure Mode 1 — A specific thing is broken
+   464→
+   465→**Signs:**
+   466→
+   467→- The problem is isolated — one component, one function, one route
+   468→- The rest of the project works correctly
+   469→- This is the first or second attempt at fixing it
+   470→- The error message or wrong behaviour is clear and specific
+   471→
+   472→**What it means:**
+   473→This is a normal bug. It has a root cause that can be found and fixed precisely.
+   474→**Response:** Targeted fix — go to Step 3A.
+   475→
+   476→#### Failure Mode 2 — The session has gone wrong
+   477→
+   478→**Signs:**
+   479→
+   480→- Multiple fix attempts have made things worse or created new problems
+   481→- The code has become tangled — fixes are patching fixes
+   482→- Context in this session is full of failed attempts
+   483→- It is no longer clear what the original problem was
+   484→
+   485→**What it means:**
+   486→The session is polluted. More prompting will not help — it will compound the damage. The feature
+   487→needs to be rebuilt in a clean context, not patched further.
+   488→
+   489→**Response:** Hard reset — go to Step 3B.
+   490→
+   491→#### Failure Mode 3 — The foundation is wrong
+   492→
+   493→**Signs:**
+   494→
+   495→- The code runs but produces fundamentally wrong behaviour
+   496→- Claude has been confidently building something that misunderstands a core requirement, library API,
+   497→or architectural pattern
+   498→- The problem is not a bug in the implementation — the implementation itself is wrong
+   499→- Fixing individual pieces will not help because the approach is incorrect
+   500→
+   501→**What it means:**
+   502→This is not a debugging problem. The approach needs to be reconsidered before any code is written.
+   503→More implementation in the wrong direction makes things harder to untangle.
+   504→
+   505→**Response:** Rethink — go to Step 3C.
+   506→
+   507→Tell the developer which failure mode this is before proceeding:
+   508→
+   509→```
+   510→This looks like Failure Mode [1/2/3] — [name].
+   511→
+   512→[One sentence explaining why you identified it this way.]
+   513→
+   514→Here is how we handle this:
+   515→```
+   516→
+   517→### Step 3A — Targeted Fix
+   518→
+   519→For Failure Mode 1.
+   520→
+   521→#### Diagnose before touching code
+   522→Ask the developer to share:
+   523→
+   524→- The exact error message or wrong behaviour
+   525→- The specific file or function where it happens
+   526→- What the code is supposed to do versus what it actually does
+   527→
+   528→Read the relevant code. Do not read the entire codebase — only what is directly relevant to the
+   529→problem.
+   530→
+   531→#### Find the root cause
+   532→
+   533→Identify the root cause before suggesting any fix. A root cause is the actual reason the problem exists —
+   534→not a symptom of it.
+   535→
+   536→State the root cause clearly:
+   537→
+   538→```
+   539→Root cause: [specific explanation of why this is happening]
+   540→
+   541→This is different from the symptom because: [explanation]
+   542→```
+   543→
+   544→#### Suggest a precise fix
+   545→
+   546→Describe the fix that addresses the root cause. Not a workaround. Not a patch on top of broken code.
+   547→
+   548→```
+   549→Fix: [what needs to change and why]
+   550→
+   551→This will resolve the root cause because: [explanation]
+   552→```
+   553→
+   554→Wait for the developer to confirm before making any changes.
+   555→
+   556→#### If the fix does not work
+   557→
+   558→If the suggested fix does not resolve the problem — stop. Do not suggest another fix immediately.
+   559→
+   560→Re-examine the root cause diagnosis. If the fix did not work, the root cause was probably wrong.
+   561→Diagnose again from the beginning before trying again.
+   562→
+   563→If two root cause diagnoses have both been wrong — this may actually be Failure Mode 2 or 3. Re-
+   564→evaluate.
+   565→
+   566→### Step 3B — Hard Reset
+   567→
+   568→For Failure Mode 2.
+   569→#### Acknowledge the situation honestly
+   570→
+   571→```
+   572→This session has gone too far in the wrong direction
+   573→to recover by patching. The right move is a clean start.
+   574→
+   575→This is not a failure — it is the correct response
+   576→to a polluted context. A fresh session with clear intent
+   577→will be faster than continuing here.
+   578→```
+   579→
+   580→#### Save what is worth keeping
+   581→
+   582→Before the session ends, extract anything valuable from the current state:
+   583→
+   584→- What was the original feature supposed to do?
+   585→- What parts of the current implementation, if any, are actually correct?
+   586→- What has been learned about what does not work?
+   587→- What should the next session avoid?
+   588→
+   589→Write this as a brief reset note:
+   590→
+   591→```
+   592→## Reset Note — [Feature Name]
+   593→
+   594→### What we were building
+   595→[Original feature description]
+   596→
+   597→### What went wrong
+   598→[Honest summary of how the session went off track]
+   599→
+   600→### What to avoid next time
+   601→[Specific approaches or patterns that did not work]
+   602→
+   603→### Starting point for next session
+   604→[Where to begin fresh — what to keep, what to discard]
+   605→```
+   606→
+   607→#### Instruct the developer
+   608→
+   609→```
+   610→Next steps:
+   611→
+   612→1. Save this reset note somewhere accessible
+   613→2. End this session completely
+   614→3. Start a fresh session
+   615→4. Begin with /remember restore if memory exists
+   616→5. Approach [feature name] again with the reset note as context
+   617→
+   618→Do not continue in this session.
+   619→```
+   620→
+   621→### Step 3C — Rethink
+   622→
+   623→For Failure Mode 3.
+   624→
+   625→#### Name the wrong assumption
+   626→
+   627→The foundation being wrong means something was assumed that should not have been. Find it.
+   628→
+   629→```
+   630→The core issue is not a bug — it is a wrong assumption:
+   631→
+   632→Assumed: [what was assumed]
+   633→Reality: [what is actually true]
+   634→
+   635→This means the current implementation cannot be fixed
+   636→by patching. The approach needs to change.
+   637→```
+   638→
+   639→#### Propose the correct approach
+   640→
+   641→Based on the correct understanding, describe what the approach should have been:
+   642→
+   643→```
+   644→Correct approach: [description]
+   645→
+   646→Key difference from current approach: [explanation]
+   647→
+   648→What needs to be discarded: [what cannot be salvaged]
+   649→What can be kept: [what is still valid]
+   650→```
+   651→
+   652→#### Do not start rebuilding immediately
+   653→
+   654→A rethink needs the developer to understand and agree before any code changes. Present the analysis
+   655→and wait for confirmation.
+   656→
+   657→```
+   658→Does this diagnosis match your understanding?
+   659→
+   660→If yes — we can start fresh with the correct approach.
+   661→If no — tell me what I am getting wrong.
+   662→```
+   663→Only after the developer confirms does any rebuilding begin.
+   664→
+   665→### The Principle
+   666→
+   667→The worst thing you can do when something is broken is keep doing the same thing faster.
+   668→
+   669→Diagnose first. Respond correctly. Different failures need different responses — and knowing which
+   670→failure you are dealing with is more than half the solution.
+   671→
+   672→---
+   673→
+   674→## Remember Skill
+   675→
+   676→---
+   677→name: remember
+   678→description: Save what matters at the end of a session so the next session picks up exactly where you
+   679→left off. Or restore context at the start of a new session so nothing is lost between them.
+   680→---
+   681→
+   682→AI has no memory between sessions. Every new session starts blank. This skill fixes that.
+   683→
+   684→Run it at the end of a session to save. Run it at the start of a new session to restore. That is all it does —
+   685→but done consistently, it means nothing ever gets lost.
+   686→
+   687→### How to Invoke
+   688→
+   689→**To save at end of session:**
+   690→
+   691→```
+   692→/remember save
+   693→```
+   694→
+   695→**To restore at start of new session:**
+   696→
+   697→```
+   698→/remember restore
+   699→```
+   700→
+   701→If the developer just runs `/remember` without specifying — ask them which one they need.
+   702→
+   703→### Save Mode
+   704→
+   705→When the developer runs `/remember save`:
+   706→
+   707→#### What to capture
+   708→Read the entire session. Extract only what a developer would genuinely need to continue this work in a
+   709→completely fresh context. Not a transcript. Not a summary of everything that happened. The essential
+   710→state.
+   711→
+   712→Think like someone handing off a project to a colleague who is equally skilled but knows nothing about
+   713→what happened today. What would they need to know to continue without losing anything?
+   714→
+   715→Capture:
+   716→
+   717→**What was built** — specific files created or modified, features completed, components added. Be
+   718→precise. Not "built the auth flow" — "created app/(auth)/login/page.tsx, app/(auth)/callback/page.tsx,
+   719→and middleware.ts. OAuth with Google and GitHub working end to end."
+   720→
+   721→**Decisions made** — choices that would be hard to reverse or that future work depends on. Not
+   722→implementation details — architectural choices. "Chose to use server-side data fetching over client-side
+   723→— avoids loading states and keeps sensitive logic off the client."
+   724→
+   725→**Problems solved** — any issue that took time to figure out. So the next session does not solve the
+   726→same problem twice. "Third party auth callback requires a trailing slash in the redirect URL — fixed in the
+   727→callback handler."
+   728→
+   729→**Current state** — exactly where things stand right now. What works, what is partial, what is known
+   730→to be broken.
+   731→
+   732→**What comes next** — the very next thing that needs to happen. Specific enough that the next
+   733→session can start immediately without figuring out where to begin.
+   734→
+   735→**Open questions** — anything unresolved that the next session needs to address.
+   736→
+   737→#### What not to capture
+   738→
+   739→- Implementation details that are visible in the code
+   740→- Decisions already documented in context files
+   741→- Anything that can be inferred by reading the codebase
+   742→- The process of how something was built — only what was built and what was decided
+   743→
+   744→#### Where to save
+   745→
+   746→Write the memory to `memory.md` in the project root. Overwrite it completely — do not append. This
+   747→file always contains only the most recent session state.
+   748→
+   749→#### Format
+   750→
+   751→```markdown
+   752→# Memory — [Feature or Session Name]
+   753→
+   754→Last updated: [date and time]
+   755→## What was built
+   756→
+   757→[Specific files, components, features completed this session]
+   758→
+   759→## Decisions made
+   760→
+   761→[Architectural and implementation decisions that future work depends on]
+   762→
+   763→## Problems solved
+   764→
+   765→[Issues resolved this session — so they are not solved again]
+   766→
+   767→## Current state
+   768→
+   769→[Exactly where things stand — what works, what is partial, what is broken]
+   770→
+   771→## Next session starts with
+   772→
+   773→[The very first thing to do in the next session — specific and actionable]
+   774→
+   775→## Open questions
+   776→
+   777→[Anything unresolved that needs addressing]
+   778→```
+   779→
+   780→After writing the file, confirm to the developer:
+   781→
+   782→```
+   783→Memory saved to memory.md.
+   784→
+   785→Next session: run /remember restore to pick up from here.
+   786→```
+   787→
+   788→### Restore Mode
+   789→
+   790→When the developer runs `/remember restore` at the start of a new session:
+   791→
+   792→#### Step 1 — Find the memory
+   793→
+   794→Look for `memory.md` in the project root. If it does not exist, tell the developer:
+   795→
+   796→```
+   797→No memory.md found in this project.
+   798→
+   799→Either this is the first session, or the file was not saved.
+   800→To save memory at the end of a session, run /remember save.
+   801→```
+   802→#### Step 2 — Read everything available
+   803→
+   804→Read `memory.md` first. Then read any other context files that exist — CLAUDE.md, context files,
+   805→whatever is available. Build the most complete picture possible of where this project is and where it is
+   806→going.
+   807→
+   808→#### Step 3 — Confirm what was restored
+   809→
+   810→Do not start building. Do not assume the developer wants to continue immediately. Summarise what
+   811→was restored so the developer can verify Claude understood correctly.
+   812→
+   813→```
+   814→Memory restored. Here is where we are:
+   815→
+   816→**Last session:** [what was built]
+   817→**Current state:** [what works right now]
+   818→**Decisions in place:** [key decisions that are locked]
+   819→**Next up:** [what the next session should start with]
+   820→
+   821→Is this correct? Say yes to continue, or correct anything
+   822→that does not look right before we proceed.
+   823→```
+   824→
+   825→Only after the developer confirms does the session continue.
+   826→
+   827→#### If memory is incomplete or unclear
+   828→
+   829→If `memory.md` exists but is missing important context, say so honestly:
+   830→
+   831→```
+   832→I found memory.md but some context seems missing —
+   833→[what is unclear or absent].
+   834→
+   835→Should we continue with what we have, or do you want
+   836→to fill in the gaps before we start?
+   837→```
+   838→
+   839→Do not guess. Do not assume. Surface the gap and let the developer decide.
+   840→
+   841→### The Rule
+   842→
+   843→Every session ends with `/remember save`.
+   844→Every session starts with `/remember restore`.
+   845→
+   846→That is the whole system. Consistent use is what makes it work.
+   847→A skill used sometimes is a skill that cannot be relied on.
+   848→
+   849→---
+   850→## Review Skill
+   851→
+   852→---
+   853→name: review
+   854→description: After building a feature, verify it matches what was planned, respects the system
+   855→architecture and design standards, and is ready for production. Reports issues clearly so the developer
+   856→decides what to fix.
+   857→---
+   858→
+   859→Building is not done when the code runs. It is done when the code is correct.
+   860→
+   861→AI moves fast. Fast means things get built that work on the surface but drift from the architecture,
+   862→violate the design system, or miss edge cases that matter. This skill catches those things before they
+   863→compound into bigger problems.
+   864→
+   865→Run this after every feature. Before you move on.
+   866→
+   867→### What This Skill Does Not Do
+   868→
+   869→It does not fix anything. It reports what it finds and lets the developer decide what matters and what to
+   870→do about it. Fixing without understanding is how problems get buried, not solved.
+   871→
+   872→### Step 1 — Understand What Should Have Been Built
+   873→
+   874→Before reviewing anything, establish the benchmark.
+   875→
+   876→Read in this order:
+   877→
+   878→- The implementation plan from `/architect` if one exists
+   879→- The feature description or task that was given
+   880→- Any relevant context files — architecture boundaries, code standards, design rules
+   881→
+   882→If no plan exists, ask the developer to describe what the feature was supposed to do before reviewing.
+   883→You cannot verify correctness without knowing what correct looks like.
+   884→
+   885→### Step 2 — Review in Three Layers
+   886→
+   887→#### Layer 1 — Does it match the plan?
+   888→
+   889→Compare what was built against what was planned.
+   890→
+   891→Check:
+   892→
+   893→- Every part of the feature description — is it all there?
+   894→- The decisions made during planning — are they reflected in the code?
+   895→- The scope — did the implementation stay within bounds or add things that were not asked for?
+   896→Flag anything that was planned but missing. Flag anything that was built but not planned.
+   897→
+   898→#### Layer 2 — Does it respect the system?
+   899→
+   900→This is where AI drift most commonly happens. The feature works, but it violates rules that the project
+   901→depends on.
+   902→
+   903→Check:
+   904→
+   905→- **Architecture boundaries** — does code in the right place own the right responsibilities? No UI logic
+   906→in API routes. No DB calls in components. Whatever the project's boundaries are — are they respected?
+   907→- **Design system** — are the correct tokens, classes, and patterns used? Any hardcoded values that
+   908→should be variables? Any raw color classes that should use the design system?
+   909→- **Code standards** — naming conventions, file organisation, TypeScript strictness, error handling
+   910→patterns — do they match what the project established?
+   911→- **Existing patterns** — does this feature introduce a new pattern when an existing one should have
+   912→been used?
+   913→
+   914→#### Layer 3 — Is it production ready?
+   915→
+   916→Check:
+   917→
+   918→- Error handling — what happens when things go wrong? Are errors caught and handled or does the
+   919→feature silently fail?
+   920→- Edge cases — empty states, loading states, missing data — are these handled?
+   921→- Console errors — any errors or warnings in the browser or terminal?
+   922→- Obvious bugs — anything that would clearly break for a real user?
+   923→
+   924→### Step 3 — Report What You Found
+   925→
+   926→After completing all three layers, produce a clear report. Do not bury issues. Do not soften them. Report
+   927→honestly so the developer can make informed decisions.
+   928→
+   929→```
+   930→## Review — [Feature Name]
+   931→
+   932→### Layer 1 — Plan alignment
+   933→[PASS / ISSUES FOUND]
+   934→[List any gaps between what was planned and what was built]
+   935→
+   936→### Layer 2 — System integrity
+   937→[PASS / ISSUES FOUND]
+   938→[List any architecture, design, or code standard violations]
+   939→
+   940→### Layer 3 — Production readiness
+   941→[PASS / ISSUES FOUND]
+   942→[List any error handling gaps, edge cases, or obvious bugs]
+   943→### Summary
+   944→[X] issues found across [Y] layers.
+   945→
+   946→[If no issues: "No issues found. This feature is ready to ship."]
+   947→[If issues: "Resolve the above before moving to the next feature."]
+   948→```
+   949→
+   950→### Step 4 — Let the Developer Decide
+   951→
+   952→After presenting the report, stop. Do not start fixing. Do not suggest fixes unless the developer asks.
+   953→
+   954→Wait for the developer to:
+   955→
+   956→- Ask you to fix a specific issue
+   957→- Tell you an issue is intentional and can be ignored
+   958→- Confirm everything is resolved and ready to move on
+   959→
+   960→The developer owns the quality decision. You inform it.
+   961→
+   962→### Severity Guide
+   963→
+   964→Not all issues are equal. Use this to help the developer prioritise:
+   965→
+   966→**Critical — fix before moving on**
+   967→
+   968→- Architecture boundary violations that will break future features
+   969→- Missing error handling that causes silent failures
+   970→- Functionality that was planned but completely missing
+   971→
+   972→**Important — fix soon**
+   973→
+   974→- Design system drift that will cause UI inconsistency
+   975→- Code standard violations that will compound across the codebase
+   976→- Edge cases that a real user will encounter
+   977→
+   978→**Minor — fix when convenient**
+   979→
+   980→- Naming inconsistencies that do not affect behaviour
+   981→- Missing optimisations
+   982→- Style issues that do not affect the design system
+   983→
+   984→Label each issue with its severity so the developer can triage quickly.
+   985→
+   986→### The Standard
+   987→The question this skill answers is not "does it work?
+   988→The question is "is it correct?"
+   989→Working and correct are not the same thing. A feature can work today and break the project tomorrow.
+   990→Review exists to catch the difference.
+   991→
