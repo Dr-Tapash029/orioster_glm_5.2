@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -11,9 +11,11 @@ const inter = Inter({
   display: "swap",
 });
 
-const jetMono = JetBrains_Mono({
-  variable: "--font-geist-mono",
+// Sora as a close approximation to Wope's "Rebond Grotesque" heading font
+const sora = Sora({
+  variable: "--font-heading",
   subsets: ["latin"],
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
@@ -32,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${inter.variable} ${jetMono.variable} antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${sora.variable} antialiased bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"

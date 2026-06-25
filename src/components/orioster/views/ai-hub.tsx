@@ -138,7 +138,7 @@ const DOC_CARDS: Array<{
     title: 'Prescription',
     description: 'AI generates an advisory prescription with dosage, frequency, and notes.',
     icon: <Pill className="h-5 w-5" />,
-    accent: 'bg-cyan-500/15 text-cyan-300',
+    accent: 'bg-violet-500/15 text-violet-300',
     task: 'RX_GENERATION',
   },
   {
@@ -186,7 +186,7 @@ export function AiHubView() {
       <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
               <LayoutGrid className="h-6 w-6" />
             </div>
             <div>
@@ -486,7 +486,7 @@ function DocWorkflow({
           {/* Loading inline */}
           {loading && !result && (
             <div className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-10">
-              <Loader2 className="h-5 w-5 animate-spin text-cyan-300" />
+              <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
               <div>
                 <p className="text-sm font-medium">Generating {card.title.toLowerCase()}…</p>
                 <p className="text-[11px] text-slate-400">AI is processing the de-identified summary</p>
@@ -787,7 +787,7 @@ function ResultDisplay({
       {docType === 'CERTIFICATE' && (
         <GlassPanel className="p-5">
           <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-            <FileBadge className="h-5 w-5 text-cyan-300" />
+            <FileBadge className="h-5 w-5 text-violet-300" />
             <p className="text-sm font-semibold">Medical Certificate — Draft</p>
             <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
               <AlertTriangle className="h-2.5 w-2.5" /> Requires doctor signature
@@ -894,7 +894,7 @@ function PatientPickerInline({
                     onClick={() => { onChange(p.id); setOpen(false); setSearch('') }}
                     className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/5"
                   >
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-[10px] font-semibold text-cyan-300">
+                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-[10px] font-semibold text-violet-300">
                       {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">

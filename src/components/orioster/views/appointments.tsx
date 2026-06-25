@@ -35,7 +35,7 @@ interface Doctor { id: string; name: string }
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
   SCHEDULED: { label: 'Scheduled', cls: 'bg-amber-500/15 text-amber-300', icon: <Clock className="h-3 w-3" /> },
-  IN_PROGRESS: { label: 'In Progress', cls: 'bg-cyan-500/15 text-cyan-300', icon: <Activity className="h-3 w-3" /> },
+  IN_PROGRESS: { label: 'In Progress', cls: 'bg-violet-500/15 text-violet-300', icon: <Activity className="h-3 w-3" /> },
   COMPLETED: { label: 'Completed', cls: 'bg-emerald-500/15 text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
   CANCELLED: { label: 'Cancelled', cls: 'bg-red-500/15 text-red-400', icon: <XCircle className="h-3 w-3" /> },
 }
@@ -195,7 +195,7 @@ export function AppointmentsView() {
             className={cn(
               'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
               statusFilter === s
-                ? 'border-cyan-500/30 bg-cyan-500/15 text-cyan-300'
+                ? 'border-violet-500/30 bg-violet-500/15 text-violet-300'
                 : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
             )}
           >
@@ -206,7 +206,7 @@ export function AppointmentsView() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
         </div>
       ) : appointments.length === 0 ? (
         <GlassPanel className="flex flex-col items-center justify-center gap-3 py-16 text-center">
@@ -230,7 +230,7 @@ export function AppointmentsView() {
                   <div className="min-w-0">
                     <button
                       onClick={() => { setActivePatient(a.patientId); setView('patient-detail') }}
-                      className="truncate text-left font-semibold text-slate-100 hover:text-cyan-300 hover:underline"
+                      className="truncate text-left font-semibold text-slate-100 hover:text-violet-300 hover:underline"
                     >
                       {a.patient.fullName}
                     </button>

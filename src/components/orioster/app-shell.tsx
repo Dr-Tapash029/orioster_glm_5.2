@@ -74,23 +74,23 @@ export function AppShell({ children }: { children: ReactNode }) {
     .toUpperCase()
 
   return (
-    <div className="mh-bg flex min-h-screen flex-col">
+    <div className="wope-bg flex min-h-screen flex-col">
       <OfflineBanner online={online} />
 
       {/* ═══ Top Navigation Bar ════════════════════════════════ */}
-      <header className="sticky top-0 z-30 border-b border-cyan-500/10 bg-[#061425]/80 backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 border-b border-violet-500/10 bg-[#0a0118]/80 backdrop-blur-2xl">
         <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
           {/* Left: Logo with breathing glow */}
           <button
             onClick={() => navigate('dashboard')}
             className="flex items-center gap-2.5"
           >
-            <div className="mh-logo-glow flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-[#061425]">
+            <div className="wope-logo-glow flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
               <HeartPulse className="h-6 w-6" />
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-bold leading-none tracking-wide text-slate-100">ORIOSTER</p>
-              <p className="text-[10px] font-medium tracking-wider text-cyan-400">AI-POWERED HMS</p>
+              <p className="text-[10px] font-medium tracking-wider text-violet-400">AI-POWERED HMS</p>
             </div>
           </button>
 
@@ -121,16 +121,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
 
             {/* Notifications */}
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-cyan-300">
+            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300">
               <Bell className="h-4.5 w-4.5" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-cyan-400 mh-pulse" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-violet-400 wope-pulse" />
             </button>
 
             {/* AI Assistant quick access */}
             {(role === 'DOCTOR' || role === 'ADMIN') && (
               <button
                 onClick={() => navigate('orio-ai')}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-cyan-500/10 hover:text-cyan-300"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-violet-500/10 hover:text-violet-300"
                 title="Orio AI Assistant"
               >
                 <Sparkles className="h-4.5 w-4.5" />
@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {/* Profile */}
             <div className="hidden items-center gap-2 rounded-lg border border-white/10 bg-white/5 py-1 pl-1 pr-3 sm:flex">
               <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-cyan-500/20 text-[11px] font-semibold text-cyan-300">
+                <AvatarFallback className="bg-violet-500/20 text-[11px] font-semibold text-violet-300">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         {/* Horizontal nav row (desktop) */}
-        <nav className="hidden items-center gap-0.5 border-t border-cyan-500/5 px-4 md:flex sm:px-6">
+        <nav className="hidden items-center gap-0.5 border-t border-violet-500/5 px-4 md:flex sm:px-6">
           {visibleNav.map((item) => (
             <NavTab
               key={item.key}
@@ -187,15 +187,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-72 border-r border-cyan-500/15 bg-[#061425] p-4 shadow-2xl">
+          <div className="absolute left-0 top-0 h-full w-72 border-r border-violet-500/15 bg-[#0a0118] p-4 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="mh-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-[#061425]">
+                <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
                   <HeartPulse className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-100">ORIOSTER</p>
-                  <p className="text-[10px] text-cyan-400">AI-POWERED HMS</p>
+                  <p className="text-[10px] text-violet-400">AI-POWERED HMS</p>
                 </div>
               </div>
               <button onClick={() => setMobileOpen(false)} className="rounded-lg p-1 text-slate-400 hover:bg-white/5">
@@ -238,10 +238,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="min-w-0 flex-1 p-3 sm:p-5 lg:p-6">{children}</main>
 
       {/* Sticky footer */}
-      <footer className="mt-auto border-t border-cyan-500/10 bg-[#061425]/60 px-4 py-3 backdrop-blur-md">
+      <footer className="mt-auto border-t border-violet-500/10 bg-[#0a0118]/60 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-cyan-400">ORIOSTER</span>
+            <span className="font-semibold text-violet-400">ORIOSTER</span>
             <span className="hidden sm:inline">·</span>
             <span className="hidden sm:inline">Hospital Operations</span>
             <span>·</span>
@@ -258,7 +258,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Horizontal nav tab (desktop) ──────────────────────────────
+// ── Horizontal nav tab (desktop) — Wope pill style ───────────
 function NavTab({
   item,
   active,
@@ -272,10 +272,10 @@ function NavTab({
     <button
       onClick={onClick}
       className={cn(
-        'nav-tab-indicator btn-press ripple flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-all',
+        'btn-press ripple flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all',
         active
-          ? 'active border-cyan-400 text-cyan-300'
-          : 'border-transparent text-slate-400 hover:text-slate-200'
+          ? 'bg-violet-500/15 text-white shadow-[0_0_20px_rgba(113,61,255,0.20)]'
+          : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
       )}
     >
       <span className="transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
@@ -300,7 +300,7 @@ function NavButton({
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all',
         active
-          ? 'bg-cyan-500/15 text-cyan-300 shadow-[0_0_20px_rgba(54,184,216,0.15)]'
+          ? 'bg-violet-500/15 text-violet-300 shadow-[0_0_20px_rgba(54,184,216,0.15)]'
           : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
       )}
     >

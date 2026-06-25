@@ -251,18 +251,18 @@ export function InvoicesView() {
                   <div className="mt-3 space-y-1 border-t border-white/10 pt-2 text-xs">
                     <div className="flex justify-between"><span className="text-slate-400">Subtotal</span><span className="font-medium tabular-nums text-slate-100">৳{subtotal.toLocaleString()}</span></div>
                     <div className="flex justify-between"><span className="text-slate-400">Tax (5%)</span><span className="font-medium tabular-nums text-slate-100">৳{tax.toLocaleString()}</span></div>
-                    <div className="flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-cyan-300">৳{total.toLocaleString()}</span></div>
+                    <div className="flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-violet-300">৳{total.toLocaleString()}</span></div>
                   </div>
                 </div>
 
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-slate-300">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-xs text-slate-300">
                   <input
                     type="checkbox"
                     checked={useAi}
                     onChange={(e) => setUseAi(e.target.checked)}
                     className="h-4 w-4 rounded accent-cyan-500"
                   />
-                  <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                  <Sparkles className="h-3.5 w-3.5 text-violet-400" />
                   <span>Use AI to suggest line items (advisory — requires Step 8 summary)</span>
                 </label>
 
@@ -281,7 +281,7 @@ export function InvoicesView() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
         </div>
       ) : invoices.length === 0 ? (
         <GlassPanel className="flex flex-col items-center justify-center gap-3 py-16 text-center">
@@ -303,12 +303,12 @@ export function InvoicesView() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <Receipt className="h-4 w-4 text-cyan-400" />
+                      <Receipt className="h-4 w-4 text-violet-400" />
                       <span className="font-mono text-sm font-semibold text-slate-100">{inv.invoiceNo}</span>
                     </div>
                     <button
                       onClick={() => { setActivePatient(inv.patient.id); setView('patient-detail') }}
-                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-cyan-300 hover:underline"
+                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-violet-300 hover:underline"
                     >
                       {inv.patient.fullName}
                     </button>
@@ -338,7 +338,7 @@ export function InvoicesView() {
                 <div className="mt-3 border-t border-white/10 pt-2 text-xs">
                   <div className="flex justify-between"><span className="text-slate-400">Subtotal</span><span className="tabular-nums text-slate-100">৳{inv.subtotal.toLocaleString()}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">Tax</span><span className="tabular-nums text-slate-100">৳{inv.tax.toLocaleString()}</span></div>
-                  <div className="mt-1 flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-cyan-300">৳{inv.total.toLocaleString()}</span></div>
+                  <div className="mt-1 flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-violet-300">৳{inv.total.toLocaleString()}</span></div>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">

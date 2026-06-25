@@ -106,7 +106,7 @@ export function PatientsListView() {
       <GlassPanel className="overflow-hidden p-0">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
           </div>
         ) : patients.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
@@ -151,7 +151,7 @@ export function PatientsListView() {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-xs font-semibold text-cyan-300">
+                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-300">
                           {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                         </div>
                         <div className="min-w-0">
@@ -181,7 +181,7 @@ export function PatientsListView() {
                       <div className="flex items-center gap-2 text-[11px] text-slate-400">
                         {p._count.aiResults > 0 && (
                           <span className="inline-flex items-center gap-0.5" title="AI results">
-                            <Sparkles className="h-3 w-3 text-cyan-400" />
+                            <Sparkles className="h-3 w-3 text-violet-400" />
                             {p._count.aiResults}
                           </span>
                         )}
@@ -226,7 +226,7 @@ function StatusPill({ status }: { status: string }) {
     DRAFT: 'bg-white/5 text-slate-400',
     IN_PROGRESS: 'bg-amber-500/15 text-amber-300',
     COMPLETED: 'bg-emerald-500/15 text-emerald-300',
-    REVIEWED: 'bg-cyan-500/15 text-cyan-300',
+    REVIEWED: 'bg-violet-500/15 text-violet-300',
   }
   const label: Record<string, string> = {
     DRAFT: 'Draft',

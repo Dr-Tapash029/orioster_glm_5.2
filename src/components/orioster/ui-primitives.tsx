@@ -2,7 +2,7 @@
 
 // ═══════════════════════════════════════════════════════════════
 // ORIOSTER HMS — Shared UI primitives
-// Dark navy + cyan glow glassmorphism design system
+// Dark purple + violet glow glassmorphism design system
 // ═══════════════════════════════════════════════════════════════
 
 import { cn } from '@/lib/utils'
@@ -121,7 +121,7 @@ export function RiskBadge({ level }: { level: RiskLevel }) {
 // ── Role Badge ────────────────────────────────────────────────
 export function RoleBadge({ role }: { role: string }) {
   const config: Record<string, { label: string; cls: string }> = {
-    DOCTOR: { label: 'Doctor', cls: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' },
+    DOCTOR: { label: 'Doctor', cls: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
     NURSE: { label: 'Nurse', cls: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
     ADMIN: { label: 'Admin', cls: 'bg-white/10 text-slate-200 border-white/20' },
     LAB_TECH: { label: 'Lab Tech', cls: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
@@ -162,7 +162,7 @@ export function ConfidenceMeter({ value }: { value: number }) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="w-10 text-right text-xs font-semibold tabular-nums text-cyan-300">{pct}%</span>
+      <span className="w-10 text-right text-xs font-semibold tabular-nums text-violet-300">{pct}%</span>
     </div>
   )
 }
@@ -214,9 +214,9 @@ export function StatCard({
   const accents: Record<string, { card: string; iconBg: string; iconColor: string; valueColor: string }> = {
     cyan: {
       card: 'kpi-cyan',
-      iconBg: 'bg-cyan-500/20',
-      iconColor: 'text-cyan-300',
-      valueColor: 'text-cyan-100',
+      iconBg: 'bg-violet-500/20',
+      iconColor: 'text-violet-300',
+      valueColor: 'text-violet-100',
     },
     amber: {
       card: 'kpi-amber',

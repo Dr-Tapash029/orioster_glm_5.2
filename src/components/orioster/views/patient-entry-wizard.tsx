@@ -380,7 +380,7 @@ export function PatientEntryWizard() {
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
       </div>
     )
   }
@@ -449,10 +449,10 @@ export function PatientEntryWizard() {
                 className={cn(
                   'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold',
                   currentStep === 8
-                    ? 'bg-cyan-500/15 text-cyan-300 glow-cyan'
+                    ? 'bg-violet-500/15 text-violet-300 glow-violet'
                     : currentStep === 9
                       ? 'bg-violet-500/15 text-violet-300'
-                      : 'bg-cyan-500/15 text-cyan-300'
+                      : 'bg-violet-500/15 text-violet-300'
                 )}
               >
                 {completedSteps.has(currentStep) ? <Check className="h-5 w-5" /> : currentStep}
@@ -461,7 +461,7 @@ export function PatientEntryWizard() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-base font-semibold sm:text-lg">{currentStepMeta.title}</h2>
                   {currentStep === 8 && (
-                    <Badge className="gap-1 bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/30">
+                    <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30">
                       <ShieldCheck className="h-3 w-3" /> Privacy Firewall
                     </Badge>
                   )}
@@ -568,7 +568,7 @@ function ProgressRail({
         <span className="text-xs font-medium text-slate-400">
           Step {currentStep} of {WIZARD_STEPS.length}
         </span>
-        <span className="text-xs font-semibold text-cyan-300">
+        <span className="text-xs font-semibold text-violet-300">
           {Math.round(((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100)}% complete
         </span>
       </div>
@@ -586,7 +586,7 @@ function ProgressRail({
                 onClick={() => onJump(s.id)}
                 className={cn(
                   'inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
-                  isCurrent && 'border-cyan-400 bg-cyan-500 text-cyan-950',
+                  isCurrent && 'border-violet-400 bg-violet-500 text-white',
                   !isCurrent && isDone && 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
                   !isCurrent && !isDone && canJump && 'border-white/10 bg-white/5 text-slate-400',
                   !canJump && 'border-white/10 bg-white/5 text-slate-500 cursor-not-allowed'
@@ -641,7 +641,7 @@ function VerticalStepper({
                 onClick={() => onJump(s.id)}
                 className={cn(
                   'group flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors',
-                  isCurrent && 'bg-cyan-500/10',
+                  isCurrent && 'bg-violet-500/10',
                   !isCurrent && !isLocked && 'hover:bg-white/10',
                   isLocked && 'cursor-not-allowed opacity-60'
                 )}
@@ -650,7 +650,7 @@ function VerticalStepper({
                   className={cn(
                     'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border text-[11px] font-bold',
                     isDone && 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300',
-                    !isDone && isCurrent && 'border-cyan-400 bg-cyan-500 text-cyan-950',
+                    !isDone && isCurrent && 'border-violet-400 bg-violet-500 text-white',
                     !isDone && !isCurrent && 'border-white/10 bg-background text-slate-400'
                   )}
                 >
@@ -1109,7 +1109,7 @@ function StepHistory({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
                   active && isNone && 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300',
-                  active && !isNone && 'border-cyan-400 bg-cyan-500 text-cyan-950',
+                  active && !isNone && 'border-violet-400 bg-violet-500 text-white',
                   !active && 'border-white/10 bg-white/5 text-slate-400 hover:bg-white/5'
                 )}
               >
@@ -1398,7 +1398,7 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
       {/* Triage preview */}
       <GlassPanel variant="subtle" className="flex items-center justify-between p-3">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-cyan-300" />
+          <Activity className="h-4 w-4 text-violet-300" />
           <span className="text-sm font-medium">Local triage level (computed, no AI)</span>
         </div>
         <TriageBadge level={triagePreview} />
@@ -1765,7 +1765,7 @@ function StepDoctor({ patient, onAdvance, triggerSaved }: StepProps) {
 
           {doctorId && date && slot && (
             <GlassPanel variant="subtle" className="flex items-center gap-3 p-3">
-              <Calendar className="h-4 w-4 text-cyan-300" />
+              <Calendar className="h-4 w-4 text-violet-300" />
               <p className="text-sm">
                 <span className="font-medium">
                   {doctors.find((d) => d.id === doctorId)?.name}
@@ -1859,16 +1859,16 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
   return (
     <div className="space-y-4">
       {/* Firewall banner */}
-      <GlassPanel variant="subtle" className="border-cyan-500/30 bg-cyan-500/5 p-4 glow-cyan">
+      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4 glow-violet">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-semibold">Privacy Firewall</p>
               {hasGenerated && (
-                <Badge className="gap-1 bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/30">
+                <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30">
                   <Check className="h-3 w-3" /> Complete
                 </Badge>
               )}
@@ -1895,7 +1895,7 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
 
       {generating && !hasGenerated && (
         <GlassPanel variant="subtle" className="flex items-center gap-3 p-6">
-          <Loader2 className="h-5 w-5 animate-spin text-cyan-300" />
+          <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
           <div>
             <p className="text-sm font-medium">Generating patient_summary_v1…</p>
             <p className="text-xs text-slate-400">Compressing structured data, stripping PHI…</p>
@@ -1967,7 +1967,7 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
           {/* What the AI sees */}
           <GlassPanel variant="subtle" className="p-3">
             <div className="flex items-start gap-2 text-xs">
-              <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-cyan-300" />
+              <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-violet-300" />
               <p className="text-slate-400">
                 The next step (Notify Doctor) will call the Orio AI service. The AI will receive{' '}
                 <strong>only the summary above</strong> — no name, no contact, no address, no local ID.
@@ -2064,7 +2064,7 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
   return (
     <div className="space-y-4">
       {/* AI context banner */}
-      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4 glow-cyan">
+      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4 glow-violet">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
             <Sparkles className="h-5 w-5" />
@@ -2166,7 +2166,7 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
                 <ul className="space-y-1">
                   {aiOutput.advice.map((a, i) => (
                     <li key={i} className="flex gap-2 text-xs text-slate-100/80">
-                      <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-cyan-400" />
+                      <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-violet-400" />
                       {a}
                     </li>
                   ))}
@@ -2342,7 +2342,7 @@ function StepReview({
     <div className="space-y-4">
       <GlassPanel variant="subtle" className="p-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
             <ClipboardCheck className="h-5 w-5" />
           </div>
           <div>
@@ -2364,7 +2364,7 @@ function StepReview({
               c.verified
                 ? 'border-emerald-500/30 bg-emerald-500/5'
                 : checked[c.id]
-                  ? 'border-cyan-500/30 bg-cyan-500/10'
+                  ? 'border-violet-500/30 bg-violet-500/10'
                   : 'border-white/10 bg-white/5 hover:bg-white/5',
               c.verified && 'cursor-default'
             )}

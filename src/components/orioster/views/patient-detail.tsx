@@ -168,7 +168,7 @@ export function PatientDetailView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
       </div>
     )
   }
@@ -205,7 +205,7 @@ export function PatientDetailView() {
       <GlassPanel variant="strong" className="p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-cyan-500/15 text-lg font-bold text-cyan-300">
+            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-violet-500/15 text-lg font-bold text-violet-300">
               {patient.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
             </div>
             <div>
@@ -221,7 +221,7 @@ export function PatientDetailView() {
                 <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
                 {latestTriage && <TriageBadge level={latestTriage} />}
                 {firewallOk ? (
-                  <Badge className="gap-1 bg-cyan-500/15 text-cyan-300">
+                  <Badge className="gap-1 bg-violet-500/15 text-violet-300">
                     <Lock className="h-3 w-3" /> Firewall Active
                   </Badge>
                 ) : (
@@ -354,7 +354,7 @@ function OverviewTab({
           subtitle="De-identified, compressed summary that AI receives"
           action={
             patient.localSummary ? (
-              <Badge className="gap-1 bg-cyan-500/15 text-cyan-300">
+              <Badge className="gap-1 bg-violet-500/15 text-violet-300">
                 <Lock className="h-3 w-3" /> Generated
               </Badge>
             ) : (
@@ -365,8 +365,8 @@ function OverviewTab({
           }
         />
         {patient.localSummary ? (
-          <div className="mt-4 rounded-xl border border-cyan-500/25 bg-cyan-500/5 p-4 glow-cyan">
-            <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
+          <div className="mt-4 rounded-xl border border-violet-500/25 bg-violet-500/5 p-4 glow-violet">
+            <div className="flex items-center gap-2 text-xs font-semibold text-violet-300">
               <CheckCircle2 className="h-4 w-4" /> Local summary active — AI eligible
             </div>
             <p className="mt-2 whitespace-pre-wrap font-mono text-sm leading-relaxed text-slate-100/90">
@@ -488,7 +488,7 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
     <GlassPanel className="p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
             <TaskIcon taskType={result.taskType} />
           </div>
           <div>
@@ -500,7 +500,7 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           <RiskBadge level={(result.riskLevel as RiskLevel) ?? 'moderate'} />
-          <Badge variant="outline" className="gap-1 border-cyan-500/30 text-[10px] text-cyan-300">
+          <Badge variant="outline" className="gap-1 border-violet-500/30 text-[10px] text-violet-300">
             <Sparkles className="h-2.5 w-2.5" /> Tier {result.tierUsed}
           </Badge>
           <Badge variant="outline" className="border-white/10 text-[10px] text-slate-300">{result.recommendationType}</Badge>
@@ -534,7 +534,7 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
                     <div key={i} className="rounded-md bg-white/5 px-3 py-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-slate-100">{i + 1}. {d.condition}</span>
-                        <span className="text-xs font-semibold tabular-nums text-cyan-300">{Math.round(d.probability * 100)}%</span>
+                        <span className="text-xs font-semibold tabular-nums text-violet-300">{Math.round(d.probability * 100)}%</span>
                       </div>
                       <p className="mt-1 text-xs text-slate-400">{d.reasoning}</p>
                     </div>
@@ -664,7 +664,7 @@ function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
           <GlassPanel key={r.id} className="p-4 sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
                   <FlaskConical className="h-5 w-5" />
                 </div>
                 <div>
@@ -722,8 +722,8 @@ function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
             )}
 
             {r.aiFeedback && (
-              <div className="mt-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
+              <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
                   <Sparkles className="h-3.5 w-3.5" /> AI Feedback
                 </p>
                 <p className="mt-1 text-sm text-slate-100/90">{r.aiFeedback}</p>
@@ -789,7 +789,7 @@ function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
                         <td className="py-2 pr-3 text-slate-100">{it.description}</td>
                         <td className="py-2 pr-3 text-right tabular-nums text-slate-300">{it.quantity}</td>
                         <td className="py-2 pr-3 text-right tabular-nums text-slate-300">{formatCurrency(it.unit_price)}</td>
-                        <td className="py-2 text-right font-medium tabular-nums text-cyan-300">
+                        <td className="py-2 text-right font-medium tabular-nums text-violet-300">
                           {formatCurrency((it.quantity ?? 0) * (it.unit_price ?? 0))}
                         </td>
                       </tr>
@@ -802,7 +802,7 @@ function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
             <div className="mt-3 flex flex-wrap justify-end gap-x-6 gap-y-1 text-sm">
               <span className="text-slate-400">Subtotal: <span className="font-medium text-slate-100 tabular-nums">{formatCurrency(inv.subtotal)}</span></span>
               <span className="text-slate-400">Tax: <span className="font-medium text-slate-100 tabular-nums">{formatCurrency(inv.tax)}</span></span>
-              <span className="text-slate-400">Total: <span className="font-bold text-cyan-300 tabular-nums">{formatCurrency(inv.total)}</span></span>
+              <span className="text-slate-400">Total: <span className="font-bold text-violet-300 tabular-nums">{formatCurrency(inv.total)}</span></span>
             </div>
           </GlassPanel>
         )
@@ -830,7 +830,7 @@ function AppointmentsTab({ appointments }: { appointments: AppointmentRecord[] }
           <GlassPanel key={a.id} className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/15 text-xs font-semibold text-cyan-300">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-300">
                   {a.doctor.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                 </div>
                 <div>
@@ -920,7 +920,7 @@ function RichBlock({
 }) {
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
+      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-violet-300">
         {icon} {title}
       </p>
       {children}
@@ -958,7 +958,7 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     DRAFT: 'bg-white/5 text-slate-400 border-white/10',
     IN_PROGRESS: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-    COMPLETED: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    COMPLETED: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
     REVIEWED: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
   }
   return (
@@ -998,7 +998,7 @@ function InvoiceStatus({ status }: { status: string }) {
 
 function ApptStatus({ status }: { status: string }) {
   const map: Record<string, string> = {
-    SCHEDULED: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    SCHEDULED: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
     IN_PROGRESS: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
     COMPLETED: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
     CANCELLED: 'bg-red-500/15 text-red-400 border-red-500/30',

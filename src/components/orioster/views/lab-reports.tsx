@@ -249,8 +249,8 @@ export function LabReportsView() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-[11px] text-slate-300">
-                  <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                <div className="flex items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-[11px] text-slate-300">
+                  <Sparkles className="h-3.5 w-3.5 text-violet-400" />
                   AI will analyze the parameters and provide advisory feedback after saving.
                 </div>
 
@@ -269,7 +269,7 @@ export function LabReportsView() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
         </div>
       ) : reports.length === 0 ? (
         <GlassPanel className="flex flex-col items-center justify-center gap-3 py-16 text-center">
@@ -295,12 +295,12 @@ export function LabReportsView() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <FlaskConical className="h-4 w-4 text-cyan-400" />
+                      <FlaskConical className="h-4 w-4 text-violet-400" />
                       <span className="font-semibold text-slate-100">{LAB_REPORT_LABELS[r.reportType] ?? r.reportType}</span>
                     </div>
                     <button
                       onClick={() => { setActivePatient(r.patient.id); setView('patient-detail') }}
-                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-cyan-300 hover:underline"
+                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-violet-300 hover:underline"
                     >
                       {r.patient.fullName} · {r.patient.age ?? '?'}y {r.patient.gender.toLowerCase()}
                     </button>
@@ -342,8 +342,8 @@ export function LabReportsView() {
                 </div>
 
                 {aiFeedback && (
-                  <div className="mt-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
+                  <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
                       <Sparkles className="h-3.5 w-3.5" />
                       AI Advisory Analysis
                     </div>

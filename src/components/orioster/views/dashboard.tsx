@@ -84,7 +84,7 @@ export function DashboardView() {
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
       </div>
     )
   }
@@ -108,10 +108,10 @@ export function DashboardView() {
   return (
     <div className="space-y-5">
       {/* ═══ Welcome Panel ══════════════════════════════════════ */}
-      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6 mh-stagger-1">
+      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6 wope-stagger-1">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-cyan-400">{roleGreeting(role)}</p>
+            <p className="text-sm font-medium text-violet-400">{roleGreeting(role)}</p>
             <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">{user?.name}</h1>
             <p className="mt-1 text-sm text-slate-400">
               Here is today&apos;s hospital operations overview.
@@ -132,16 +132,16 @@ export function DashboardView() {
 
       {/* ═══ KPI Cards (gradient + glow) ════════════════════════ */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <div className="mh-stagger-1">
+        <div className="wope-stagger-1">
           <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-5 w-5" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
         </div>
-        <div className="mh-stagger-2">
+        <div className="wope-stagger-2">
           <StatCard label="Active Cases" value={s.inProgressAppts + s.scheduledAppts} icon={<Activity className="h-5 w-5" />} trend={`${s.scheduledAppts} scheduled`} accent="amber" />
         </div>
-        <div className="mh-stagger-3">
+        <div className="wope-stagger-3">
           <StatCard label="Beneficiaries" value={s.completedPatients} icon={<Users className="h-5 w-5" />} trend={`${s.reviewedPatients} reviewed`} accent="turquoise" />
         </div>
-        <div className="mh-stagger-4">
+        <div className="wope-stagger-4">
           <StatCard label="AI Alerts" value={s.triage.red} icon={<AlertTriangle className="h-5 w-5" />} trend="Critical triage" accent="critical" />
         </div>
       </div>
@@ -149,7 +149,7 @@ export function DashboardView() {
       {/* ═══ Charts row ═════════════════════════════════════════ */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Humanitarian Trends — area chart */}
-        <GlassPanel className="p-4 sm:p-5 mh-stagger-3 lg:col-span-2">
+        <GlassPanel className="p-4 sm:p-5 wope-stagger-3 lg:col-span-2">
           <SectionHeader title="Humanitarian Trends" subtitle="Patients · Referrals · Medicine Distribution" />
           <div className="mt-4 h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -184,7 +184,7 @@ export function DashboardView() {
         </GlassPanel>
 
         {/* Triage distribution */}
-        <GlassPanel className="p-4 sm:p-5 mh-stagger-4">
+        <GlassPanel className="p-4 sm:p-5 wope-stagger-4">
           <SectionHeader title="Triage Distribution" subtitle="Local clinical triage" />
           <div className="mt-4 h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -220,18 +220,18 @@ export function DashboardView() {
       </div>
 
       {/* ═══ Recent Activities / Patients ═══════════════════════ */}
-      <GlassPanel className="p-4 sm:p-5 mh-stagger-5">
+      <GlassPanel className="p-4 sm:p-5 wope-stagger-5">
         <SectionHeader
           title="Recent Activities"
           subtitle="Latest activities across all roles"
           action={
-            <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="gap-1.5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+            <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="gap-1.5 text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
               <Users className="h-3.5 w-3.5" />
               View all
             </Button>
           }
         />
-        <div className="mt-4 overflow-x-auto mh-scroll">
+        <div className="mt-4 overflow-x-auto wope-scroll">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5 text-left text-xs text-slate-500">
@@ -256,7 +256,7 @@ export function DashboardView() {
                 >
                   <td className="py-2.5 pr-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/15 text-xs font-semibold text-cyan-300">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-300">
                         {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
                       </div>
                       <div>
