@@ -198,7 +198,7 @@ export function InvoicesView() {
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-medium text-slate-400">Line Items</p>
-                    <Button size="sm" variant="ghost" onClick={addItem} className="h-7 text-xs text-slate-300 hover:text-slate-100">
+                    <Button size="sm" variant="ghost" onClick={addItem} className="fx-btn-border-trace btn-press ripple h-7 text-xs text-slate-300 hover:text-slate-100">
                       <Plus className="h-3 w-3" /> Add
                     </Button>
                   </div>
@@ -241,7 +241,7 @@ export function InvoicesView() {
                           size="icon"
                           variant="ghost"
                           onClick={() => removeItem(idx)}
-                          className="h-8 w-8 text-red-400 hover:bg-red-500/10"
+                          className="fx-btn-border-trace btn-press ripple h-8 w-8 text-red-400 hover:bg-red-500/10"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -347,7 +347,7 @@ export function InvoicesView() {
                     size="sm"
                     variant="ghost"
                     onClick={() => window.print()}
-                    className="h-7 text-xs text-slate-300 hover:text-slate-100"
+                    className="fx-btn-border-trace btn-press ripple h-7 text-xs text-slate-300 hover:text-slate-100"
                   >
                     <Printer className="h-3.5 w-3.5" /> Print
                   </Button>

@@ -376,7 +376,7 @@ function PatientPicker({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between font-normal"
+          className="fx-btn-border-trace btn-press ripple w-full justify-between font-normal"
         >
           {selected ? (
             <span className="flex items-center gap-2 truncate">
@@ -455,7 +455,7 @@ function DiagnosisPanel({
         </div>
         <div className="flex gap-2">
           {result && (
-            <Button variant="outline" size="sm" onClick={onReset} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace btn-press ripple gap-1.5">
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
@@ -596,7 +596,7 @@ function TreatmentPanel({
         </div>
         <div className="flex gap-2">
           {result && (
-            <Button variant="outline" size="sm" onClick={onReset} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace btn-press ripple gap-1.5">
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
@@ -625,7 +625,7 @@ function TreatmentPanel({
               </p>
             </div>
           </div>
-          <Button size="sm" variant="outline" onClick={onGoToDiagnosis} className="gap-1.5">
+          <Button size="sm" variant="outline" onClick={onGoToDiagnosis} className="fx-btn-border-trace btn-press ripple gap-1.5">
             <Stethoscope className="h-3.5 w-3.5" /> Go to Diagnosis
           </Button>
         </GlassPanel>
@@ -732,14 +732,14 @@ function PrescriptionPanel({
         <div className="flex gap-2">
           {result && (
             <>
-              <Button variant="outline" size="sm" onClick={onReset} className="gap-1.5">
+              <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace btn-press ripple gap-1.5">
                 <RefreshCw className="h-3.5 w-3.5" /> Clear
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => { toast.success('Prescription sent to print queue'); window.print() }}
-                className="gap-1.5"
+                className="fx-btn-border-trace btn-press ripple gap-1.5"
               >
                 <Printer className="h-3.5 w-3.5" /> Print
               </Button>

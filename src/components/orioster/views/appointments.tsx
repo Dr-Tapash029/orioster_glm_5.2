@@ -262,17 +262,17 @@ export function AppointmentsView() {
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {a.status === 'SCHEDULED' && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'IN_PROGRESS')} className="h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'IN_PROGRESS')} className="fx-btn-border-trace btn-press ripple h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
                       Start
                     </Button>
                   )}
                   {a.status === 'IN_PROGRESS' && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'COMPLETED')} className="h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'COMPLETED')} className="fx-btn-border-trace btn-press ripple h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
                       Complete
                     </Button>
                   )}
                   {(a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS') && (
-                    <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, 'CANCELLED')} className="h-7 text-xs text-red-400">
+                    <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, 'CANCELLED')} className="fx-btn-border-trace btn-press ripple h-7 text-xs text-red-400">
                       Cancel
                     </Button>
                   )}
@@ -280,7 +280,7 @@ export function AppointmentsView() {
                     size="sm"
                     variant="ghost"
                     onClick={() => { setActivePatient(a.patientId); setView('patient-detail') }}
-                    className="ml-auto h-7 text-xs text-slate-300 hover:text-slate-100"
+                    className="fx-btn-border-trace btn-press ripple ml-auto h-7 text-xs text-slate-300 hover:text-slate-100"
                   >
                     View <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>

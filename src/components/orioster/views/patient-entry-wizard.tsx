@@ -406,7 +406,7 @@ export function PatientEntryWizard() {
             </Badge>
           )}
           {patient && <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />}
-          <Button variant="ghost" size="sm" onClick={handleCancel} className="text-slate-400">
+          <Button variant="ghost" size="sm" onClick={handleCancel} className="fx-btn-border-trace btn-press ripple text-slate-400">
             Exit
           </Button>
         </div>
@@ -536,7 +536,7 @@ export function PatientEntryWizard() {
               variant="outline"
               onClick={goBack}
               disabled={currentStep === 1}
-              className="gap-1.5"
+              className="fx-btn-border-trace btn-press ripple gap-1.5"
             >
               <ChevronLeft className="h-4 w-4" />
               Back
@@ -1211,7 +1211,7 @@ function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }:
         <p className="text-sm text-slate-400">
           Add each ongoing medication. Leave empty if patient is not on any medication.
         </p>
-        <Button variant="outline" size="sm" onClick={addMed} className="gap-1.5">
+        <Button variant="outline" size="sm" onClick={addMed} className="fx-btn-border-trace btn-press ripple gap-1.5">
           <Plus className="h-3.5 w-3.5" />
           Add medication
         </Button>
@@ -1281,7 +1281,7 @@ function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }:
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-slate-400 hover:text-red-500"
+                    className="fx-btn-border-trace btn-press ripple h-9 w-9 text-slate-400 hover:text-red-500"
                     onClick={() => removeMed(idx)}
                     aria-label="Remove medication"
                   >
@@ -1567,11 +1567,11 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
           Record known hypersensitivities. At least one entry (or "None") is required.
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={markNone} disabled={hasNone} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={markNone} disabled={hasNone} className="fx-btn-border-trace btn-press ripple gap-1.5">
             <Check className="h-3.5 w-3.5" />
             No known allergies
           </Button>
-          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="fx-btn-border-trace btn-press ripple gap-1.5">
             <Plus className="h-3.5 w-3.5" />
             Add allergy
           </Button>
@@ -1618,7 +1618,7 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 text-slate-400 hover:text-red-500"
+                  className="fx-btn-border-trace btn-press ripple h-9 w-9 text-slate-400 hover:text-red-500"
                   onClick={() => removeAllergy(idx)}
                   aria-label="Remove allergy"
                 >
@@ -1887,7 +1887,7 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
         <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
           <AlertTriangle className="h-3.5 w-3.5" />
           {error}
-          <Button variant="ghost" size="sm" onClick={generate} className="ml-auto h-6 px-2 text-[11px]">
+          <Button variant="ghost" size="sm" onClick={generate} className="fx-btn-border-trace btn-press ripple ml-auto h-6 px-2 text-[11px]">
             Retry
           </Button>
         </div>
@@ -1914,7 +1914,7 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
                 size="sm"
                 onClick={generate}
                 disabled={generating}
-                className="h-7 gap-1.5 text-[11px] text-slate-400"
+                className="fx-btn-border-trace btn-press ripple h-7 gap-1.5 text-[11px] text-slate-400"
               >
                 <RotateCcw className="h-3 w-3" />
                 Regenerate
@@ -2130,7 +2130,7 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
                 size="sm"
                 onClick={runNotify}
                 disabled={loading}
-                className="mt-2 h-7 gap-1.5 text-[11px]"
+                className="fx-btn-border-trace btn-press ripple mt-2 h-7 gap-1.5 text-[11px]"
               >
                 <RotateCcw className="h-3 w-3" />
                 Retry now

@@ -658,6 +658,18 @@
   border-radius: 999px !important;
 }
 
+/* Active state for nav buttons — filled violet to indicate current page */
+.fx-btn-border-trace-active {
+  background: rgba(113, 61, 255, 0.20) !important;
+  color: #ffffff !important;
+  border-color: rgba(113, 61, 255, 0.40) !important;
+  box-shadow: 0 0 20px rgba(113, 61, 255, 0.25) !important;
+}
+.fx-btn-border-trace-active::before,
+.fx-btn-border-trace-active::after {
+  transform: translateX(0) !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    SHADCN OVERRIDES — Adapt to Wope dark purple theme
    ═══════════════════════════════════════════════════════════════ */

@@ -195,7 +195,7 @@ export function PatientDetailView() {
       <Button
         variant="ghost"
         size="sm"
-        className="gap-1.5"
+        className="fx-btn-border-trace btn-press ripple gap-1.5"
         onClick={() => { setActivePatient(null); setView('patients') }}
       >
         <ArrowLeft className="h-4 w-4" /> Back to Patients
@@ -632,7 +632,7 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
       </AnimatePresence>
 
       <div className="mt-3 flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)} className="gap-1 text-xs text-slate-300 hover:text-slate-100">
+        <Button variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)} className="fx-btn-border-trace btn-press ripple gap-1 text-xs text-slate-300 hover:text-slate-100">
           {expanded ? 'Hide details' : 'Show details'}
         </Button>
         <span className="text-[11px] text-slate-400">

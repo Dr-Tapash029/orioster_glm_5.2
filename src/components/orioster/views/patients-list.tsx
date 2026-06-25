@@ -118,7 +118,7 @@ export function PatientsListView() {
               <p className="text-sm text-slate-400">Try adjusting your search or add a new patient.</p>
             </div>
             {canAddPatient && (
-              <Button variant="outline" size="sm" onClick={() => setView('patient-entry')} className="gap-1.5">
+              <Button variant="outline" size="sm" onClick={() => setView('patient-entry')} className="fx-btn-border-trace btn-press ripple gap-1.5">
                 <UserPlus className="h-3.5 w-3.5" />
                 Add Patient
               </Button>

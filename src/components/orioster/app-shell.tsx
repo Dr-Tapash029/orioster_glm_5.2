@@ -258,7 +258,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Horizontal nav tab (desktop) — Wope pill style ───────────
+// ── Horizontal nav tab (desktop) — Border Trace style ────────
 function NavTab({
   item,
   active,
@@ -272,10 +272,8 @@ function NavTab({
     <button
       onClick={onClick}
       className={cn(
-        'btn-press ripple flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all',
-        active
-          ? 'bg-violet-500/15 text-white shadow-[0_0_20px_rgba(113,61,255,0.20)]'
-          : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+        'btn-press ripple fx-btn-border-trace fx-btn-border-trace-sm flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all',
+        active && 'fx-btn-border-trace-active'
       )}
     >
       <span className="transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
@@ -298,10 +296,8 @@ function NavButton({
     <button
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all',
-        active
-          ? 'bg-violet-500/15 text-violet-300 shadow-[0_0_20px_rgba(54,184,216,0.15)]'
-          : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+        'btn-press ripple fx-btn-border-trace fx-btn-border-trace-sm flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all',
+        active && 'fx-btn-border-trace-active'
       )}
     >
       {item.icon}

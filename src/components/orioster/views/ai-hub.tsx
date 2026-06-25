@@ -473,7 +473,7 @@ function DocWorkflow({
                 {result ? 'Regenerate' : 'Generate with AI'}
               </Button>
               {result && (
-                <Button variant="outline" size="sm" onClick={() => setResult(null)} className="gap-1.5">
+                <Button variant="outline" size="sm" onClick={() => setResult(null)} className="fx-btn-border-trace btn-press ripple gap-1.5">
                   <RefreshCw className="h-3.5 w-3.5" /> Clear
                 </Button>
               )}
@@ -860,7 +860,7 @@ function PatientPickerInline({
       <Button
         variant="outline"
         role="combobox"
-        className="w-full justify-between font-normal"
+        className="fx-btn-border-trace btn-press ripple w-full justify-between font-normal"
         onClick={() => setOpen((o) => !o)}
       >
         {selected ? (

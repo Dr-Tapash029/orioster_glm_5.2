@@ -225,7 +225,7 @@ export function DashboardView() {
           title="Recent Activities"
           subtitle="Latest activities across all roles"
           action={
-            <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="gap-1.5 text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
+            <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="fx-btn-border-trace btn-press ripple gap-1.5 text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
               <Users className="h-3.5 w-3.5" />
               View all
             </Button>
