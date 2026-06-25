@@ -169,7 +169,7 @@ export function InvoicesView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="btn-cyan gap-2">
                 <Plus className="h-4 w-4" />
                 New Invoice
               </Button>
@@ -195,10 +195,10 @@ export function InvoicesView() {
                   </Select>
                 </div>
 
-                <div className="rounded-lg border bg-muted/30 p-3">
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="text-xs font-medium text-muted-foreground">Line Items</p>
-                    <Button size="sm" variant="ghost" onClick={addItem} className="h-7 text-xs">
+                    <p className="text-xs font-medium text-slate-400">Line Items</p>
+                    <Button size="sm" variant="ghost" onClick={addItem} className="h-7 text-xs text-slate-300 hover:text-slate-100">
                       <Plus className="h-3 w-3" /> Add
                     </Button>
                   </div>
@@ -241,32 +241,32 @@ export function InvoicesView() {
                           size="icon"
                           variant="ghost"
                           onClick={() => removeItem(idx)}
-                          className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                          className="h-8 w-8 text-red-400 hover:bg-red-500/10"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 space-y-1 border-t pt-2 text-xs">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-medium tabular-nums">৳{subtotal.toLocaleString()}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Tax (5%)</span><span className="font-medium tabular-nums">৳{tax.toLocaleString()}</span></div>
-                    <div className="flex justify-between border-t pt-1"><span className="font-semibold">Total</span><span className="font-bold tabular-nums">৳{total.toLocaleString()}</span></div>
+                  <div className="mt-3 space-y-1 border-t border-white/10 pt-2 text-xs">
+                    <div className="flex justify-between"><span className="text-slate-400">Subtotal</span><span className="font-medium tabular-nums text-slate-100">৳{subtotal.toLocaleString()}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Tax (5%)</span><span className="font-medium tabular-nums text-slate-100">৳{tax.toLocaleString()}</span></div>
+                    <div className="flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-cyan-300">৳{total.toLocaleString()}</span></div>
                   </div>
                 </div>
 
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-slate-300">
                   <input
                     type="checkbox"
                     checked={useAi}
                     onChange={(e) => setUseAi(e.target.checked)}
-                    className="h-4 w-4 rounded accent-primary"
+                    className="h-4 w-4 rounded accent-cyan-500"
                   />
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
                   <span>Use AI to suggest line items (advisory — requires Step 8 summary)</span>
                 </label>
 
-                <Button onClick={generateInvoice} disabled={generating} className="w-full gap-2">
+                <Button onClick={generateInvoice} disabled={generating} className="btn-cyan w-full gap-2">
                   {generating ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
                   ) : (
@@ -281,16 +281,16 @@ export function InvoicesView() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
         </div>
       ) : invoices.length === 0 ? (
         <GlassPanel className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-            <Receipt className="h-7 w-7 text-muted-foreground" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
+            <Receipt className="h-7 w-7 text-slate-500" />
           </div>
           <div>
-            <p className="font-medium">No invoices</p>
-            <p className="text-sm text-muted-foreground">Generate a new invoice to get started.</p>
+            <p className="font-medium text-slate-100">No invoices</p>
+            <p className="text-sm text-slate-400">Generate a new invoice to get started.</p>
           </div>
         </GlassPanel>
       ) : (
@@ -303,21 +303,21 @@ export function InvoicesView() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <Receipt className="h-4 w-4 text-primary" />
-                      <span className="font-mono text-sm font-semibold">{inv.invoiceNo}</span>
+                      <Receipt className="h-4 w-4 text-cyan-400" />
+                      <span className="font-mono text-sm font-semibold text-slate-100">{inv.invoiceNo}</span>
                     </div>
                     <button
                       onClick={() => { setActivePatient(inv.patient.id); setView('patient-detail') }}
-                      className="mt-0.5 text-left text-sm hover:underline"
+                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-cyan-300 hover:underline"
                     >
                       {inv.patient.fullName}
                     </button>
                   </div>
                   <span className={cn(
                     'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
-                    inv.status === 'PAID' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                      : inv.status === 'CANCELLED' ? 'bg-red-500/15 text-red-700 dark:text-red-300'
-                      : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                    inv.status === 'PAID' ? 'bg-emerald-500/15 text-emerald-300'
+                      : inv.status === 'CANCELLED' ? 'bg-red-500/15 text-red-400'
+                      : 'bg-amber-500/15 text-amber-300'
                   )}>
                     {inv.status}
                   </span>
@@ -326,28 +326,28 @@ export function InvoicesView() {
                 <div className="mt-3 space-y-1">
                   {items.slice(0, 4).map((it, i) => (
                     <div key={i} className="flex justify-between text-xs">
-                      <span className="truncate pr-2">{it.description} ×{it.quantity}</span>
-                      <span className="tabular-nums text-muted-foreground">৳{(it.quantity * it.unit_price).toLocaleString()}</span>
+                      <span className="truncate pr-2 text-slate-200">{it.description} ×{it.quantity}</span>
+                      <span className="tabular-nums text-slate-400">৳{(it.quantity * it.unit_price).toLocaleString()}</span>
                     </div>
                   ))}
                   {items.length > 4 && (
-                    <p className="text-[11px] text-muted-foreground">+{items.length - 4} more items</p>
+                    <p className="text-[11px] text-slate-400">+{items.length - 4} more items</p>
                   )}
                 </div>
 
-                <div className="mt-3 border-t pt-2 text-xs">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">৳{inv.subtotal.toLocaleString()}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Tax</span><span className="tabular-nums">৳{inv.tax.toLocaleString()}</span></div>
-                  <div className="mt-1 flex justify-between border-t pt-1"><span className="font-semibold">Total</span><span className="font-bold tabular-nums">৳{inv.total.toLocaleString()}</span></div>
+                <div className="mt-3 border-t border-white/10 pt-2 text-xs">
+                  <div className="flex justify-between"><span className="text-slate-400">Subtotal</span><span className="tabular-nums text-slate-100">৳{inv.subtotal.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">Tax</span><span className="tabular-nums text-slate-100">৳{inv.tax.toLocaleString()}</span></div>
+                  <div className="mt-1 flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-cyan-300">৳{inv.total.toLocaleString()}</span></div>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">{format(new Date(inv.createdAt), 'MMM d, yyyy')}</span>
+                  <span className="text-[11px] text-slate-400">{format(new Date(inv.createdAt), 'MMM d, yyyy')}</span>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => window.print()}
-                    className="h-7 text-xs"
+                    className="h-7 text-xs text-slate-300 hover:text-slate-100"
                   >
                     <Printer className="h-3.5 w-3.5" /> Print
                   </Button>

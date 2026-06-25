@@ -1,6 +1,9 @@
 'use client'
 
-// ORIOSTER — Shared UI primitives (glassmorphism design system)
+// ═══════════════════════════════════════════════════════════════
+// MUSLIM HANDS HMS — Shared UI primitives
+// Dark navy + cyan glow glassmorphism design system
+// ═══════════════════════════════════════════════════════════════
 
 import { cn } from '@/lib/utils'
 import {
@@ -28,7 +31,7 @@ export function GlassPanel({
     subtle: 'glass-subtle',
   }
   return (
-    <div className={cn(variants[variant], 'rounded-2xl', className)} {...props}>
+    <div className={cn(variants[variant], 'rounded-xl', className)} {...props}>
       {children}
     </div>
   )
@@ -39,22 +42,22 @@ export function SyncStatusBadge({ status }: { status: SyncStatus }) {
   const config: Record<SyncStatus, { label: string; cls: string; icon: React.ReactNode }> = {
     DRAFT: {
       label: 'Draft',
-      cls: 'bg-muted/60 text-muted-foreground border-border',
+      cls: 'bg-white/5 text-slate-400 border-white/10',
       icon: <RefreshCw className="h-3 w-3" />,
     },
     QUEUED: {
       label: 'Queued',
-      cls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+      cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
       icon: <CloudUpload className="h-3 w-3" />,
     },
     SYNCED: {
       label: 'Synced',
-      cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+      cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
       icon: <CheckCircle2 className="h-3 w-3" />,
     },
     CONFLICT: {
       label: 'Conflict',
-      cls: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
+      cls: 'bg-red-500/15 text-red-400 border-red-500/30',
       icon: <AlertTriangle className="h-3 w-3" />,
     },
   }
@@ -117,10 +120,10 @@ export function RiskBadge({ level }: { level: RiskLevel }) {
 // ── Role Badge ────────────────────────────────────────────────
 export function RoleBadge({ role }: { role: string }) {
   const config: Record<string, { label: string; cls: string }> = {
-    DOCTOR: { label: 'Doctor', cls: 'bg-primary/15 text-primary border-primary/30' },
-    NURSE: { label: 'Nurse', cls: 'bg-accent/15 text-accent-foreground border-accent/30' },
-    ADMIN: { label: 'Admin', cls: 'bg-foreground/10 text-foreground border-foreground/20' },
-    LAB_TECH: { label: 'Lab Tech', cls: 'bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30' },
+    DOCTOR: { label: 'Doctor', cls: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' },
+    NURSE: { label: 'Nurse', cls: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+    ADMIN: { label: 'Admin', cls: 'bg-white/10 text-slate-200 border-white/20' },
+    LAB_TECH: { label: 'Lab Tech', cls: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
   }
   const c = config[role] ?? config.ADMIN
   return (
@@ -138,7 +141,7 @@ export function RoleBadge({ role }: { role: string }) {
 // ── AI Disclaimer Chip ────────────────────────────────────────
 export function DisclaimerChip({ text }: { text?: string }) {
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+    <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
       <span>{text ?? 'This output is not a diagnosis and must be reviewed by a human professional.'}</span>
     </div>
@@ -152,13 +155,13 @@ export function ConfidenceMeter({ value }: { value: number }) {
     pct >= 75 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'
   return (
     <div className="flex items-center gap-2">
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
         <div
           className={cn('h-full rounded-full transition-all duration-500', color)}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="w-10 text-right text-xs font-semibold tabular-nums">{pct}%</span>
+      <span className="w-10 text-right text-xs font-semibold tabular-nums text-cyan-300">{pct}%</span>
     </div>
   )
 }
@@ -169,7 +172,7 @@ export function OfflineBanner({ online }: { online: boolean }) {
   return (
     <div className="flex items-center gap-2 bg-amber-500/90 px-4 py-1.5 text-xs font-medium text-amber-950">
       <WifiOff className="h-3.5 w-3.5" />
-      Offline mode — all clinical workflows remain fully functional. Data will sync when connection returns.
+      Offline mode — all humanitarian operations remain fully functional. Data will sync when connection returns.
     </div>
   )
 }
@@ -181,8 +184,8 @@ export function OnlineIndicator({ online }: { online: boolean }) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium',
         online
-          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-          : 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+          : 'border-amber-500/30 bg-amber-500/10 text-amber-300'
       )}
     >
       {online ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
@@ -191,39 +194,62 @@ export function OnlineIndicator({ online }: { online: boolean }) {
   )
 }
 
-// ── Stat Card ─────────────────────────────────────────────────
+// ── KPI Stat Card (with gradient + glow) ──────────────────────
 export function StatCard({
   label,
   value,
   icon,
   trend,
-  accent = 'primary',
+  accent = 'cyan',
+  className,
 }: {
   label: string
   value: string | number
   icon: React.ReactNode
   trend?: string
-  accent?: 'primary' | 'accent' | 'amber' | 'red'
+  accent?: 'cyan' | 'amber' | 'turquoise' | 'critical'
+  className?: string
 }) {
-  const accents = {
-    primary: 'text-primary bg-primary/10',
-    accent: 'text-accent-foreground bg-accent/15',
-    amber: 'text-amber-600 dark:text-amber-300 bg-amber-500/10',
-    red: 'text-red-600 dark:text-red-300 bg-red-500/10',
+  const accents: Record<string, { card: string; iconBg: string; iconColor: string; valueColor: string }> = {
+    cyan: {
+      card: 'kpi-cyan',
+      iconBg: 'bg-cyan-500/20',
+      iconColor: 'text-cyan-300',
+      valueColor: 'text-cyan-100',
+    },
+    amber: {
+      card: 'kpi-amber',
+      iconBg: 'bg-amber-500/20',
+      iconColor: 'text-amber-300',
+      valueColor: 'text-amber-100',
+    },
+    turquoise: {
+      card: 'kpi-turquoise',
+      iconBg: 'bg-emerald-500/20',
+      iconColor: 'text-emerald-300',
+      valueColor: 'text-emerald-100',
+    },
+    critical: {
+      card: 'kpi-critical',
+      iconBg: 'bg-red-500/20',
+      iconColor: 'text-red-300',
+      valueColor: 'text-red-100',
+    },
   }
+  const a = accents[accent] ?? accents.cyan
   return (
-    <GlassPanel className="p-4">
+    <div className={cn('rounded-xl p-4 sm:p-5', a.card, className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="mt-1 text-2xl font-bold tracking-tight tabular-nums">{value}</p>
-          {trend && <p className="mt-0.5 text-[11px] text-muted-foreground">{trend}</p>}
+          <p className="truncate text-xs font-medium text-slate-400">{label}</p>
+          <p className={cn('mt-1 text-2xl font-bold tracking-tight tabular-nums sm:text-3xl', a.valueColor)}>{value}</p>
+          {trend && <p className="mt-0.5 text-[11px] text-slate-500">{trend}</p>}
         </div>
-        <div className={cn('flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', accents[accent])}>
+        <div className={cn('flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl', a.iconBg, a.iconColor)}>
           {icon}
         </div>
       </div>
-    </GlassPanel>
+    </div>
   )
 }
 
@@ -240,8 +266,8 @@ export function SectionHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+        <h2 className="text-lg font-semibold tracking-tight text-slate-100">{title}</h2>
+        {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
       </div>
       {action}
     </div>

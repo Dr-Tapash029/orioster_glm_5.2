@@ -1,0 +1,702 @@
+  1401→          <Activity className="h-4 w-4 text-primary" />
+  1402→          <span className="text-sm font-medium">Local triage level (computed, no AI)</span>
+  1403→        </div>
+  1404→        <TriageBadge level={triagePreview} />
+  1405→      </GlassPanel>
+  1406→
+  1407→      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  1408→        <Field label="Temperature (°C)" icon={<Thermometer className="h-3.5 w-3.5" />}>
+  1409→          <Input
+  1410→            type="number"
+  1411→            step="0.1"
+  1412→            value={temperature}
+  1413→            onChange={(e) => setTemperature(e.target.value)}
+  1414→            placeholder="36.5"
+  1415→          />
+  1416→        </Field>
+  1417→        <Field label="BP systolic (mmHg)" icon={<HeartPulse className="h-3.5 w-3.5" />}>
+  1418→          <Input
+  1419→            type="number"
+  1420→            value={bpSystolic}
+  1421→            onChange={(e) => setBpSystolic(e.target.value)}
+  1422→            placeholder="120"
+  1423→          />
+  1424→        </Field>
+  1425→        <Field label="BP diastolic (mmHg)">
+  1426→          <Input
+  1427→            type="number"
+  1428→            value={bpDiastolic}
+  1429→            onChange={(e) => setBpDiastolic(e.target.value)}
+  1430→            placeholder="80"
+  1431→          />
+  1432→        </Field>
+  1433→        <Field label="Heart rate (BPM)" icon={<HeartPulse className="h-3.5 w-3.5" />}>
+  1434→          <Input
+  1435→            type="number"
+  1436→            value={heartRate}
+  1437→            onChange={(e) => setHeartRate(e.target.value)}
+  1438→            placeholder="72"
+  1439→          />
+  1440→        </Field>
+  1441→        <Field label="SpO₂ (%)" icon={<Wind className="h-3.5 w-3.5" />}>
+  1442→          <Input
+  1443→            type="number"
+  1444→            min={0}
+  1445→            max={100}
+  1446→            value={spo2}
+  1447→            onChange={(e) => setSpo2(e.target.value)}
+  1448→            placeholder="98"
+  1449→          />
+  1450→        </Field>
+  1451→        <Field label="Weight (kg)" icon={<Weight className="h-3.5 w-3.5" />}>
+  1452→          <Input
+  1453→            type="number"
+  1454→            value={weightKg}
+  1455→            onChange={(e) => setWeightKg(e.target.value)}
+  1456→            placeholder="62"
+  1457→          />
+  1458→        </Field>
+  1459→        <Field label="Height (cm)" icon={<Ruler className="h-3.5 w-3.5" />}>
+  1460→          <Input
+  1461→            type="number"
+  1462→            value={heightCm}
+  1463→            onChange={(e) => setHeightCm(e.target.value)}
+  1464→            placeholder="165"
+  1465→          />
+  1466→        </Field>
+  1467→      </div>
+  1468→
+  1469→      {abnormalFlags.length > 0 && (
+  1470→        <GlassPanel variant="subtle" className="space-y-1.5 p-3">
+  1471→          <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+  1472→            <AlertTriangle className="h-3.5 w-3.5" />
+  1473→            {abnormalFlags.length} abnormal value{abnormalFlags.length > 1 ? 's' : ''} detected
+  1474→          </div>
+  1475→          {abnormalFlags.map((f, i) => (
+  1476→            <p key={i} className="text-[11px] text-muted-foreground">
+  1477→              · <span className="font-medium text-foreground">{f.field}:</span> {f.msg}
+  1478→            </p>
+  1479→          ))}
+  1480→        </GlassPanel>
+  1481→      )}
+  1482→
+  1483→      <StepFooter>
+  1484→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1485→      </StepFooter>
+  1486→    </div>
+  1487→  )
+  1488→}
+  1489→
+  1490→// ─────────────────────────────────────────────────────────────
+  1491→// STEP 6 — Hypersensitivity (Allergies)
+  1492→// ─────────────────────────────────────────────────────────────
+  1493→
+  1494→function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1495→  const [allergies, setAllergies] = useState<AllergyEntry[]>(() => {
+  1496→    const parsed = safeParse<AllergyEntry[]>(patient?.allergies, [])
+  1497→    // If patient has no allergies field yet, default to "None"
+  1498→    if (!patient?.allergies && parsed.length === 0) return [{ allergen: 'None', severity: 'Mild' }]
+  1499→    return parsed
+  1500→  })
+  1501→  const [saving, setSaving] = useState(false)
+  1502→
+  1503→  const hasNone = allergies.some((a) => a.allergen.toLowerCase() === 'none')
+  1504→
+  1505→  const addAllergy = () => {
+  1506→    if (hasNone) {
+  1507→      // Remove None when adding a real allergy
+  1508→      setAllergies([{ allergen: '', severity: 'Mild' }])
+  1509→      return
+  1510→    }
+  1511→    setAllergies((prev) => [...prev, { allergen: '', severity: 'Mild' }])
+  1512→  }
+  1513→
+  1514→  const updateAllergy = (idx: number, patch: Partial<AllergyEntry>) => {
+  1515→    setAllergies((prev) => prev.map((a, i) => (i === idx ? { ...a, ...patch } : a)))
+  1516→  }
+  1517→
+  1518→  const removeAllergy = (idx: number) => {
+  1519→    setAllergies((prev) => {
+  1520→      const next = prev.filter((_, i) => i !== idx)
+  1521→      return next.length === 0 ? [{ allergen: 'None', severity: 'Mild' }] : next
+  1522→    })
+  1523→  }
+  1524→
+  1525→  const markNone = () => {
+  1526→    setAllergies([{ allergen: 'None', severity: 'Mild' }])
+  1527→  }
+  1528→
+  1529→  const handleContinue = async () => {
+  1530→    if (allergies.length === 0) {
+  1531→      toast.error('Please mark "No known allergies" or add at least one entry')
+  1532→      return
+  1533→    }
+  1534→    setSaving(true)
+  1535→    try {
+  1536→      const cleaned = allergies.filter((a) => a.allergen.trim())
+  1537→      if (cleaned.length === 0) {
+  1538→        toast.error('Allergy entries cannot be empty')
+  1539→        setSaving(false)
+  1540→        return
+  1541→      }
+  1542→      const payload = JSON.stringify(cleaned)
+  1543→      const res = await fetch(`/api/patients/${patient!.id}`, {
+  1544→        method: 'PATCH',
+  1545→        headers: { 'Content-Type': 'application/json' },
+  1546→        body: JSON.stringify({ allergies: payload }),
+  1547→      })
+  1548→      if (!res.ok) throw new Error('Save failed')
+  1549→      const data = await res.json()
+  1550→      onPatientUpdated(data.patient)
+  1551→      triggerSaved()
+  1552→      toast.success(
+  1553→        hasNone ? 'No known allergies recorded' : `${cleaned.length} allerg${cleaned.length > 1 ? 'ies' : 'y'} saved`
+  1554→      )
+  1555→      onAdvance()
+  1556→    } catch (e) {
+  1557→      toast.error('Save failed', { description: (e as Error).message })
+  1558→    } finally {
+  1559→      setSaving(false)
+  1560→    }
+  1561→  }
+  1562→
+  1563→  return (
+  1564→    <div className="space-y-4">
+  1565→      <div className="flex flex-wrap items-center justify-between gap-2">
+  1566→        <p className="text-sm text-muted-foreground">
+  1567→          Record known hypersensitivities. At least one entry (or "None") is required.
+  1568→        </p>
+  1569→        <div className="flex gap-2">
+  1570→          <Button variant="outline" size="sm" onClick={markNone} disabled={hasNone} className="gap-1.5">
+  1571→            <Check className="h-3.5 w-3.5" />
+  1572→            No known allergies
+  1573→          </Button>
+  1574→          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="gap-1.5">
+  1575→            <Plus className="h-3.5 w-3.5" />
+  1576→            Add allergy
+  1577→          </Button>
+  1578→        </div>
+  1579→      </div>
+  1580→
+  1581→      {hasNone ? (
+  1582→        <GlassPanel variant="subtle" className="flex items-center gap-3 p-4">
+  1583→          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+  1584→            <Check className="h-4 w-4" />
+  1585→          </div>
+  1586→          <div>
+  1587→            <p className="text-sm font-medium">No known allergies (NKA)</p>
+  1588→            <p className="text-xs text-muted-foreground">Patient has no documented hypersensitivities.</p>
+  1589→          </div>
+  1590→        </GlassPanel>
+  1591→      ) : (
+  1592→        <div className="space-y-2.5">
+  1593→          {allergies.map((a, idx) => (
+  1594→            <GlassPanel key={idx} variant="subtle" className="p-3">
+  1595→              <div className="grid gap-2.5 sm:grid-cols-[1.5fr_1fr_auto] sm:items-end">
+  1596→                <Field label={idx === 0 ? 'Allergen' : undefined}>
+  1597→                  <Input
+  1598→                    placeholder="e.g. Penicillin, Peanuts, Latex"
+  1599→                    value={a.allergen}
+  1600→                    onChange={(e) => updateAllergy(idx, { allergen: e.target.value })}
+  1601→                  />
+  1602→                </Field>
+  1603→                <Field label={idx === 0 ? 'Severity' : undefined}>
+  1604→                  <Select
+  1605→                    value={a.severity}
+  1606→                    onValueChange={(v) => updateAllergy(idx, { severity: v })}
+  1607→                  >
+  1608→                    <SelectTrigger className="w-full">
+  1609→                      <SelectValue placeholder="Select severity" />
+  1610→                    </SelectTrigger>
+  1611→                    <SelectContent>
+  1612→                      {ALLERGY_SEVERITIES.map((s) => (
+  1613→                        <SelectItem key={s} value={s}>{s}</SelectItem>
+  1614→                      ))}
+  1615→                    </SelectContent>
+  1616→                  </Select>
+  1617→                </Field>
+  1618→                <Button
+  1619→                  variant="ghost"
+  1620→                  size="icon"
+  1621→                  className="h-9 w-9 text-muted-foreground hover:text-red-500"
+  1622→                  onClick={() => removeAllergy(idx)}
+  1623→                  aria-label="Remove allergy"
+  1624→                >
+  1625→                  <Trash2 className="h-4 w-4" />
+  1626→                </Button>
+  1627→              </div>
+  1628→            </GlassPanel>
+  1629→          ))}
+  1630→        </div>
+  1631→      )}
+  1632→
+  1633→      <StepFooter>
+  1634→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1635→      </StepFooter>
+  1636→    </div>
+  1637→  )
+  1638→}
+  1639→
+  1640→// ─────────────────────────────────────────────────────────────
+  1641→// STEP 7 — Assign Doctor
+  1642→// ─────────────────────────────────────────────────────────────
+  1643→
+  1644→const TIME_SLOTS = [
+  1645→  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+  1646→  '12:00', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+  1647→]
+  1648→
+  1649→function StepDoctor({ patient, onAdvance, triggerSaved }: StepProps) {
+  1650→  const [doctors, setDoctors] = useState<Doctor[]>([])
+  1651→  const [loading, setLoading] = useState(true)
+  1652→  const [doctorId, setDoctorId] = useState('')
+  1653→  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
+  1654→  const [slot, setSlot] = useState('')
+  1655→  const [reason, setReason] = useState('')
+  1656→  const [saving, setSaving] = useState(false)
+  1657→
+  1658→  useEffect(() => {
+  1659→    fetch('/api/staff?role=DOCTOR')
+  1660→      .then((r) => r.json())
+  1661→      .then((data) => setDoctors(data.staff ?? []))
+  1662→      .catch(() => toast.error('Failed to load doctors'))
+  1663→      .finally(() => setLoading(false))
+  1664→  }, [])
+  1665→
+  1666→  const handleContinue = async () => {
+  1667→    if (!doctorId) {
+  1668→      toast.error('Please select a doctor')
+  1669→      return
+  1670→    }
+  1671→    if (!date || !slot) {
+  1672→      toast.error('Please pick a date and time slot')
+  1673→      return
+  1674→    }
+  1675→    setSaving(true)
+  1676→    try {
+  1677→      const scheduledAt = new Date(`${date}T${slot}:00`).toISOString()
+  1678→      const res = await fetch('/api/appointments', {
+  1679→        method: 'POST',
+  1680→        headers: { 'Content-Type': 'application/json' },
+  1681→        body: JSON.stringify({
+  1682→          patientId: patient!.id,
+  1683→          doctorId,
+  1684→          scheduledAt,
+  1685→          reason: reason || patient!.chiefComplaint || 'Consultation',
+  1686→          status: 'SCHEDULED',
+  1687→        }),
+  1688→      })
+  1689→      if (!res.ok) throw new Error('Failed to schedule appointment')
+  1690→      triggerSaved()
+  1691→      const doc = doctors.find((d) => d.id === doctorId)
+  1692→      toast.success(`Appointment scheduled with ${doc?.name ?? 'doctor'}`)
+  1693→      onAdvance()
+  1694→    } catch (e) {
+  1695→      toast.error('Scheduling failed', { description: (e as Error).message })
+  1696→    } finally {
+  1697→      setSaving(false)
+  1698→    }
+  1699→  }
+  1700→
+  1701→  if (loading) {
+  1702→    return (
+  1703→      <div className="flex items-center justify-center py-10">
+  1704→        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+  1705→      </div>
+  1706→    )
+  1707→  }
+  1708→
+  1709→  return (
+  1710→    <div className="space-y-4">
+  1711→      {doctors.length === 0 ? (
+  1712→        <GlassPanel variant="subtle" className="p-4 text-center text-sm text-muted-foreground">
+  1713→          <Stethoscope className="mx-auto h-8 w-8 opacity-50" />
+  1714→          <p className="mt-2 font-medium text-foreground">No doctors available</p>
+  1715→          <p className="mt-1 text-xs">Ask an administrator to add doctors in Staff management.</p>
+  1716→        </GlassPanel>
+  1717→      ) : (
+  1718→        <>
+  1719→          <Field label="Assign doctor" required>
+  1720→            <Select value={doctorId} onValueChange={setDoctorId}>
+  1721→              <SelectTrigger className="w-full">
+  1722→                <SelectValue placeholder="Select a doctor" />
+  1723→              </SelectTrigger>
+  1724→              <SelectContent>
+  1725→                {doctors.map((d) => (
+  1726→                  <SelectItem key={d.id} value={d.id}>
+  1727→                    {d.name}
+  1728→                  </SelectItem>
+  1729→                ))}
+  1730→              </SelectContent>
+  1731→            </Select>
+  1732→          </Field>
+  1733→
+  1734→          <div className="grid gap-4 sm:grid-cols-2">
+  1735→            <Field label="Appointment date" icon={<Calendar className="h-3.5 w-3.5" />} required>
+  1736→              <Input
+  1737→                type="date"
+  1738→                value={date}
+  1739→                min={new Date().toISOString().slice(0, 10)}
+  1740→                onChange={(e) => setDate(e.target.value)}
+  1741→              />
+  1742→            </Field>
+  1743→            <Field label="Time slot" required>
+  1744→              <Select value={slot} onValueChange={setSlot}>
+  1745→                <SelectTrigger className="w-full">
+  1746→                  <SelectValue placeholder="Select a time slot" />
+  1747→                </SelectTrigger>
+  1748→                <SelectContent>
+  1749→                  {TIME_SLOTS.map((s) => (
+  1750→                    <SelectItem key={s} value={s}>{s}</SelectItem>
+  1751→                  ))}
+  1752→                </SelectContent>
+  1753→              </Select>
+  1754→            </Field>
+  1755→          </div>
+  1756→
+  1757→          <Field label="Reason for visit (optional)">
+  1758→            <Textarea
+  1759→              rows={2}
+  1760→              value={reason}
+  1761→              onChange={(e) => setReason(e.target.value)}
+  1762→              placeholder="Defaults to chief complaint"
+  1763→            />
+  1764→          </Field>
+  1765→
+  1766→          {doctorId && date && slot && (
+  1767→            <GlassPanel variant="subtle" className="flex items-center gap-3 p-3">
+  1768→              <Calendar className="h-4 w-4 text-primary" />
+  1769→              <p className="text-sm">
+  1770→                <span className="font-medium">
+  1771→                  {doctors.find((d) => d.id === doctorId)?.name}
+  1772→                </span>
+  1773→                <span className="text-muted-foreground">
+  1774→                  {' · '}{new Date(`${date}T${slot}:00`).toLocaleString(undefined, {
+  1775→                    weekday: 'short',
+  1776→                    month: 'short',
+  1777→                    day: 'numeric',
+  1778→                    hour: '2-digit',
+  1779→                    minute: '2-digit',
+  1780→                  })}
+  1781→                </span>
+  1782→              </p>
+  1783→            </GlassPanel>
+  1784→          )}
+  1785→        </>
+  1786→      )}
+  1787→
+  1788→      <StepFooter>
+  1789→        <ContinueButton
+  1790→          onClick={handleContinue}
+  1791→          loading={saving}
+  1792→          disabled={doctors.length === 0}
+  1793→          label="Schedule & Continue"
+  1794→        />
+  1795→      </StepFooter>
+  1796→    </div>
+  1797→  )
+  1798→}
+  1799→
+  1800→// ─────────────────────────────────────────────────────────────
+  1801→// STEP 8 — Local Summary (PRIVACY FIREWALL — NO AI, NO NETWORK)
+  1802→// ─────────────────────────────────────────────────────────────
+  1803→
+  1804→function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1805→  const [summary, setSummary] = useState<string | null>(patient?.localSummary ?? null)
+  1806→  const [compressionRatio, setCompressionRatio] = useState<number | null>(null)
+  1807→  const [summaryId, setSummaryId] = useState<string | null>(null)
+  1808→  const [generating, setGenerating] = useState(false)
+  1809→  const [error, setError] = useState<string | null>(null)
+  1810→  const hasGenerated = !!summary
+  1811→
+  1812→  const generate = useCallback(async () => {
+  1813→    if (!patient) return
+  1814→    setGenerating(true)
+  1815→    setError(null)
+  1816→    try {
+  1817→      const res = await fetch('/api/summary', {
+  1818→        method: 'POST',
+  1819→        headers: { 'Content-Type': 'application/json' },
+  1820→        body: JSON.stringify({ patientId: patient.id }),
+  1821→      })
+  1822→      if (!res.ok) {
+  1823→        const data = await res.json().catch(() => ({}))
+  1824→        throw new Error(data.error ?? 'Failed to generate summary')
+  1825→      }
+  1826→      const data: SummaryResponse = await res.json()
+  1827→      setSummary(data.summary)
+  1828→      setCompressionRatio(data.compressionRatio)
+  1829→      setSummaryId(data.summaryId)
+  1830→      onPatientUpdated({ localSummary: data.summary })
+  1831→      triggerSaved()
+  1832→      toast.success('patient_summary_v1 generated locally', {
+  1833→        description: `Compression: ${Math.round(data.compressionRatio * 100)}% · Privacy firewall active`,
+  1834→      })
+  1835→    } catch (e) {
+  1836→      setError((e as Error).message)
+  1837→      toast.error('Summary generation failed', { description: (e as Error).message })
+  1838→    } finally {
+  1839→      setGenerating(false)
+  1840→    }
+  1841→  }, [patient, onPatientUpdated, triggerSaved])
+  1842→
+  1843→  // Auto-generate on first entry if no summary yet
+  1844→  useEffect(() => {
+  1845→    if (!patient) return
+  1846→    if (!patient.localSummary && !generating && !error) {
+  1847→      generate()
+  1848→    }
+  1849→  }, [patient, generating, error, generate])
+  1850→
+  1851→  const handleContinue = () => {
+  1852→    if (!summary) {
+  1853→      toast.error('Please generate the local summary first')
+  1854→      return
+  1855→    }
+  1856→    onAdvance()
+  1857→  }
+  1858→
+  1859→  return (
+  1860→    <div className="space-y-4">
+  1861→      {/* Firewall banner */}
+  1862→      <GlassPanel variant="subtle" className="border-emerald-500/30 bg-emerald-500/5 p-4">
+  1863→        <div className="flex items-start gap-3">
+  1864→          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+  1865→            <ShieldCheck className="h-5 w-5" />
+  1866→          </div>
+  1867→          <div className="min-w-0 flex-1">
+  1868→            <div className="flex flex-wrap items-center gap-2">
+  1869→              <p className="text-sm font-semibold">Privacy Firewall</p>
+  1870→              {hasGenerated && (
+  1871→                <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
+  1872→                  <Check className="h-3 w-3" /> Complete
+  1873→                </Badge>
+  1874→              )}
+  1875→            </div>
+  1876→            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+  1877→              This step is <strong>strictly local</strong>. No AI, no network. A de-identified
+  1878→              summary (<code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>) is
+  1879→              generated from the structured data captured so far. All downstream AI calls
+  1880→              receive <em>only</em> this summary — raw PHI never leaves the device.
+  1881→            </p>
+  1882→          </div>
+  1883→        </div>
+  1884→      </GlassPanel>
+  1885→
+  1886→      {error && (
+  1887→        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300">
+  1888→          <AlertTriangle className="h-3.5 w-3.5" />
+  1889→          {error}
+  1890→          <Button variant="ghost" size="sm" onClick={generate} className="ml-auto h-6 px-2 text-[11px]">
+  1891→            Retry
+  1892→          </Button>
+  1893→        </div>
+  1894→      )}
+  1895→
+  1896→      {generating && !hasGenerated && (
+  1897→        <GlassPanel variant="subtle" className="flex items-center gap-3 p-6">
+  1898→          <Loader2 className="h-5 w-5 animate-spin text-emerald-600 dark:text-emerald-400" />
+  1899→          <div>
+  1900→            <p className="text-sm font-medium">Generating patient_summary_v1…</p>
+  1901→            <p className="text-xs text-muted-foreground">Compressing structured data, stripping PHI…</p>
+  1902→          </div>
+  1903→        </GlassPanel>
+  1904→      )}
+  1905→
+  1906→      {summary && (
+  1907→        <>
+  1908→          {/* Summary output — monospace box */}
+  1909→          <div>
+  1910→            <div className="mb-2 flex items-center justify-between">
+  1911→              <p className="text-sm font-medium">patient_summary_v1 (de-identified)</p>
+  1912→              <Button
+  1913→                variant="ghost"
+  1914→                size="sm"
+  1915→                onClick={generate}
+  1916→                disabled={generating}
+  1917→                className="h-7 gap-1.5 text-[11px] text-muted-foreground"
+  1918→              >
+  1919→                <RotateCcw className="h-3 w-3" />
+  1920→                Regenerate
+  1921→              </Button>
+  1922→            </div>
+  1923→            <pre className="max-h-72 overflow-auto rounded-xl border border-border/60 bg-muted/40 p-4 font-mono text-[12px] leading-relaxed text-foreground/90 orio-scroll">
+  1924→{summary}
+  1925→            </pre>
+  1926→            {summaryId && (
+  1927→              <p className="mt-1.5 text-[10px] text-muted-foreground">
+  1928→                Summary ID: <span className="font-mono">{summaryId}</span>
+  1929→              </p>
+  1930→            )}
+  1931→          </div>
+  1932→
+  1933→          {/* Compression ratio */}
+  1934→          {compressionRatio != null && (
+  1935→            <GlassPanel variant="subtle" className="p-4">
+  1936→              <div className="mb-2 flex items-center justify-between">
+  1937→                <div>
+  1938→                  <p className="text-sm font-medium">Compression ratio</p>
+  1939→                  <p className="text-[11px] text-muted-foreground">
+  1940→                    Target ≥ 70% (raw JSON vs. de-identified summary)
+  1941→                  </p>
+  1942→                </div>
+  1943→                <span
+  1944→                  className={cn(
+  1945→                    'text-2xl font-bold tabular-nums',
+  1946→                    compressionRatio >= 0.7 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+  1947→                  )}
+  1948→                >
+  1949→                  {Math.round(compressionRatio * 100)}%
+  1950→                </span>
+  1951→              </div>
+  1952→              <Progress
+  1953→                value={compressionRatio * 100}
+  1954→                className={cn(
+  1955→                  'h-2',
+  1956→                  compressionRatio >= 0.7 ? '[&>[data-slot=progress-indicator]]:bg-emerald-500' : '[&>[data-slot=progress-indicator]]:bg-amber-500'
+  1957→                )}
+  1958→              />
+  1959→              <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+  1960→                <span>0%</span>
+  1961→                <span className={compressionRatio >= 0.7 ? 'text-emerald-600 dark:text-emerald-400' : ''}>70% target</span>
+  1962→                <span>100%</span>
+  1963→              </div>
+  1964→            </GlassPanel>
+  1965→          )}
+  1966→
+  1967→          {/* What the AI sees */}
+  1968→          <GlassPanel variant="subtle" className="p-3">
+  1969→            <div className="flex items-start gap-2 text-xs">
+  1970→              <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+  1971→              <p className="text-muted-foreground">
+  1972→                The next step (Notify Doctor) will call the Orio AI service. The AI will receive{' '}
+  1973→                <strong>only the summary above</strong> — no name, no contact, no address, no local ID.
+  1974→                This is the privacy firewall in action.
+  1975→              </p>
+  1976→            </div>
+  1977→          </GlassPanel>
+  1978→        </>
+  1979→      )}
+  1980→
+  1981→      <StepFooter>
+  1982→        <ContinueButton onClick={handleContinue} loading={generating} disabled={!summary} />
+  1983→      </StepFooter>
+  1984→    </div>
+  1985→  )
+  1986→}
+  1987→
+  1988→// ─────────────────────────────────────────────────────────────
+  1989→// STEP 9 — Notify Doctor (AI-assisted, receives only summary_v1)
+  1990→// ─────────────────────────────────────────────────────────────
+  1991→
+  1992→function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1993→  const [aiOutput, setAiOutput] = useState<AiNotifyResponse['output'] | null>(null)
+  1994→  const [tierUsed, setTierUsed] = useState<number | null>(null)
+  1995→  const [modelUsed, setModelUsed] = useState<string | null>(null)
+  1996→  const [disclaimer, setDisclaimer] = useState<string>(MANDATORY_DISCLAIMER)
+  1997→  const [loading, setLoading] = useState(false)
+  1998→  const [error, setError] = useState<string | null>(null)
+  1999→  const [blocked, setBlocked] = useState(false)
+  2000→  const [queued, setQueued] = useState(false)
+  2001→  const alreadyNotified = patient?.notificationStatus === 'SENT'
+  2002→
+  2003→  const runNotify = useCallback(async () => {
+  2004→    if (!patient) return
+  2005→    setLoading(true)
+  2006→    setError(null)
+  2007→    setBlocked(false)
+  2008→    try {
+  2009→      const res = await fetch('/api/orio-ai', {
+  2010→        method: 'POST',
+  2011→        headers: { 'Content-Type': 'application/json' },
+  2012→        body: JSON.stringify({ patientId: patient.id, task: 'NOTIFY_DOCTOR' }),
+  2013→      })
+  2014→      const data: AiNotifyResponse = await res.json()
+  2015→      if (!res.ok) {
+  2016→        if (data.blocked) {
+  2017→          setBlocked(true)
+  2018→          setError(data.error ?? 'AI is hard-disabled until Step 8 is complete.')
+  2019→          throw new Error(data.error ?? 'AI blocked')
+  2020→        }
+  2021→        throw new Error(data.error ?? 'AI request failed')
+  2022→      }
+  2023→      setAiOutput(data.output ?? null)
+  2024→      setTierUsed(data.tierUsed ?? null)
+  2025→      setModelUsed(data.modelUsed ?? null)
+  2026→      setDisclaimer(data.disclaimer ?? MANDATORY_DISCLAIMER)
+  2027→      onPatientUpdated({ notificationStatus: 'SENT' })
+  2028→      triggerSaved()
+  2029→      toast.success('Doctor notified with AI-enhanced summary')
+  2030→    } catch (e) {
+  2031→      // If offline or network issue, queue locally
+  2032→      if (!online || (e as Error).message.toLowerCase().includes('fetch')) {
+  2033→        setQueued(true)
+  2034→        onPatientUpdated({ notificationStatus: 'QUEUED' })
+  2035→        triggerSaved()
+  2036→        toast('Notification queued locally', {
+  2037→          description: 'Will be delivered to the doctor when connection returns.',
+  2038→        })
+  2039→      } else {
+  2040→        setError((e as Error).message)
+  2041→        toast.error('AI notification failed', { description: (e as Error).message })
+  2042→      }
+  2043→    } finally {
+  2044→      setLoading(false)
+  2045→    }
+  2046→  }, [patient, online, onPatientUpdated, triggerSaved])
+  2047→
+  2048→  // Auto-run on mount if not yet notified
+  2049→  useEffect(() => {
+  2050→    if (!patient) return
+  2051→    if (!alreadyNotified && !loading && !error && !queued) {
+  2052→      runNotify()
+  2053→    }
+  2054→  }, [patient?.id])
+  2055→
+  2056→  const handleContinue = () => {
+  2057→    if (!aiOutput && !queued) {
+  2058→      toast.error('Please complete the notification step first')
+  2059→      return
+  2060→    }
+  2061→    onAdvance()
+  2062→  }
+  2063→
+  2064→  return (
+  2065→    <div className="space-y-4">
+  2066→      {/* AI context banner */}
+  2067→      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4">
+  2068→        <div className="flex items-start gap-3">
+  2069→          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-300">
+  2070→            <Sparkles className="h-5 w-5" />
+  2071→          </div>
+  2072→          <div className="min-w-0 flex-1">
+  2073→            <p className="text-sm font-semibold">AI-Assisted Doctor Notification</p>
+  2074→            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+  2075→              The Orio AI service will receive <strong>only</strong> the de-identified{' '}
+  2076→              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>{' '}
+  2077→              from Step 8 and produce an enhanced, prioritized notification for the assigned doctor.
+  2078→              Raw PHI never reaches the AI.
+  2079→            </p>
+  2080→          </div>
+  2081→        </div>
+  2082→      </GlassPanel>
+  2083→
+  2084→      {blocked && (
+  2085→        <GlassPanel variant="subtle" className="border-red-500/30 bg-red-500/10 p-4">
+  2086→          <div className="flex items-start gap-2">
+  2087→            <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600 dark:text-red-400" />
+  2088→            <div>
+  2089→              <p className="text-sm font-semibold text-red-700 dark:text-red-300">AI hard-disabled</p>
+  2090→              <p className="mt-0.5 text-xs text-red-700/80 dark:text-red-300/80">{error}</p>
+  2091→              <p className="mt-1 text-xs text-muted-foreground">
+  2092→                Go back to Step 8 and generate the local summary first.
+  2093→              </p>
+  2094→            </div>
+  2095→          </div>
+  2096→        </GlassPanel>
+  2097→      )}
+  2098→
+  2099→      {loading && (
+  2100→        <GlassPanel variant="subtle" className="flex items-center gap-3 p-6">
+
+[showing lines 1401-2100 of 2530; use offset=2101 with limit to continue reading]

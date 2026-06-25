@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const geistSans = Geist({
+const inter = Inter({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const jetMono = JetBrains_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "ORIOSTER — AI Powered HMS",
+  title: "Muslim Hands — AI-Powered HMS",
   description:
-    "Offline-first, AI-assisted, multi-tenant Hospital Management System for low-resource healthcare environments.",
-  keywords: ["ORIOSTER", "HMS", "Hospital Management", "AI Healthcare", "Clinical Decision Support"],
+    "Offline-first, AI-assisted humanitarian health operations command center. Built for low-resource healthcare environments.",
+  keywords: ["Muslim Hands", "HMS", "Humanitarian", "AI Healthcare", "Clinical Decision Support"],
 };
 
 export default function RootLayout({
@@ -28,19 +30,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${jetMono.variable} antialiased bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}
           <Toaster />
-          <SonnerToaster position="top-right" richColors closeButton />
+          <SonnerToaster position="top-right" theme="dark" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

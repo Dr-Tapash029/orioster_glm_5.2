@@ -1,0 +1,195 @@
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:125:    accent: 'bg-amber-500/15 text-amber-600 dark:text-amber-300',
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:133:    accent: 'bg-violet-500/15 text-violet-600 dark:text-violet-300',
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:149:    accent: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300',
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:194:              <p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:199:          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:226:              <p className="mt-1 flex-1 text-sm text-muted-foreground">{card.description}</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:228:                <span className="text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:229:                  Task: <code className="rounded bg-muted px-1 py-0.5">{card.task}</code>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:247:      <p className="px-1 text-center text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:410:      <DialogHeader className="border-b border-border/40 px-5 py-4">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:428:            <Label className="text-xs font-medium text-muted-foreground">Patient</Label>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:440:                <span className="text-muted-foreground">· {patient.age ?? '?'}y {patient.gender.toLowerCase()}</span>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:441:                <span className="text-muted-foreground">· {patient.chiefComplaint ?? 'No complaint'}</span>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:449:              <p className="flex items-center gap-1.5 font-semibold text-red-700 dark:text-red-300">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:452:              <p className="mt-1 text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:480:              <span className="ml-auto text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:488:            <div className="flex items-center justify-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-10">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:492:                <p className="text-[11px] text-muted-foreground">AI is processing the de-identified summary</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:510:                  <div className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 px-3 py-2.5">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:517:                      <p className="text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:557:          <Label className="text-xs font-medium text-muted-foreground">Report Type</Label>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:579:              <span className="ml-1 text-[10px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:594:      <p className="mt-2 text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:616:            <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:626:            <span className="text-muted-foreground">Confidence</span>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:636:          <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:637:            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:644:                <tr className="border-b text-left text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:653:                  <tr key={i} className="border-b border-border/40 last:border-0">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:663:                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-muted-foreground">No items.</td></tr>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:668:                  <tr className="border-t bg-muted/20">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:669:                    <td colSpan={3} className="px-4 py-2.5 text-right text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:676:                      <span className="block text-[11px] font-normal text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:691:          <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:692:            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:699:                <tr className="border-b text-left text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:708:                  <tr key={i} className="border-b border-border/40 last:border-0">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:712:                    <td className="px-4 py-2.5 text-muted-foreground">{p.note}</td>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:716:                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-muted-foreground">No analysis.</td></tr>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:722:            <div className="border-t border-border/40 px-4 py-3">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:723:              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:728:                  <li key={i} className="text-xs text-foreground/90">• {a}</li>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:739:          <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:740:            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:747:                <tr className="border-b text-left text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:757:                  <tr key={i} className="border-b border-border/40 last:border-0">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:762:                    <td className="px-4 py-2.5 text-muted-foreground">{rx.notes ?? '—'}</td>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:766:                  <tr><td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">No prescription items.</td></tr>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:772:            <div className="border-t border-border/40 px-4 py-3">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:773:              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:778:                  <li key={i} className="text-xs text-foreground/90">• {a}</li>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:789:          <div className="flex items-center gap-2 border-b border-border/40 pb-3">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:797:            <p className="text-foreground/90">{o.summary}</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:800:                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recommended Rest / Recovery</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:810:                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Certificate Recommendation</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:825:          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:830:              <li key={i} className="text-xs text-muted-foreground">• {it}</li>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:869:            <span className="text-[11px] text-muted-foreground">· {selected.localId}</span>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:872:          <span className="text-muted-foreground">Select patient…</span>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:879:          <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover p-2 shadow-lg">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:889:                <p className="py-4 text-center text-xs text-muted-foreground">No patient found.</p>
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:895:                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:902:                      <p className="truncate text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:909:                      <ShieldAlert className="h-3 w-3 text-red-500" />
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:924:    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:926:      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:927:      : 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30'
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:938:    normal: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:939:    low: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:940:    high: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:958:    ? 'text-emerald-600 dark:text-emerald-300'
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:960:      ? 'text-red-600 dark:text-red-300'
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:961:      : 'text-muted-foreground'
+/home/z/my-project/src/components/orioster/views/ai-hub.tsx:963:    <div className="rounded-lg border border-border/40 bg-muted/20 px-3 py-2">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:178:              <p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:180:                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">patient_summary_v1</code>. The doctor always has the final say.
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:184:          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:202:            <div className="mt-4 space-y-2.5 border-t border-border/40 pt-3">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:207:                <span className="text-xs text-muted-foreground">Triage</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:211:                <span className="text-xs text-muted-foreground">Sync</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:215:                <span className="text-xs text-muted-foreground">Chief Complaint</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:229:                <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:233:                <Badge variant="outline" className="gap-1.5 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:240:            <p className="mt-4 text-sm text-muted-foreground">Select a patient to view firewall status.</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:249:                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:253:                <p className="mt-1.5 line-clamp-3 text-[11px] leading-relaxed text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:257:              <p className="text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:318:      <p className="px-1 text-center text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:334:        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-600 dark:text-red-400">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:338:          <p className="font-semibold text-red-700 dark:text-red-300">AI is disabled — patient_summary_v1 not generated</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:339:          <p className="mt-1 text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:384:              <span className="text-[11px] text-muted-foreground">· {selected.localId}</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:387:            <span className="text-muted-foreground">Search patient…</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:416:                      <p className="truncate text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:423:                      <ShieldAlert className="h-3.5 w-3.5 text-red-500" />
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:452:          <p className="text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:484:                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:494:                  <span className="text-muted-foreground">Overall confidence</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:521:                          <p className="mt-1 text-sm text-muted-foreground">{d.reasoning}</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:593:          <p className="text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:614:          <span className="text-muted-foreground">Confirmed diagnosis:</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:623:              <p className="text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:649:                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:659:                  <span className="text-muted-foreground">Overall confidence</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:728:          <p className="text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:770:                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:780:                  <span className="text-muted-foreground">Overall confidence</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:789:              <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:790:                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:797:                    <tr className="border-b text-left text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:807:                      <tr key={i} className="border-b border-border/40 last:border-0">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:812:                        <td className="px-4 py-2.5 text-muted-foreground">{rx.notes ?? '—'}</td>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:817:                        <td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:858:    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:860:      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:861:      : 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30'
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:875:      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:897:    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-300',
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:898:    red: 'bg-red-500/10 text-red-600 dark:text-red-300',
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:907:        <span className="ml-auto text-[11px] text-muted-foreground">{items?.length ?? 0}</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:915:              <span className="text-foreground/90">{it}</span>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:920:        <p className="text-sm text-muted-foreground">No items.</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:929:      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:934:          <li key={i} className="text-xs text-muted-foreground">• {it}</li>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:947:      className="flex items-center justify-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-10"
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:952:        <p className="text-[11px] text-muted-foreground">4-tier failover active · non-blocking</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:972:        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:974:      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/orio-ai.tsx:984:      <span className="text-xs text-muted-foreground">{label}</span>
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:397:          <p className="mt-0.5 text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:409:          <Button variant="ghost" size="sm" onClick={handleCancel} className="text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:447:            <div className="mb-5 flex items-start gap-3 border-b border-border/40 pb-4">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:454:                      ? 'bg-violet-500/15 text-violet-300'
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:469:                    <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:474:                <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:568:        <span className="text-xs font-medium text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:591:                  !isCurrent && !isDone && canJump && 'border-border bg-muted/40 text-muted-foreground',
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:592:                  !canJump && 'border-border/50 bg-muted/20 text-muted-foreground/50 cursor-not-allowed'
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:645:                  !isCurrent && !isLocked && 'hover:bg-muted/50',
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:654:                    !isDone && !isCurrent && 'border-border bg-background text-muted-foreground'
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:663:                      isCurrent ? 'text-foreground' : 'text-muted-foreground'
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:672:                        isFirewall ? 'text-emerald-400' : 'text-violet-600'
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:696:      <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:941:              Patient consent given <span className="text-red-500">*</span>
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:943:            <p className="text-[11px] leading-snug text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1113:                  !active && 'border-border bg-muted/40 text-muted-foreground hover:bg-muted'
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1123:          <p className="mt-2 text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1211:        <p className="text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1222:          <Pill className="mx-auto h-8 w-8 text-muted-foreground/50" />
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1224:          <p className="mt-1 text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1284:                    className="h-9 w-9 text-muted-foreground hover:text-red-500"
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1476:            <p key={i} className="text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1477:              · <span className="font-medium text-foreground">{f.field}:</span> {f.msg}
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1566:        <p className="text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1588:            <p className="text-xs text-muted-foreground">Patient has no documented hypersensitivities.</p>
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1621:                  className="h-9 w-9 text-muted-foreground hover:text-red-500"
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1704:        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1712:        <GlassPanel variant="subtle" className="p-4 text-center text-sm text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1714:          <p className="mt-2 font-medium text-foreground">No doctors available</p>
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1773:                <span className="text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1876:            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1878:              summary (<code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>) is
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1901:            <p className="text-xs text-muted-foreground">Compressing structured data, stripping PHI…</p>
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1917:                className="h-7 gap-1.5 text-[11px] text-muted-foreground"
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1923:            <pre className="max-h-72 overflow-auto rounded-xl border border-border/60 bg-muted/40 p-4 font-mono text-[12px] leading-relaxed text-foreground/90 orio-scroll">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1927:              <p className="mt-1.5 text-[10px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1939:                  <p className="text-[11px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:1959:              <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2067:      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4 glow-cyan">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2069:          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2074:            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2076:              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>{' '}
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2091:              <p className="mt-1 text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2101:          <Loader2 className="h-5 w-5 animate-spin text-violet-600" />
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2104:            <p className="text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2158:            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2162:              <div className="mt-3 border-t border-border/40 pt-3">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2163:                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2168:                    <li key={i} className="flex gap-2 text-xs text-foreground/80">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2181:              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2185:              <p className="mt-1 text-[10px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2200:              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2206:              <p className="mt-1 text-[10px] text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2216:            <details className="rounded-lg border border-border/40 bg-muted/20 p-3 text-xs">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2217:              <summary className="cursor-pointer font-medium text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2222:                  <li key={i} className="text-muted-foreground">· {l}</li>
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2350:            <p className="mt-0.5 text-xs text-muted-foreground">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2351:              Your role: <span className="font-medium text-foreground">{role}</span>. Verify each
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2368:                  : 'border-border/60 bg-muted/20 hover:bg-muted/40',
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2412:        <p className="text-[11px] text-muted-foreground sm:text-right">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2456:          {icon && <span className="text-muted-foreground">{icon}</span>}
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2458:          {required && <span className="text-red-500">*</span>}
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2459:          {hint && <span className="ml-auto text-[10px] font-normal text-muted-foreground">{hint}</span>}
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2469:    <div className="flex items-center justify-end gap-2 border-t border-border/40 pt-4">
+/home/z/my-project/src/components/orioster/views/patient-entry-wizard.tsx:2498:      <span className="text-muted-foreground">{label}</span>

@@ -159,7 +159,7 @@ export function OrioAiView() {
   if (loadingPatients) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
       </div>
     )
   }
@@ -170,18 +170,18 @@ export function OrioAiView() {
       <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Orio AI — Clinical Decision Support</h1>
-              <p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
+              <p className="mt-0.5 max-w-2xl text-sm text-slate-400">
                 Advisory-only clinical intelligence. AI receives only de-identified{' '}
-                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">patient_summary_v1</code>. The doctor always has the final say.
+                <code className="rounded bg-white/5 px-1 py-0.5 text-[11px]">patient_summary_v1</code>. The doctor always has the final say.
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300">
             <ShieldAlert className="h-3 w-3" /> Advisory Mode
           </Badge>
         </div>
@@ -199,20 +199,20 @@ export function OrioAiView() {
             />
           </div>
           {selected && (
-            <div className="mt-4 space-y-2.5 border-t border-border/40 pt-3">
+            <div className="mt-4 space-y-2.5 border-t border-white/10 pt-3">
               <Row label="Local ID" value={selected.localId} />
               <Row label="Age / Sex" value={`${selected.age ?? '?'}y · ${selected.gender.toLowerCase()}`} />
               <Row label="Status" value={selected.status} />
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Triage</span>
+                <span className="text-xs text-slate-400">Triage</span>
                 <TriageBadge level={(selected.vitals[0]?.triageLevel as TriageLevel) ?? null} />
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Sync</span>
+                <span className="text-xs text-slate-400">Sync</span>
                 <SyncStatusBadge status={selected.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
               </div>
               <div>
-                <span className="text-xs text-muted-foreground">Chief Complaint</span>
+                <span className="text-xs text-slate-400">Chief Complaint</span>
                 <p className="mt-0.5 text-sm font-medium">{selected.chiefComplaint ?? '—'}</p>
               </div>
             </div>
@@ -226,18 +226,18 @@ export function OrioAiView() {
             subtitle="AI is hard-disabled until patient_summary_v1 exists"
             action={
               firewallOk ? (
-                <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                <Badge className="gap-1.5 bg-cyan-500/15 text-cyan-300 border-cyan-500/30 glow-cyan">
                   <Lock className="h-3 w-3" /> Firewall Active
                 </Badge>
               ) : (
-                <Badge variant="outline" className="gap-1.5 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+                <Badge variant="outline" className="gap-1.5 border-red-500/40 bg-red-500/10 text-red-400">
                   <ShieldAlert className="h-3 w-3" /> AI Disabled
                 </Badge>
               )
             }
           />
           {!selected ? (
-            <p className="mt-4 text-sm text-muted-foreground">Select a patient to view firewall status.</p>
+            <p className="mt-4 text-sm text-slate-400">Select a patient to view firewall status.</p>
           ) : !firewallOk ? (
             <FirewallWarning onGoToWizard={() => {
               setActivePatient(selected.id)
@@ -245,16 +245,16 @@ export function OrioAiView() {
             }} />
           ) : (
             <div className="mt-4 space-y-3">
-              <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              <div className="rounded-xl border border-cyan-500/25 bg-cyan-500/5 p-3 glow-cyan">
+                <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
                   <CheckCircle2 className="h-4 w-4" />
                   patient_summary_v1 generated
                 </div>
-                <p className="mt-1.5 line-clamp-3 text-[11px] leading-relaxed text-muted-foreground">
+                <p className="mt-1.5 line-clamp-3 text-[11px] leading-relaxed text-slate-400">
                   {selected.localSummary}
                 </p>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[11px] text-slate-400">
                 Raw PHI never leaves the device. The AI receives only the compressed, de-identified summary above. Outputs are advisory and must be reviewed by a human professional.
               </p>
             </div>
@@ -315,7 +315,7 @@ export function OrioAiView() {
       )}
 
       {/* Footer note */}
-      <p className="px-1 text-center text-[11px] text-muted-foreground">
+      <p className="px-1 text-center text-[11px] text-slate-400">
         ORIO AI · 4-tier failover · Privacy firewall enforced server-side · {user?.name ?? 'Doctor'}
       </p>
     </div>
@@ -331,16 +331,16 @@ function FirewallWarning({ onGoToWizard }: { onGoToWizard: () => void }) {
       className="mt-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-600 dark:text-red-400">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-400">
           <ShieldAlert className="h-5 w-5" />
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-red-700 dark:text-red-300">AI is disabled — patient_summary_v1 not generated</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="font-semibold text-red-400">AI is disabled — patient_summary_v1 not generated</p>
+          <p className="mt-1 text-sm text-slate-400">
             Complete the Patient Entry Wizard through <span className="font-medium">Step 8 (Local Summary)</span> first.
             The privacy firewall requires a de-identified summary before any AI task can run.
           </p>
-          <Button size="sm" className="mt-3 gap-1.5" onClick={onGoToWizard}>
+          <Button size="sm" className="btn-cyan mt-3 gap-1.5" onClick={onGoToWizard}>
             <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
           </Button>
         </div>
@@ -381,10 +381,10 @@ function PatientPicker({
           {selected ? (
             <span className="flex items-center gap-2 truncate">
               <span className="truncate">{selected.fullName}</span>
-              <span className="text-[11px] text-muted-foreground">· {selected.localId}</span>
+              <span className="text-[11px] text-slate-400">· {selected.localId}</span>
             </span>
           ) : (
-            <span className="text-muted-foreground">Search patient…</span>
+            <span className="text-slate-400">Search patient…</span>
           )}
           <ChevronRight className={cn('h-4 w-4 opacity-50 transition-transform', open && 'rotate-90')} />
         </Button>
@@ -408,12 +408,12 @@ function PatientPicker({
                     onSelect={() => { onChange(p.id); setOpen(false); setSearch('') }}
                     className="gap-2"
                   >
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-[11px] font-semibold text-cyan-300">
                       {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{p.fullName}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">
+                      <p className="truncate text-[11px] text-slate-400">
                         {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? 'No complaint'}
                       </p>
                     </div>
@@ -449,7 +449,7 @@ function DiagnosisPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold">Differential Diagnosis</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-400">
             AI suggests the 3 most probable diagnoses from the de-identified summary.
           </p>
         </div>
@@ -459,7 +459,7 @@ function DiagnosisPanel({
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading} className="gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading} className="btn-cyan gap-1.5">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Run AI'}
           </Button>
@@ -481,7 +481,7 @@ function DiagnosisPanel({
             <GlassPanel variant="subtle" className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+                  <p className="text-xs font-medium text-slate-400">AI Summary</p>
                   <p className="mt-1 text-sm">{result.output.summary}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
@@ -491,7 +491,7 @@ function DiagnosisPanel({
               </div>
               <div className="mt-3">
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Overall confidence</span>
+                  <span className="text-slate-400">Overall confidence</span>
                   <span className="font-semibold tabular-nums">{Math.round(result.output.confidence * 100)}%</span>
                 </div>
                 <ConfidenceMeter value={result.output.confidence} />
@@ -512,13 +512,13 @@ function DiagnosisPanel({
                       <div className="flex items-start gap-3">
                         <div className={cn(
                           'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold',
-                          isConfirmed ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
+                          isConfirmed ? 'bg-cyan-500 text-cyan-950' : 'bg-cyan-500/15 text-cyan-300'
                         )}>
                           {i + 1}
                         </div>
                         <div>
                           <p className="font-semibold leading-tight">{d.condition}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">{d.reasoning}</p>
+                          <p className="mt-1 text-sm text-slate-400">{d.reasoning}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
@@ -526,7 +526,7 @@ function DiagnosisPanel({
                         <Button
                           size="sm"
                           variant={isConfirmed ? 'default' : 'outline'}
-                          className="gap-1.5"
+                          className={cn('gap-1.5', isConfirmed && 'btn-cyan')}
                           onClick={() => onConfirm(d.condition)}
                         >
                           {isConfirmed ? (
@@ -553,8 +553,8 @@ function DiagnosisPanel({
             <DisclaimerChip text={result.disclaimer} />
 
             {confirmedDx && (
-              <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
+              <div className="flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs">
+                <CheckCircle2 className="h-4 w-4 text-cyan-300" />
                 <span>
                   <span className="font-semibold">{confirmedDx}</span> marked as confirmed diagnosis.
                   Proceed to <span className="font-medium">Treatment Plan</span> to generate a plan based on this selection.
@@ -590,7 +590,7 @@ function TreatmentPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold">Treatment Plan</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-400">
             Requires a confirmed diagnosis selected from the differential step.
           </p>
         </div>
@@ -600,7 +600,7 @@ function TreatmentPanel({
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="btn-cyan gap-1.5">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ClipboardList className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Generate Plan'}
           </Button>
@@ -609,9 +609,9 @@ function TreatmentPanel({
 
       {/* Confirmed diagnosis chip */}
       {confirmedDx ? (
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs">
-          <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-          <span className="text-muted-foreground">Confirmed diagnosis:</span>
+        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs">
+          <CheckCircle2 className="h-3.5 w-3.5 text-cyan-300" />
+          <span className="text-slate-400">Confirmed diagnosis:</span>
           <span className="font-semibold">{confirmedDx}</span>
         </div>
       ) : (
@@ -620,7 +620,7 @@ function TreatmentPanel({
             <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
             <div>
               <p className="text-sm font-medium">No confirmed diagnosis selected</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-400">
                 Run Differential Diagnosis and select a condition first. The treatment plan is contextual to the doctor-confirmed diagnosis.
               </p>
             </div>
@@ -646,7 +646,7 @@ function TreatmentPanel({
             <GlassPanel variant="subtle" className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+                  <p className="text-xs font-medium text-slate-400">AI Summary</p>
                   <p className="mt-1 text-sm">{result.output.summary}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
@@ -656,7 +656,7 @@ function TreatmentPanel({
               </div>
               <div className="mt-3">
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Overall confidence</span>
+                  <span className="text-slate-400">Overall confidence</span>
                   <span className="font-semibold tabular-nums">{Math.round(result.output.confidence * 100)}%</span>
                 </div>
                 <ConfidenceMeter value={result.output.confidence} />
@@ -725,7 +725,7 @@ function PrescriptionPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold">Prescription Generation</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-400">
             AI generates an advisory prescription reviewed against allergies and current medications.
           </p>
         </div>
@@ -745,7 +745,7 @@ function PrescriptionPanel({
               </Button>
             </>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading} className="gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading} className="btn-cyan gap-1.5">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pill className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Generate Rx'}
           </Button>
@@ -767,7 +767,7 @@ function PrescriptionPanel({
             <GlassPanel variant="subtle" className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+                  <p className="text-xs font-medium text-slate-400">AI Summary</p>
                   <p className="mt-1 text-sm">{result.output.summary}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
@@ -777,7 +777,7 @@ function PrescriptionPanel({
               </div>
               <div className="mt-3">
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Overall confidence</span>
+                  <span className="text-slate-400">Overall confidence</span>
                   <span className="font-semibold tabular-nums">{Math.round(result.output.confidence * 100)}%</span>
                 </div>
                 <ConfidenceMeter value={result.output.confidence} />
@@ -786,15 +786,15 @@ function PrescriptionPanel({
 
             {/* Prescription table */}
             <GlassPanel className="overflow-hidden p-0">
-              <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Rx · {result.output.prescription?.length ?? 0} item(s)
                 </p>
               </div>
               <div className="overflow-x-auto orio-scroll">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs text-muted-foreground">
+                    <tr className="border-b text-left text-xs text-slate-400">
                       <th className="px-4 py-2 font-medium">Drug</th>
                       <th className="px-4 py-2 font-medium">Dosage</th>
                       <th className="px-4 py-2 font-medium">Frequency</th>
@@ -804,17 +804,17 @@ function PrescriptionPanel({
                   </thead>
                   <tbody>
                     {result.output.prescription?.map((rx, i) => (
-                      <tr key={i} className="border-b border-border/40 last:border-0">
+                      <tr key={i} className="border-b border-white/10 last:border-0">
                         <td className="px-4 py-2.5 font-medium">{rx.drug}</td>
                         <td className="px-4 py-2.5 tabular-nums">{rx.dosage}</td>
                         <td className="px-4 py-2.5">{rx.frequency}</td>
                         <td className="px-4 py-2.5">{rx.duration}</td>
-                        <td className="px-4 py-2.5 text-muted-foreground">{rx.notes ?? '—'}</td>
+                        <td className="px-4 py-2.5 text-slate-400">{rx.notes ?? '—'}</td>
                       </tr>
                     ))}
                     {(!result.output.prescription || result.output.prescription.length === 0) && (
                       <tr>
-                        <td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">
+                        <td colSpan={5} className="px-4 py-6 text-center text-sm text-slate-400">
                           No prescription items returned.
                         </td>
                       </tr>
@@ -855,10 +855,10 @@ function PrescriptionPanel({
 // ── Shared sub-components ────────────────────────────────────────────────────
 function TierBadge({ tier, model }: { tier: number; model?: string }) {
   const cls = tier === 1
-    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
     : tier === 2
-      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
-      : 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30'
+      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+      : 'bg-red-500/15 text-red-400 border-red-500/30'
   return (
     <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', cls)}>
       <Sparkles className="h-2.5 w-2.5" />
@@ -869,10 +869,10 @@ function TierBadge({ tier, model }: { tier: number; model?: string }) {
 
 function ProbabilityBar({ value, rank }: { value: number; rank: number }) {
   const pct = Math.round(Math.max(0, Math.min(1, value)) * 100)
-  const colors = ['bg-primary', 'bg-primary/70', 'bg-primary/45']
+  const colors = ['bg-cyan-500', 'bg-cyan-500/70', 'bg-cyan-500/45']
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
         <div
           className={cn('h-full rounded-full transition-all duration-500', colors[rank] ?? colors[2])}
           style={{ width: `${pct}%` }}
@@ -892,10 +892,10 @@ function TreatmentCard({
   accent: 'primary' | 'accent' | 'amber' | 'red'
 }) {
   const accents = {
-    primary: 'bg-primary/10 text-primary',
-    accent: 'bg-accent/15 text-accent-foreground',
-    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-300',
-    red: 'bg-red-500/10 text-red-600 dark:text-red-300',
+    primary: 'bg-cyan-500/15 text-cyan-300',
+    accent: 'bg-emerald-500/15 text-emerald-300',
+    amber: 'bg-amber-500/10 text-amber-300',
+    red: 'bg-red-500/10 text-red-400',
   }
   return (
     <GlassPanel className="p-4">
@@ -904,7 +904,7 @@ function TreatmentCard({
           {icon}
         </div>
         <p className="text-sm font-semibold">{title}</p>
-        <span className="ml-auto text-[11px] text-muted-foreground">{items?.length ?? 0}</span>
+        <span className="ml-auto text-[11px] text-slate-400">{items?.length ?? 0}</span>
       </div>
       <Separator className="my-3" />
       {items && items.length > 0 ? (
@@ -912,12 +912,12 @@ function TreatmentCard({
           {items.map((it, i) => (
             <li key={i} className="flex items-start gap-2 text-sm">
               <span className={cn('mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full', accents[accent].split(' ')[0])} />
-              <span className="text-foreground/90">{it}</span>
+              <span className="text-slate-100/90">{it}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">No items.</p>
+        <p className="text-sm text-slate-400">No items.</p>
       )}
     </GlassPanel>
   )
@@ -926,12 +926,12 @@ function TreatmentCard({
 function LimitationsList({ items }: { items: string[] }) {
   return (
     <GlassPanel variant="subtle" className="p-3">
-      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
         <AlertTriangle className="h-3.5 w-3.5" /> AI Limitations
       </p>
       <ul className="space-y-1">
         {items.map((it, i) => (
-          <li key={i} className="text-xs text-muted-foreground">• {it}</li>
+          <li key={i} className="text-xs text-slate-400">• {it}</li>
         ))}
       </ul>
     </GlassPanel>
@@ -944,12 +944,12 @@ function InlineLoader({ label }: { label: string }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex items-center justify-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-10"
+      className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-10"
     >
-      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      <Loader2 className="h-5 w-5 animate-spin text-cyan-300" />
       <div>
         <p className="text-sm font-medium">{label}</p>
-        <p className="text-[11px] text-muted-foreground">4-tier failover active · non-blocking</p>
+        <p className="text-[11px] text-slate-400">4-tier failover active · non-blocking</p>
       </div>
     </motion.div>
   )
@@ -964,14 +964,14 @@ function EmptyTask({
 }) {
   return (
     <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/15 text-cyan-300">
         {icon}
       </div>
       <div>
         <p className="font-semibold">{title}</p>
-        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+        <p className="mx-auto mt-1 max-w-md text-sm text-slate-400">{description}</p>
       </div>
-      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
         <Wand2 className="h-3 w-3" /> Outputs are advisory — review before action
       </div>
     </GlassPanel>
@@ -981,7 +981,7 @@ function EmptyTask({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs text-slate-400">{label}</span>
       <span className="text-sm font-medium">{value}</span>
     </div>
   )

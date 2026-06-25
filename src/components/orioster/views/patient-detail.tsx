@@ -155,10 +155,10 @@ export function PatientDetailView() {
   if (!activePatientId) {
     return (
       <GlassPanel className="flex flex-col items-center justify-center gap-3 p-12 text-center">
-        <User className="h-10 w-10 text-muted-foreground" />
-        <p className="font-semibold">No patient selected</p>
-        <p className="text-sm text-muted-foreground">Choose a patient from the list to view their record.</p>
-        <Button onClick={() => setView('patients')} className="gap-1.5">
+        <User className="h-10 w-10 text-slate-500" />
+        <p className="font-semibold text-slate-100">No patient selected</p>
+        <p className="text-sm text-slate-400">Choose a patient from the list to view their record.</p>
+        <Button onClick={() => setView('patients')} className="btn-cyan gap-1.5">
           <ArrowLeft className="h-4 w-4" /> Go to Patients
         </Button>
       </GlassPanel>
@@ -168,7 +168,7 @@ export function PatientDetailView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
       </div>
     )
   }
@@ -176,10 +176,10 @@ export function PatientDetailView() {
   if (!patient) {
     return (
       <GlassPanel className="flex flex-col items-center justify-center gap-3 p-12 text-center">
-        <User className="h-10 w-10 text-muted-foreground" />
-        <p className="font-semibold">Patient not found</p>
-        <p className="text-sm text-muted-foreground">The selected patient record could not be loaded.</p>
-        <Button onClick={() => setView('patients')} className="gap-1.5">
+        <User className="h-10 w-10 text-slate-500" />
+        <p className="font-semibold text-slate-100">Patient not found</p>
+        <p className="text-sm text-slate-400">The selected patient record could not be loaded.</p>
+        <Button onClick={() => setView('patients')} className="btn-cyan gap-1.5">
           <ArrowLeft className="h-4 w-4" /> Go to Patients
         </Button>
       </GlassPanel>
@@ -205,12 +205,12 @@ export function PatientDetailView() {
       <GlassPanel variant="strong" className="p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-lg font-bold text-primary">
+            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-cyan-500/15 text-lg font-bold text-cyan-300">
               {patient.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{patient.fullName}</h1>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <h1 className="text-xl font-bold tracking-tight text-slate-100 sm:text-2xl">{patient.fullName}</h1>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-400">
                 <span className="font-mono text-xs">{patient.localId}</span>
                 <span>·</span>
                 <span>{patient.age ?? '?'}y · {patient.gender.toLowerCase()}</span>
@@ -221,23 +221,23 @@ export function PatientDetailView() {
                 <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
                 {latestTriage && <TriageBadge level={latestTriage} />}
                 {firewallOk ? (
-                  <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                  <Badge className="gap-1 bg-cyan-500/15 text-cyan-300">
                     <Lock className="h-3 w-3" /> Firewall Active
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+                  <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-400">
                     <ShieldAlert className="h-3 w-3" /> AI Disabled
                   </Badge>
                 )}
                 {patient.notificationStatus && (
-                  <Badge variant="outline" className="gap-1">
+                  <Badge variant="outline" className="gap-1 border-white/10 text-slate-300">
                     <CalendarClock className="h-3 w-3" /> Notify: {patient.notificationStatus}
                   </Badge>
                 )}
               </div>
             </div>
           </div>
-          <div className="text-right text-xs text-muted-foreground">
+          <div className="text-right text-xs text-slate-400">
             <p>Created {formatDistanceToNow(new Date(patient.createdAt), { addSuffix: true })}</p>
             <p className="mt-0.5">by {patient.createdByStaff?.name ?? '—'} · <RoleBadge role={patient.createdByStaff?.role ?? 'ADMIN'} /></p>
           </div>
@@ -321,27 +321,27 @@ function OverviewTab({
         <SectionHeader title="Clinical Snapshot" />
         <div className="mt-4 space-y-3">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Chief Complaint</p>
-            <p className="mt-0.5 text-sm font-medium">{patient.chiefComplaint ?? '—'}</p>
+            <p className="text-xs font-medium text-slate-400">Chief Complaint</p>
+            <p className="mt-0.5 text-sm font-medium text-slate-100">{patient.chiefComplaint ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Past History</p>
+            <p className="text-xs font-medium text-slate-400">Past History</p>
             {pastHistory.length > 0 ? (
               <div className="mt-1 flex flex-wrap gap-1.5">
                 {pastHistory.map((h, i) => (
-                  <Badge key={i} variant="outline" className="text-[11px]">{h}</Badge>
+                  <Badge key={i} variant="outline" className="border-white/10 text-[11px] text-slate-300">{h}</Badge>
                 ))}
               </div>
             ) : (
-              <p className="mt-0.5 text-sm text-muted-foreground">None recorded</p>
+              <p className="mt-0.5 text-sm text-slate-400">None recorded</p>
             )}
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Allergies</p>
+            <p className="text-xs font-medium text-slate-400">Allergies</p>
             <AllergyList items={allergies} />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Ongoing Medications</p>
+            <p className="text-xs font-medium text-slate-400">Ongoing Medications</p>
             <MedicationList items={medications} />
           </div>
         </div>
@@ -354,40 +354,40 @@ function OverviewTab({
           subtitle="De-identified, compressed summary that AI receives"
           action={
             patient.localSummary ? (
-              <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              <Badge className="gap-1 bg-cyan-500/15 text-cyan-300">
                 <Lock className="h-3 w-3" /> Generated
               </Badge>
             ) : (
-              <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+              <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-400">
                 <ShieldAlert className="h-3 w-3" /> Step 8 incomplete
               </Badge>
             )
           }
         />
         {patient.localSummary ? (
-          <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+          <div className="mt-4 rounded-xl border border-cyan-500/25 bg-cyan-500/5 p-4 glow-cyan">
+            <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
               <CheckCircle2 className="h-4 w-4" /> Local summary active — AI eligible
             </div>
-            <p className="mt-2 whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/90">
+            <p className="mt-2 whitespace-pre-wrap font-mono text-sm leading-relaxed text-slate-100/90">
               {patient.localSummary}
             </p>
-            <p className="mt-3 text-[11px] text-muted-foreground">
+            <p className="mt-3 text-[11px] text-slate-400">
               Raw PHI (name, contact, address, IDs) never leaves the device. The AI receives only this compressed summary.
             </p>
           </div>
         ) : (
           <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-600 dark:text-red-400">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-400">
                 <ShieldAlert className="h-5 w-5" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-red-700 dark:text-red-300">Step 8 not completed</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="font-semibold text-red-300">Step 8 not completed</p>
+                <p className="mt-1 text-sm text-slate-400">
                   The local summary (privacy firewall) has not been generated. Orio AI tasks are hard-disabled for this patient until the wizard is completed through Step 8.
                 </p>
-                <Button size="sm" className="mt-3 gap-1.5" onClick={onGoToWizard}>
+                <Button size="sm" className="mt-3 btn-cyan gap-1.5" onClick={onGoToWizard}>
                   <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
                 </Button>
               </div>
@@ -410,7 +410,7 @@ function VitalsTab({ vitals }: { vitals: VitalsRecord[] }) {
       <div className="mt-4 overflow-x-auto orio-scroll">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-xs text-muted-foreground">
+            <tr className="border-b border-white/10 text-left text-xs text-slate-400">
               <th className="pb-2 pr-3 font-medium">Recorded</th>
               <th className="pb-2 pr-3 font-medium">Triage</th>
               <th className="pb-2 pr-3 font-medium">Temp</th>
@@ -423,29 +423,29 @@ function VitalsTab({ vitals }: { vitals: VitalsRecord[] }) {
           </thead>
           <tbody>
             {vitals.map((v) => (
-              <tr key={v.id} className="border-b border-border/40 last:border-0">
-                <td className="py-2.5 pr-3 text-xs text-muted-foreground">
+              <tr key={v.id} className="border-b border-white/10 last:border-0">
+                <td className="py-2.5 pr-3 text-xs text-slate-400">
                   {format(new Date(v.recordedAt), 'dd MMM yyyy, HH:mm')}
                 </td>
                 <td className="py-2.5 pr-3">
                   <TriageBadge level={(v.triageLevel as TriageLevel) ?? null} />
                 </td>
-                <td className="py-2.5 pr-3 tabular-nums">
+                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
                   {v.temperature != null ? `${v.temperature}°C` : '—'}
                 </td>
-                <td className="py-2.5 pr-3 tabular-nums">
+                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
                   {v.bpSystolic != null && v.bpDiastolic != null ? `${v.bpSystolic}/${v.bpDiastolic}` : '—'}
                 </td>
-                <td className="py-2.5 pr-3 tabular-nums">
+                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
                   {v.heartRate != null ? `${v.heartRate}` : '—'}
                 </td>
-                <td className="py-2.5 pr-3 tabular-nums">
+                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
                   {v.spo2 != null ? `${v.spo2}%` : '—'}
                 </td>
-                <td className="py-2.5 pr-3 tabular-nums">
+                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
                   {v.weightKg != null ? `${v.weightKg} kg` : '—'}
                 </td>
-                <td className="py-2.5 text-xs text-muted-foreground">
+                <td className="py-2.5 text-xs text-slate-400">
                   {formatDistanceToNow(new Date(v.recordedAt), { addSuffix: true })}
                 </td>
               </tr>
@@ -488,31 +488,31 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
     <GlassPanel className="p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300">
             <TaskIcon taskType={result.taskType} />
           </div>
           <div>
-            <p className="font-semibold">{taskLabel}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="font-semibold text-slate-100">{taskLabel}</p>
+            <p className="text-xs text-slate-400">
               {format(new Date(result.createdAt), 'dd MMM yyyy, HH:mm')} · by {result.createdByStaff?.name ?? '—'}
             </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           <RiskBadge level={(result.riskLevel as RiskLevel) ?? 'moderate'} />
-          <Badge variant="outline" className="gap-1 text-[10px]">
+          <Badge variant="outline" className="gap-1 border-cyan-500/30 text-[10px] text-cyan-300">
             <Sparkles className="h-2.5 w-2.5" /> Tier {result.tierUsed}
           </Badge>
-          <Badge variant="outline" className="text-[10px]">{result.recommendationType}</Badge>
+          <Badge variant="outline" className="border-white/10 text-[10px] text-slate-300">{result.recommendationType}</Badge>
         </div>
       </div>
 
-      <p className="mt-3 text-sm">{result.summary}</p>
+      <p className="mt-3 text-sm text-slate-100">{result.summary}</p>
 
       <div className="mt-3 max-w-xs">
         <div className="mb-1 flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Confidence</span>
-          <span className="font-semibold tabular-nums">{Math.round(result.confidence * 100)}%</span>
+          <span className="text-slate-400">Confidence</span>
+          <span className="font-semibold tabular-nums text-slate-100">{Math.round(result.confidence * 100)}%</span>
         </div>
         <ConfidenceMeter value={result.confidence} />
       </div>
@@ -531,12 +531,12 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
               <RichBlock title="Differential Diagnosis" icon={<Stethoscope className="h-3.5 w-3.5" />}>
                 <div className="space-y-2">
                   {output.diagnosis.map((d, i) => (
-                    <div key={i} className="rounded-md bg-muted/30 px-3 py-2">
+                    <div key={i} className="rounded-md bg-white/5 px-3 py-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{i + 1}. {d.condition}</span>
-                        <span className="text-xs font-semibold tabular-nums">{Math.round(d.probability * 100)}%</span>
+                        <span className="text-sm font-medium text-slate-100">{i + 1}. {d.condition}</span>
+                        <span className="text-xs font-semibold tabular-nums text-cyan-300">{Math.round(d.probability * 100)}%</span>
                       </div>
-                      <p className="mt-1 text-xs text-muted-foreground">{d.reasoning}</p>
+                      <p className="mt-1 text-xs text-slate-400">{d.reasoning}</p>
                     </div>
                   ))}
                 </div>
@@ -556,7 +556,7 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
                 <div className="overflow-x-auto orio-scroll">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b text-left text-muted-foreground">
+                      <tr className="border-b border-white/10 text-left text-slate-400">
                         <th className="py-1 pr-2 font-medium">Drug</th>
                         <th className="py-1 pr-2 font-medium">Dose</th>
                         <th className="py-1 pr-2 font-medium">Freq</th>
@@ -565,11 +565,11 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
                     </thead>
                     <tbody>
                       {output.prescription.map((rx, i) => (
-                        <tr key={i} className="border-b border-border/30 last:border-0">
-                          <td className="py-1.5 pr-2 font-medium">{rx.drug}</td>
-                          <td className="py-1.5 pr-2 tabular-nums">{rx.dosage}</td>
-                          <td className="py-1.5 pr-2">{rx.frequency}</td>
-                          <td className="py-1.5">{rx.duration}</td>
+                        <tr key={i} className="border-b border-white/10 last:border-0">
+                          <td className="py-1.5 pr-2 font-medium text-slate-100">{rx.drug}</td>
+                          <td className="py-1.5 pr-2 tabular-nums text-slate-300">{rx.dosage}</td>
+                          <td className="py-1.5 pr-2 text-slate-300">{rx.frequency}</td>
+                          <td className="py-1.5 text-slate-300">{rx.duration}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -604,14 +604,14 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
               <RichBlock title="Lab Analysis" icon={<FlaskConical className="h-3.5 w-3.5" />}>
                 <div className="space-y-1.5">
                   {output.parameters_analysis.map((p, i) => (
-                    <div key={i} className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-1.5 text-xs">
-                      <span className="font-medium">{p.parameter}</span>
-                      <span className="tabular-nums text-muted-foreground">{p.value}</span>
+                    <div key={i} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-1.5 text-xs">
+                      <span className="font-medium text-slate-100">{p.parameter}</span>
+                      <span className="tabular-nums text-slate-400">{p.value}</span>
                       <span className={cn(
                         'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase',
-                        p.status === 'normal' && 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-                        p.status === 'low' && 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-                        p.status === 'high' && 'bg-red-500/15 text-red-700 dark:text-red-300',
+                        p.status === 'normal' && 'bg-emerald-500/15 text-emerald-300',
+                        p.status === 'low' && 'bg-amber-500/15 text-amber-300',
+                        p.status === 'high' && 'bg-red-500/15 text-red-400',
                       )}>{p.status}</span>
                     </div>
                   ))}
@@ -632,10 +632,10 @@ function AiResultCard({ result }: { result: AiResultRecord }) {
       </AnimatePresence>
 
       <div className="mt-3 flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)} className="gap-1 text-xs">
+        <Button variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)} className="gap-1 text-xs text-slate-300 hover:text-slate-100">
           {expanded ? 'Hide details' : 'Show details'}
         </Button>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-[11px] text-slate-400">
           {result.modelUsed ? `Model: ${result.modelUsed}` : ''}
         </span>
       </div>
@@ -664,29 +664,29 @@ function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
           <GlassPanel key={r.id} className="p-4 sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-600 dark:text-violet-300">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300">
                   <FlaskConical className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-semibold">{typeLabel}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-semibold text-slate-100">{typeLabel}</p>
+                  <p className="text-xs text-slate-400">
                     {format(new Date(r.createdAt), 'dd MMM yyyy, HH:mm')} · by {r.createdByStaff?.name ?? '—'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
                 {r.isNormal === null ? (
-                  <Badge variant="outline">Unknown</Badge>
+                  <Badge variant="outline" className="border-white/10 text-slate-400">Unknown</Badge>
                 ) : r.isNormal ? (
-                  <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                  <Badge className="gap-1 bg-emerald-500/15 text-emerald-300">
                     <CheckCircle2 className="h-3 w-3" /> All Normal
                   </Badge>
                 ) : (
-                  <Badge className="gap-1 bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                  <Badge className="gap-1 bg-amber-500/15 text-amber-300">
                     <AlertTriangle className="h-3 w-3" /> Abnormal
                   </Badge>
                 )}
-                <Badge variant="outline" className="text-[10px]">{r.status}</Badge>
+                <Badge variant="outline" className="border-white/10 text-[10px] text-slate-300">{r.status}</Badge>
               </div>
             </div>
 
@@ -694,7 +694,7 @@ function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
               <div className="mt-3 overflow-x-auto orio-scroll">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs text-muted-foreground">
+                    <tr className="border-b border-white/10 text-left text-xs text-slate-400">
                       <th className="pb-2 pr-3 font-medium">Parameter</th>
                       <th className="pb-2 pr-3 font-medium">Value</th>
                       <th className="pb-2 pr-3 font-medium">Unit</th>
@@ -705,15 +705,15 @@ function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
                   </thead>
                   <tbody>
                     {params.map((p, i) => (
-                      <tr key={i} className="border-b border-border/40 last:border-0">
-                        <td className="py-2 pr-3 font-medium">{p.name}</td>
-                        <td className="py-2 pr-3 tabular-nums">{p.value || '—'}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">{p.unit || '—'}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">{p.refRange || '—'}</td>
+                      <tr key={i} className="border-b border-white/10 last:border-0">
+                        <td className="py-2 pr-3 font-medium text-slate-100">{p.name}</td>
+                        <td className="py-2 pr-3 tabular-nums text-slate-100">{p.value || '—'}</td>
+                        <td className="py-2 pr-3 text-slate-400">{p.unit || '—'}</td>
+                        <td className="py-2 pr-3 text-slate-400">{p.refRange || '—'}</td>
                         <td className="py-2 pr-3">
                           <LabStatus status={p.status} />
                         </td>
-                        <td className="py-2 text-xs text-muted-foreground">{p.note || '—'}</td>
+                        <td className="py-2 text-xs text-slate-400">{p.note || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -722,11 +722,11 @@ function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
             )}
 
             {r.aiFeedback && (
-              <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+              <div className="mt-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
                   <Sparkles className="h-3.5 w-3.5" /> AI Feedback
                 </p>
-                <p className="mt-1 text-sm text-foreground/90">{r.aiFeedback}</p>
+                <p className="mt-1 text-sm text-slate-100/90">{r.aiFeedback}</p>
                 <DisclaimerChip text="AI feedback is advisory and must be reviewed by a human professional." />
               </div>
             )}
@@ -757,12 +757,12 @@ function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
           <GlassPanel key={inv.id} className="p-4 sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-300">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15 text-amber-300">
                   <Receipt className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-semibold font-mono">{inv.invoiceNo}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-semibold font-mono text-slate-100">{inv.invoiceNo}</p>
+                  <p className="text-xs text-slate-400">
                     {format(new Date(inv.createdAt), 'dd MMM yyyy, HH:mm')}
                   </p>
                 </div>
@@ -776,7 +776,7 @@ function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
               <div className="mt-3 overflow-x-auto orio-scroll">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs text-muted-foreground">
+                    <tr className="border-b border-white/10 text-left text-xs text-slate-400">
                       <th className="pb-2 pr-3 font-medium">Description</th>
                       <th className="pb-2 pr-3 text-right font-medium">Qty</th>
                       <th className="pb-2 pr-3 text-right font-medium">Unit</th>
@@ -785,11 +785,11 @@ function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
                   </thead>
                   <tbody>
                     {items.map((it, i) => (
-                      <tr key={i} className="border-b border-border/40 last:border-0">
-                        <td className="py-2 pr-3">{it.description}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{it.quantity}</td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(it.unit_price)}</td>
-                        <td className="py-2 text-right font-medium tabular-nums">
+                      <tr key={i} className="border-b border-white/10 last:border-0">
+                        <td className="py-2 pr-3 text-slate-100">{it.description}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums text-slate-300">{it.quantity}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums text-slate-300">{formatCurrency(it.unit_price)}</td>
+                        <td className="py-2 text-right font-medium tabular-nums text-cyan-300">
                           {formatCurrency((it.quantity ?? 0) * (it.unit_price ?? 0))}
                         </td>
                       </tr>
@@ -800,9 +800,9 @@ function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
             )}
 
             <div className="mt-3 flex flex-wrap justify-end gap-x-6 gap-y-1 text-sm">
-              <span className="text-muted-foreground">Subtotal: <span className="font-medium text-foreground tabular-nums">{formatCurrency(inv.subtotal)}</span></span>
-              <span className="text-muted-foreground">Tax: <span className="font-medium text-foreground tabular-nums">{formatCurrency(inv.tax)}</span></span>
-              <span className="text-muted-foreground">Total: <span className="font-bold text-foreground tabular-nums">{formatCurrency(inv.total)}</span></span>
+              <span className="text-slate-400">Subtotal: <span className="font-medium text-slate-100 tabular-nums">{formatCurrency(inv.subtotal)}</span></span>
+              <span className="text-slate-400">Tax: <span className="font-medium text-slate-100 tabular-nums">{formatCurrency(inv.tax)}</span></span>
+              <span className="text-slate-400">Total: <span className="font-bold text-cyan-300 tabular-nums">{formatCurrency(inv.total)}</span></span>
             </div>
           </GlassPanel>
         )
@@ -830,12 +830,12 @@ function AppointmentsTab({ appointments }: { appointments: AppointmentRecord[] }
           <GlassPanel key={a.id} className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/15 text-xs font-semibold text-cyan-300">
                   {a.doctor.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium">{a.doctor.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-medium text-slate-100">{a.doctor.name}</p>
+                  <p className="text-xs text-slate-400">
                     <RoleBadge role={a.doctor.role} />
                   </p>
                 </div>
@@ -843,12 +843,12 @@ function AppointmentsTab({ appointments }: { appointments: AppointmentRecord[] }
               <ApptStatus status={a.status} />
             </div>
             <div className="mt-3 space-y-1 text-sm">
-              <p className="flex items-center gap-1.5 text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-slate-400">
                 <CalendarClock className="h-3.5 w-3.5" />
                 {format(new Date(a.scheduledAt), 'dd MMM yyyy, HH:mm')}
               </p>
               {a.reason && (
-                <p className="text-xs text-muted-foreground">Reason: {a.reason}</p>
+                <p className="text-xs text-slate-400">Reason: {a.reason}</p>
               )}
             </div>
           </GlassPanel>
@@ -862,12 +862,12 @@ function AppointmentsTab({ appointments }: { appointments: AppointmentRecord[] }
 function Demographic({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2.5">
-      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50 text-muted-foreground">
+      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-white/5 text-slate-400">
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="truncate text-sm font-medium">{value}</p>
+        <p className="text-xs text-slate-400">{label}</p>
+        <p className="truncate text-sm font-medium text-slate-100">{value}</p>
       </div>
     </div>
   )
@@ -875,16 +875,16 @@ function Demographic({ icon, label, value }: { icon: React.ReactNode; label: str
 
 function AllergyList({ items }: { items: Array<Record<string, string>> | string[] }) {
   if (!items || items.length === 0) {
-    return <p className="mt-0.5 text-sm text-muted-foreground">None recorded</p>
+    return <p className="mt-0.5 text-sm text-slate-400">None recorded</p>
   }
   return (
     <div className="mt-1 flex flex-wrap gap-1.5">
       {items.map((it, i) => {
         if (typeof it === 'string') {
-          return <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-700 dark:text-red-300 text-[11px]">{it}</Badge>
+          return <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-300 text-[11px]">{it}</Badge>
         }
         return (
-          <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-700 dark:text-red-300 text-[11px]">
+          <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-300 text-[11px]">
             {it.allergen ?? it.name ?? '?'}
             {it.severity && <span className="opacity-70">({it.severity})</span>}
           </Badge>
@@ -896,16 +896,16 @@ function AllergyList({ items }: { items: Array<Record<string, string>> | string[
 
 function MedicationList({ items }: { items: Array<Record<string, string>> | string[] }) {
   if (!items || items.length === 0) {
-    return <p className="mt-0.5 text-sm text-muted-foreground">None recorded</p>
+    return <p className="mt-0.5 text-sm text-slate-400">None recorded</p>
   }
   return (
     <div className="mt-1 space-y-1">
       {items.map((it, i) => {
         if (typeof it === 'string') {
-          return <p key={i} className="text-sm">• {it}</p>
+          return <p key={i} className="text-sm text-slate-100">• {it}</p>
         }
         const parts = [it.drug ?? it.name, it.dose ?? it.dosage, it.frequency].filter(Boolean)
-        return <p key={i} className="text-sm">• {parts.join(' — ')}</p>
+        return <p key={i} className="text-sm text-slate-100">• {parts.join(' — ')}</p>
       })}
     </div>
   )
@@ -919,8 +919,8 @@ function RichBlock({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-lg border border-border/40 bg-muted/20 p-3">
-      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
         {icon} {title}
       </p>
       {children}
@@ -932,7 +932,7 @@ function ListItems({ items }: { items: string[] }) {
   return (
     <ul className="space-y-1">
       {items.map((it, i) => (
-        <li key={i} className="text-sm text-foreground/90">• {it}</li>
+        <li key={i} className="text-sm text-slate-100/90">• {it}</li>
       ))}
     </ul>
   )
@@ -956,10 +956,10 @@ function TaskIcon({ taskType }: { taskType: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    DRAFT: 'bg-muted/60 text-muted-foreground border-border',
-    IN_PROGRESS: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
-    COMPLETED: 'bg-primary/15 text-primary border-primary/30',
-    REVIEWED: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    DRAFT: 'bg-white/5 text-slate-400 border-white/10',
+    IN_PROGRESS: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    COMPLETED: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    REVIEWED: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
   }
   return (
     <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium', map[status] ?? map.DRAFT)}>
@@ -969,14 +969,14 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function LabStatus({ status }: { status?: string }) {
-  if (!status) return <span className="text-xs text-muted-foreground">—</span>
+  if (!status) return <span className="text-xs text-slate-500">—</span>
   const map: Record<string, string> = {
-    normal: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-    low: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-    high: 'bg-red-500/15 text-red-700 dark:text-red-300',
+    normal: 'bg-emerald-500/15 text-emerald-300',
+    low: 'bg-amber-500/15 text-amber-300',
+    high: 'bg-red-500/15 text-red-400',
   }
   return (
-    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase', map[status] ?? 'bg-muted text-muted-foreground')}>
+    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase', map[status] ?? 'bg-white/5 text-slate-400')}>
       {status}
     </span>
   )
@@ -984,13 +984,13 @@ function LabStatus({ status }: { status?: string }) {
 
 function InvoiceStatus({ status }: { status: string }) {
   const map: Record<string, { cls: string; icon: React.ReactNode }> = {
-    PENDING: { cls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300', icon: <AlertTriangle className="h-3 w-3" /> },
-    PAID: { cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
-    CANCELLED: { cls: 'bg-red-500/15 text-red-700 dark:text-red-300', icon: <X className="h-3 w-3" /> },
+    PENDING: { cls: 'bg-amber-500/15 text-amber-300', icon: <AlertTriangle className="h-3 w-3" /> },
+    PAID: { cls: 'bg-emerald-500/15 text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
+    CANCELLED: { cls: 'bg-red-500/15 text-red-400', icon: <X className="h-3 w-3" /> },
   }
   const c = map[status] ?? map.PENDING
   return (
-    <Badge variant="outline" className={cn('gap-1', c.cls)}>
+    <Badge variant="outline" className={cn('gap-1 border-white/10', c.cls)}>
       {c.icon} {status}
     </Badge>
   )
@@ -998,10 +998,10 @@ function InvoiceStatus({ status }: { status: string }) {
 
 function ApptStatus({ status }: { status: string }) {
   const map: Record<string, string> = {
-    SCHEDULED: 'bg-primary/15 text-primary border-primary/30',
-    IN_PROGRESS: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
-    COMPLETED: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
-    CANCELLED: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
+    SCHEDULED: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    IN_PROGRESS: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    COMPLETED: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+    CANCELLED: 'bg-red-500/15 text-red-400 border-red-500/30',
   }
   return (
     <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', map[status] ?? map.SCHEDULED)}>
@@ -1019,12 +1019,12 @@ function EmptyState({
 }) {
   return (
     <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50 text-muted-foreground">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-slate-500">
         {icon}
       </div>
       <div>
-        <p className="font-semibold">{title}</p>
-        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+        <p className="font-semibold text-slate-100">{title}</p>
+        <p className="mx-auto mt-1 max-w-md text-sm text-slate-400">{description}</p>
       </div>
     </GlassPanel>
   )

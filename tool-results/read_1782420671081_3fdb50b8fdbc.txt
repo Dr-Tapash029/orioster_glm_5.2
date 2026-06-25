@@ -1,0 +1,702 @@
+   701→  }
+   702→  if (savedAt) {
+   703→    return (
+   704→      <motion.span
+   705→        initial={{ opacity: 0, y: 4 }}
+   706→        animate={{ opacity: 1, y: 0 }}
+   707→        className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400"
+   708→      >
+   709→        <Save className="h-3 w-3" />
+   710→        Saved locally
+   711→      </motion.span>
+   712→    )
+   713→  }
+   714→  return null
+   715→}
+   716→
+   717→// ─────────────────────────────────────────────────────────────
+   718→// STEP 1 — General Information
+   719→// ─────────────────────────────────────────────────────────────
+   720→
+   721→function StepGeneral({ patient, user, onPatientCreated, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+   722→  const [fullName, setFullName] = useState(patient?.fullName ?? '')
+   723→  const [gender, setGender] = useState(patient?.gender ?? '')
+   724→  const [age, setAge] = useState<string>(patient?.age != null ? String(patient.age) : '')
+   725→  const [dateOfBirth, setDateOfBirth] = useState(patient?.dateOfBirth ?? '')
+   726→  const [contact, setContact] = useState(patient?.contact ?? '')
+   727→  const [address, setAddress] = useState(patient?.address ?? '')
+   728→  const [localIdNumber, setLocalIdNumber] = useState(patient?.localIdNumber ?? '')
+   729→  const [bloodGroup, setBloodGroup] = useState(patient?.bloodGroup ?? '')
+   730→  const [heightCm, setHeightCm] = useState(patient?.heightCm != null ? String(patient.heightCm) : '')
+   731→  const [weightKg, setWeightKg] = useState(patient?.weightKg != null ? String(patient.weightKg) : '')
+   732→  const [profession, setProfession] = useState(patient?.profession ?? '')
+   733→  const [education, setEducation] = useState(patient?.education ?? '')
+   734→  const [consentGiven, setConsentGiven] = useState(patient?.consentGiven ?? false)
+   735→  const [saving, setSaving] = useState(false)
+   736→  const [error, setError] = useState<string | null>(null)
+   737→
+   738→  const validate = (): string | null => {
+   739→    if (!fullName.trim()) return 'Full name is required'
+   740→    if (!gender) return 'Gender is required'
+   741→    if (!consentGiven) return 'Patient consent is required to proceed'
+   742→    if (age && (isNaN(Number(age)) || Number(age) < 0 || Number(age) > 130)) {
+   743→      return 'Please enter a valid age (0–130)'
+   744→    }
+   745→    return null
+   746→  }
+   747→
+   748→  const handleContinue = async () => {
+   749→    const err = validate()
+   750→    if (err) {
+   751→      setError(err)
+   752→      toast.error(err)
+   753→      return
+   754→    }
+   755→    setError(null)
+   756→    setSaving(true)
+   757→    try {
+   758→      const payload = {
+   759→        localId: patient?.localId ?? generateLocalId(),
+   760→        fullName: fullName.trim(),
+   761→        gender,
+   762→        dateOfBirth: dateOfBirth || '',
+   763→        age: age ? Number(age) : null,
+   764→        contact: contact || null,
+   765→        address: address || null,
+   766→        localIdNumber: localIdNumber || null,
+   767→        bloodGroup: bloodGroup || null,
+   768→        heightCm: heightCm ? Number(heightCm) : null,
+   769→        weightKg: weightKg ? Number(weightKg) : null,
+   770→        profession: profession || null,
+   771→        education: education || null,
+   772→        consentGiven,
+   773→        status: patient?.status ?? 'DRAFT',
+   774→        syncStatus: patient?.syncStatus ?? 'DRAFT',
+   775→        createdBy: user.id,
+   776→      }
+   777→
+   778→      if (patient) {
+   779→        // PATCH existing
+   780→        const res = await fetch(`/api/patients/${patient.id}`, {
+   781→          method: 'PATCH',
+   782→          headers: { 'Content-Type': 'application/json' },
+   783→          body: JSON.stringify(payload),
+   784→        })
+   785→        if (!res.ok) throw new Error('Failed to save')
+   786→        const data = await res.json()
+   787→        onPatientUpdated(data.patient)
+   788→      } else {
+   789→        // POST new
+   790→        const res = await fetch('/api/patients', {
+   791→          method: 'POST',
+   792→          headers: { 'Content-Type': 'application/json' },
+   793→          body: JSON.stringify(payload),
+   794→        })
+   795→        if (!res.ok) throw new Error('Failed to create patient')
+   796→        const data = await res.json()
+   797→        onPatientCreated(data.patient)
+   798→      }
+   799→      triggerSaved()
+   800→      toast.success('General information saved')
+   801→      onAdvance()
+   802→    } catch (e) {
+   803→      toast.error('Save failed', { description: (e as Error).message })
+   804→    } finally {
+   805→      setSaving(false)
+   806→    }
+   807→  }
+   808→
+   809→  return (
+   810→    <div className="space-y-5">
+   811→      {error && (
+   812→        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300">
+   813→          <AlertTriangle className="h-3.5 w-3.5" />
+   814→          {error}
+   815→        </div>
+   816→      )}
+   817→
+   818→      <div className="grid gap-4 sm:grid-cols-2">
+   819→        <Field label="Full name" icon={<User className="h-3.5 w-3.5" />} required>
+   820→          <Input
+   821→            value={fullName}
+   822→            onChange={(e) => setFullName(e.target.value)}
+   823→            placeholder="e.g. Aisha Rahman"
+   824→          />
+   825→        </Field>
+   826→        <Field label="Gender" required>
+   827→          <RadioGroup
+   828→            value={gender}
+   829→            onValueChange={setGender}
+   830→            className="flex gap-4 pt-1.5"
+   831→          >
+   832→            <div className="flex items-center gap-2">
+   833→              <RadioGroupItem value="FEMALE" id="g-f" />
+   834→              <Label htmlFor="g-f">Female</Label>
+   835→            </div>
+   836→            <div className="flex items-center gap-2">
+   837→              <RadioGroupItem value="MALE" id="g-m" />
+   838→              <Label htmlFor="g-m">Male</Label>
+   839→            </div>
+   840→            <div className="flex items-center gap-2">
+   841→              <RadioGroupItem value="OTHER" id="g-o" />
+   842→              <Label htmlFor="g-o">Other</Label>
+   843→            </div>
+   844→          </RadioGroup>
+   845→        </Field>
+   846→        <Field label="Age" icon={<Activity className="h-3.5 w-3.5" />}>
+   847→          <Input
+   848→            type="number"
+   849→            min={0}
+   850→            max={130}
+   851→            value={age}
+   852→            onChange={(e) => setAge(e.target.value)}
+   853→            placeholder="e.g. 34"
+   854→          />
+   855→        </Field>
+   856→        <Field label="Date of birth">
+   857→          <Input
+   858→            type="date"
+   859→            value={dateOfBirth}
+   860→            onChange={(e) => setDateOfBirth(e.target.value)}
+   861→          />
+   862→        </Field>
+   863→        <Field label="Contact number" icon={<Phone className="h-3.5 w-3.5" />}>
+   864→          <Input
+   865→            value={contact}
+   866→            onChange={(e) => setContact(e.target.value)}
+   867→            placeholder="+880 1XXX-XXXXXX"
+   868→          />
+   869→        </Field>
+   870→        <Field label="Local ID number" icon={<FileText className="h-3.5 w-3.5" />}>
+   871→          <Input
+   872→            value={localIdNumber}
+   873→            onChange={(e) => setLocalIdNumber(e.target.value)}
+   874→            placeholder="Camp / clinic ID"
+   875→          />
+   876→        </Field>
+   877→        <Field label="Blood group" icon={<Droplet className="h-3.5 w-3.5" />}>
+   878→          <Select value={bloodGroup} onValueChange={setBloodGroup}>
+   879→            <SelectTrigger className="w-full">
+   880→              <SelectValue placeholder="Select blood group" />
+   881→            </SelectTrigger>
+   882→            <SelectContent>
+   883→              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'].map((bg) => (
+   884→                <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+   885→              ))}
+   886→            </SelectContent>
+   887→          </Select>
+   888→        </Field>
+   889→        <Field label="Height (cm)" icon={<Ruler className="h-3.5 w-3.5" />}>
+   890→          <Input
+   891→            type="number"
+   892→            min={0}
+   893→            value={heightCm}
+   894→            onChange={(e) => setHeightCm(e.target.value)}
+   895→            placeholder="e.g. 165"
+   896→          />
+   897→        </Field>
+   898→        <Field label="Weight (kg)" icon={<Weight className="h-3.5 w-3.5" />}>
+   899→          <Input
+   900→            type="number"
+   901→            min={0}
+   902→            value={weightKg}
+   903→            onChange={(e) => setWeightKg(e.target.value)}
+   904→            placeholder="e.g. 62"
+   905→          />
+   906→        </Field>
+   907→        <Field label="Profession" icon={<Briefcase className="h-3.5 w-3.5" />}>
+   908→          <Input
+   909→            value={profession}
+   910→            onChange={(e) => setProfession(e.target.value)}
+   911→            placeholder="e.g. Teacher"
+   912→          />
+   913→        </Field>
+   914→        <Field label="Education" icon={<GraduationCap className="h-3.5 w-3.5" />}>
+   915→          <Input
+   916→            value={education}
+   917→            onChange={(e) => setEducation(e.target.value)}
+   918→            placeholder="e.g. Secondary"
+   919→          />
+   920→        </Field>
+   921→        <Field label="Address" icon={<MapPin className="h-3.5 w-3.5" />} className="sm:col-span-2">
+   922→          <Textarea
+   923→            rows={2}
+   924→            value={address}
+   925→            onChange={(e) => setAddress(e.target.value)}
+   926→            placeholder="Village / ward / district"
+   927→          />
+   928→        </Field>
+   929→      </div>
+   930→
+   931→      {/* Consent */}
+   932→      <GlassPanel variant="subtle" className="p-3">
+   933→        <label className="flex cursor-pointer items-start gap-3">
+   934→          <Checkbox
+   935→            checked={consentGiven}
+   936→            onCheckedChange={(v) => setConsentGiven(v === true)}
+   937→            className="mt-0.5"
+   938→          />
+   939→          <div className="space-y-0.5">
+   940→            <p className="text-sm font-medium">
+   941→              Patient consent given <span className="text-red-500">*</span>
+   942→            </p>
+   943→            <p className="text-[11px] leading-snug text-muted-foreground">
+   944→              Patient (or guardian) has consented to local data collection and the de-identified
+   945→              summary being used for clinical decision support. Raw PHI never leaves this device.
+   946→            </p>
+   947→          </div>
+   948→        </label>
+   949→      </GlassPanel>
+   950→
+   951→      <StepFooter>
+   952→        <ContinueButton onClick={handleContinue} loading={saving} />
+   953→      </StepFooter>
+   954→    </div>
+   955→  )
+   956→}
+   957→
+   958→// ─────────────────────────────────────────────────────────────
+   959→// STEP 2 — Chief Complaint
+   960→// ─────────────────────────────────────────────────────────────
+   961→
+   962→function StepComplaint({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+   963→  const [complaint, setComplaint] = useState(patient?.chiefComplaint ?? '')
+   964→  const [notes, setNotes] = useState(() => {
+   965→    // If existing chiefComplaint has custom text after the structured label, restore it
+   966→    if (!patient?.chiefComplaint) return ''
+   967→    const parts = patient.chiefComplaint.split(' — ')
+   968→    return parts.length > 1 ? parts.slice(1).join(' — ') : ''
+   969→  })
+   970→  const [duration, setDuration] = useState('')
+   971→  const [saving, setSaving] = useState(false)
+   972→
+   973→  const MAX_NOTES = 300
+   974→
+   975→  const handleContinue = async () => {
+   976→    if (!complaint) {
+   977→      toast.error('Please select a chief complaint')
+   978→      return
+   979→    }
+   980→    setSaving(true)
+   981→    try {
+   982→      const combined = notes.trim()
+   983→        ? `${complaint} — ${notes.trim().slice(0, MAX_NOTES)}${duration ? ` (${duration})` : ''}`
+   984→        : complaint
+   985→      const res = await fetch(`/api/patients/${patient!.id}`, {
+   986→        method: 'PATCH',
+   987→        headers: { 'Content-Type': 'application/json' },
+   988→        body: JSON.stringify({ chiefComplaint: combined }),
+   989→      })
+   990→      if (!res.ok) throw new Error('Save failed')
+   991→      const data = await res.json()
+   992→      onPatientUpdated(data.patient)
+   993→      triggerSaved()
+   994→      toast.success('Chief complaint saved')
+   995→      onAdvance()
+   996→    } catch (e) {
+   997→      toast.error('Save failed', { description: (e as Error).message })
+   998→    } finally {
+   999→      setSaving(false)
+  1000→    }
+  1001→  }
+  1002→
+  1003→  return (
+  1004→    <div className="space-y-5">
+  1005→      <div className="grid gap-4 sm:grid-cols-2">
+  1006→        <Field label="Chief complaint" required>
+  1007→          <Select value={complaint.split(' — ')[0]} onValueChange={setComplaint}>
+  1008→            <SelectTrigger className="w-full">
+  1009→              <SelectValue placeholder="Select primary complaint" />
+  1010→            </SelectTrigger>
+  1011→            <SelectContent>
+  1012→              {CHIEF_COMPLAINTS.map((c) => (
+  1013→                <SelectItem key={c} value={c}>{c}</SelectItem>
+  1014→              ))}
+  1015→            </SelectContent>
+  1016→          </Select>
+  1017→        </Field>
+  1018→        <Field label="Duration (optional)">
+  1019→          <Input
+  1020→            value={duration}
+  1021→            onChange={(e) => setDuration(e.target.value)}
+  1022→            placeholder="e.g. 3 days"
+  1023→          />
+  1024→        </Field>
+  1025→      </div>
+  1026→
+  1027→      <Field
+  1028→        label="Additional notes (optional)"
+  1029→        hint={`${notes.length} / ${MAX_NOTES} chars`}
+  1030→      >
+  1031→        <Textarea
+  1032→          rows={3}
+  1033→          value={notes}
+  1034→          maxLength={MAX_NOTES}
+  1035→          onChange={(e) => setNotes(e.target.value)}
+  1036→          placeholder="Briefly describe onset, severity, associated symptoms…"
+  1037→        />
+  1038→      </Field>
+  1039→
+  1040→      <StepFooter>
+  1041→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1042→      </StepFooter>
+  1043→    </div>
+  1044→  )
+  1045→}
+  1046→
+  1047→// ─────────────────────────────────────────────────────────────
+  1048→// STEP 3 — Past History
+  1049→// ─────────────────────────────────────────────────────────────
+  1050→
+  1051→function StepHistory({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1052→  const [tags, setTags] = useState<string[]>(() => safeParse<string[]>(patient?.pastHistory, []))
+  1053→  const [notes, setNotes] = useState('')
+  1054→  const [saving, setSaving] = useState(false)
+  1055→  const MAX_NOTES = 400
+  1056→
+  1057→  const toggleTag = (t: string) => {
+  1058→    if (t === 'None') {
+  1059→      setTags(['None'])
+  1060→      return
+  1061→    }
+  1062→    setTags((prev) => {
+  1063→      const withoutNone = prev.filter((x) => x !== 'None')
+  1064→      return withoutNone.includes(t)
+  1065→        ? withoutNone.filter((x) => x !== t)
+  1066→        : [...withoutNone, t]
+  1067→    })
+  1068→  }
+  1069→
+  1070→  const handleContinue = async () => {
+  1071→    if (tags.length === 0) {
+  1072→      toast.error('Please select at least one tag (or "None")')
+  1073→      return
+  1074→    }
+  1075→    setSaving(true)
+  1076→    try {
+  1077→      const payload = JSON.stringify(tags)
+  1078→      const res = await fetch(`/api/patients/${patient!.id}`, {
+  1079→        method: 'PATCH',
+  1080→        headers: { 'Content-Type': 'application/json' },
+  1081→        body: JSON.stringify({ pastHistory: payload }),
+  1082→      })
+  1083→      if (!res.ok) throw new Error('Save failed')
+  1084→      const data = await res.json()
+  1085→      onPatientUpdated(data.patient)
+  1086→      triggerSaved()
+  1087→      toast.success('Past history saved')
+  1088→      onAdvance()
+  1089→    } catch (e) {
+  1090→      toast.error('Save failed', { description: (e as Error).message })
+  1091→    } finally {
+  1092→      setSaving(false)
+  1093→    }
+  1094→  }
+  1095→
+  1096→  return (
+  1097→    <div className="space-y-5">
+  1098→      <div>
+  1099→        <p className="mb-2 text-sm font-medium">Select relevant history tags</p>
+  1100→        <div className="flex flex-wrap gap-2">
+  1101→          {PAST_HISTORY_TAGS.map((t) => {
+  1102→            const active = tags.includes(t)
+  1103→            const isNone = t === 'None'
+  1104→            return (
+  1105→              <button
+  1106→                key={t}
+  1107→                type="button"
+  1108→                onClick={() => toggleTag(t)}
+  1109→                className={cn(
+  1110→                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+  1111→                  active && isNone && 'border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+  1112→                  active && !isNone && 'border-primary bg-primary text-primary-foreground',
+  1113→                  !active && 'border-border bg-muted/40 text-muted-foreground hover:bg-muted'
+  1114→                )}
+  1115→              >
+  1116→                {active && <Check className="h-3 w-3" />}
+  1117→                {t}
+  1118→              </button>
+  1119→            )
+  1120→          })}
+  1121→        </div>
+  1122→        {tags.length > 0 && !tags.includes('None') && (
+  1123→          <p className="mt-2 text-[11px] text-muted-foreground">
+  1124→            {tags.length} tag{tags.length > 1 ? 's' : ''} selected
+  1125→          </p>
+  1126→        )}
+  1127→      </div>
+  1128→
+  1129→      <Field
+  1130→        label="Additional history notes (optional)"
+  1131→        hint={`${notes.length} / ${MAX_NOTES} chars`}
+  1132→      >
+  1133→        <Textarea
+  1134→          rows={3}
+  1135→          maxLength={MAX_NOTES}
+  1136→          value={notes}
+  1137→          onChange={(e) => setNotes(e.target.value)}
+  1138→          placeholder="Family history, surgical details, ongoing treatment context…"
+  1139→        />
+  1140→      </Field>
+  1141→
+  1142→      <StepFooter>
+  1143→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1144→      </StepFooter>
+  1145→    </div>
+  1146→  )
+  1147→}
+  1148→
+  1149→// ─────────────────────────────────────────────────────────────
+  1150→// STEP 4 — Ongoing Medications
+  1151→// ─────────────────────────────────────────────────────────────
+  1152→
+  1153→function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1154→  const [meds, setMeds] = useState<MedicationEntry[]>(() =>
+  1155→    safeParse<MedicationEntry[]>(patient?.ongoingMedications, [])
+  1156→  )
+  1157→  const [saving, setSaving] = useState(false)
+  1158→
+  1159→  const addMed = () => {
+  1160→    setMeds((prev) => [...prev, { drug: '', dose: '', frequency: '' }])
+  1161→  }
+  1162→
+  1163→  const updateMed = (idx: number, patch: Partial<MedicationEntry>) => {
+  1164→    setMeds((prev) => prev.map((m, i) => (i === idx ? { ...m, ...patch } : m)))
+  1165→  }
+  1166→
+  1167→  const removeMed = (idx: number) => {
+  1168→    setMeds((prev) => prev.filter((_, i) => i !== idx))
+  1169→  }
+  1170→
+  1171→  const duplicateDrugs = useMemo(() => {
+  1172→    const seen = new Map<string, number>()
+  1173→    meds.forEach((m) => {
+  1174→      if (!m.drug) return
+  1175→      seen.set(m.drug.toLowerCase(), (seen.get(m.drug.toLowerCase()) ?? 0) + 1)
+  1176→    })
+  1177→    return new Set([...seen.entries()].filter(([, n]) => n > 1).map(([k]) => k))
+  1178→  }, [meds])
+  1179→
+  1180→  const handleContinue = async () => {
+  1181→    setSaving(true)
+  1182→    try {
+  1183→      // Filter out empty rows
+  1184→      const cleaned = meds.filter((m) => m.drug.trim())
+  1185→      const payload = JSON.stringify(cleaned)
+  1186→      const res = await fetch(`/api/patients/${patient!.id}`, {
+  1187→        method: 'PATCH',
+  1188→        headers: { 'Content-Type': 'application/json' },
+  1189→        body: JSON.stringify({ ongoingMedications: payload }),
+  1190→      })
+  1191→      if (!res.ok) throw new Error('Save failed')
+  1192→      const data = await res.json()
+  1193→      onPatientUpdated(data.patient)
+  1194→      triggerSaved()
+  1195→      toast.success(
+  1196→        cleaned.length > 0
+  1197→          ? `${cleaned.length} medication${cleaned.length > 1 ? 's' : ''} saved`
+  1198→          : 'Medications cleared (no ongoing meds)'
+  1199→      )
+  1200→      onAdvance()
+  1201→    } catch (e) {
+  1202→      toast.error('Save failed', { description: (e as Error).message })
+  1203→    } finally {
+  1204→      setSaving(false)
+  1205→    }
+  1206→  }
+  1207→
+  1208→  return (
+  1209→    <div className="space-y-4">
+  1210→      <div className="flex items-center justify-between">
+  1211→        <p className="text-sm text-muted-foreground">
+  1212→          Add each ongoing medication. Leave empty if patient is not on any medication.
+  1213→        </p>
+  1214→        <Button variant="outline" size="sm" onClick={addMed} className="gap-1.5">
+  1215→          <Plus className="h-3.5 w-3.5" />
+  1216→          Add medication
+  1217→        </Button>
+  1218→      </div>
+  1219→
+  1220→      {meds.length === 0 ? (
+  1221→        <GlassPanel variant="subtle" className="p-6 text-center">
+  1222→          <Pill className="mx-auto h-8 w-8 text-muted-foreground/50" />
+  1223→          <p className="mt-2 text-sm font-medium">No medications added</p>
+  1224→          <p className="mt-1 text-xs text-muted-foreground">
+  1225→            Patient is not on any ongoing medication. Continue to proceed.
+  1226→          </p>
+  1227→        </GlassPanel>
+  1228→      ) : (
+  1229→        <div className="space-y-2.5">
+  1230→          {meds.map((m, idx) => {
+  1231→            const isDuplicate = m.drug && duplicateDrugs.has(m.drug.toLowerCase())
+  1232→            return (
+  1233→              <GlassPanel key={idx} variant="subtle" className="p-3">
+  1234→                <div className="grid gap-2.5 sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-end">
+  1235→                  <Field label={idx === 0 ? 'Drug' : undefined}>
+  1236→                    <Select
+  1237→                      value={m.drug}
+  1238→                      onValueChange={(v) => updateMed(idx, { drug: v, custom: v === '__custom' })}
+  1239→                    >
+  1240→                      <SelectTrigger className="w-full">
+  1241→                        <SelectValue placeholder="Select or type below" />
+  1242→                      </SelectTrigger>
+  1243→                      <SelectContent>
+  1244→                        {COMMON_MEDICATIONS.map((d) => (
+  1245→                          <SelectItem key={d} value={d}>{d}</SelectItem>
+  1246→                        ))}
+  1247→                        <SelectItem value="__custom">Custom drug…</SelectItem>
+  1248→                      </SelectContent>
+  1249→                    </Select>
+  1250→                    {m.drug === '__custom' && (
+  1251→                      <Input
+  1252→                        className="mt-1.5"
+  1253→                        placeholder="Type drug name"
+  1254→                        value={m.custom ? '' : m.drug === '__custom' ? '' : m.drug}
+  1255→                        onChange={(e) => updateMed(idx, { drug: e.target.value, custom: true })}
+  1256→                      />
+  1257→                    )}
+  1258→                  </Field>
+  1259→                  <Field label={idx === 0 ? 'Dose' : undefined}>
+  1260→                    <Input
+  1261→                      placeholder="e.g. 500mg"
+  1262→                      value={m.dose}
+  1263→                      onChange={(e) => updateMed(idx, { dose: e.target.value })}
+  1264→                    />
+  1265→                  </Field>
+  1266→                  <Field label={idx === 0 ? 'Frequency' : undefined}>
+  1267→                    <Select
+  1268→                      value={m.frequency}
+  1269→                      onValueChange={(v) => updateMed(idx, { frequency: v })}
+  1270→                    >
+  1271→                      <SelectTrigger className="w-full">
+  1272→                        <SelectValue placeholder="Select" />
+  1273→                      </SelectTrigger>
+  1274→                      <SelectContent>
+  1275→                        {['Once daily', 'Twice daily', 'Three times daily', 'As needed', 'Weekly', 'Monthly'].map((f) => (
+  1276→                          <SelectItem key={f} value={f}>{f}</SelectItem>
+  1277→                        ))}
+  1278→                      </SelectContent>
+  1279→                    </Select>
+  1280→                  </Field>
+  1281→                  <Button
+  1282→                    variant="ghost"
+  1283→                    size="icon"
+  1284→                    className="h-9 w-9 text-muted-foreground hover:text-red-500"
+  1285→                    onClick={() => removeMed(idx)}
+  1286→                    aria-label="Remove medication"
+  1287→                  >
+  1288→                    <Trash2 className="h-4 w-4" />
+  1289→                  </Button>
+  1290→                </div>
+  1291→                {isDuplicate && (
+  1292→                  <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+  1293→                    <AlertTriangle className="h-3 w-3" />
+  1294→                    Duplicate drug — patient may already be on this medication
+  1295→                  </div>
+  1296→                )}
+  1297→              </GlassPanel>
+  1298→            )
+  1299→          })}
+  1300→        </div>
+  1301→      )}
+  1302→
+  1303→      <StepFooter>
+  1304→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1305→      </StepFooter>
+  1306→    </div>
+  1307→  )
+  1308→}
+  1309→
+  1310→// ─────────────────────────────────────────────────────────────
+  1311→// STEP 5 — Vitals
+  1312→// ─────────────────────────────────────────────────────────────
+  1313→
+  1314→function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance, triggerSaved }: StepProps & {
+  1315→  existingVitals: VitalsRecord | null
+  1316→}) {
+  1317→  const [temperature, setTemperature] = useState(existingVitals?.temperature?.toString() ?? '')
+  1318→  const [bpSystolic, setBpSystolic] = useState(existingVitals?.bpSystolic?.toString() ?? '')
+  1319→  const [bpDiastolic, setBpDiastolic] = useState(existingVitals?.bpDiastolic?.toString() ?? '')
+  1320→  const [heartRate, setHeartRate] = useState(existingVitals?.heartRate?.toString() ?? '')
+  1321→  const [spo2, setSpo2] = useState(existingVitals?.spo2?.toString() ?? '')
+  1322→  const [weightKg, setWeightKg] = useState(existingVitals?.weightKg?.toString() ?? patient?.weightKg?.toString() ?? '')
+  1323→  const [heightCm, setHeightCm] = useState(existingVitals?.heightCm?.toString() ?? patient?.heightCm?.toString() ?? '')
+  1324→  const [saving, setSaving] = useState(false)
+  1325→
+  1326→  const triagePreview: TriageLevel = useMemo(
+  1327→    () =>
+  1328→      computeTriageLevel({
+  1329→        temperature: temperature ? Number(temperature) : null,
+  1330→        bpSystolic: bpSystolic ? Number(bpSystolic) : null,
+  1331→        bpDiastolic: bpDiastolic ? Number(bpDiastolic) : null,
+  1332→        heartRate: heartRate ? Number(heartRate) : null,
+  1333→        spo2: spo2 ? Number(spo2) : null,
+  1334→      }),
+  1335→    [temperature, bpSystolic, bpDiastolic, heartRate, spo2]
+  1336→  )
+  1337→
+  1338→  const abnormalFlags = useMemo(() => {
+  1339→    const flags: { field: string; msg: string }[] = []
+  1340→    const t = temperature ? Number(temperature) : null
+  1341→    const s = bpSystolic ? Number(bpSystolic) : null
+  1342→    const d = bpDiastolic ? Number(bpDiastolic) : null
+  1343→    const hr = heartRate ? Number(heartRate) : null
+  1344→    const sp = spo2 ? Number(spo2) : null
+  1345→    if (t != null && (t >= 39.5 || t <= 35)) flags.push({ field: 'Temperature', msg: `${t}°C — critical range` })
+  1346→    else if (t != null && (t >= 38.5 || t < 36)) flags.push({ field: 'Temperature', msg: `${t}°C — abnormal` })
+  1347→    if (s != null && s >= 180) flags.push({ field: 'BP Systolic', msg: `${s} mmHg — hypertensive crisis` })
+  1348→    if (d != null && d >= 120) flags.push({ field: 'BP Diastolic', msg: `${d} mmHg — hypertensive crisis` })
+  1349→    if (hr != null && (hr >= 120 || hr <= 50)) flags.push({ field: 'Heart rate', msg: `${hr} BPM — critical` })
+  1350→    if (sp != null && sp <= 90) flags.push({ field: 'SpO₂', msg: `${sp}% — hypoxemia` })
+  1351→    else if (sp != null && sp <= 94) flags.push({ field: 'SpO₂', msg: `${sp}% — below normal` })
+  1352→    return flags
+  1353→  }, [temperature, bpSystolic, bpDiastolic, heartRate, spo2])
+  1354→
+  1355→  const handleContinue = async () => {
+  1356→    if (!temperature && !bpSystolic && !heartRate && !spo2) {
+  1357→      toast.error('Please record at least one vital sign')
+  1358→      return
+  1359→    }
+  1360→    setSaving(true)
+  1361→    try {
+  1362→      const res = await fetch('/api/vitals', {
+  1363→        method: 'POST',
+  1364→        headers: { 'Content-Type': 'application/json' },
+  1365→        body: JSON.stringify({
+  1366→          patientId: patient!.id,
+  1367→          recordedBy: user.id,
+  1368→          temperature: temperature ? Number(temperature) : null,
+  1369→          bpSystolic: bpSystolic ? Number(bpSystolic) : null,
+  1370→          bpDiastolic: bpDiastolic ? Number(bpDiastolic) : null,
+  1371→          heartRate: heartRate ? Number(heartRate) : null,
+  1372→          spo2: spo2 ? Number(spo2) : null,
+  1373→          weightKg: weightKg ? Number(weightKg) : null,
+  1374→          heightCm: heightCm ? Number(heightCm) : null,
+  1375→        }),
+  1376→      })
+  1377→      if (!res.ok) throw new Error('Failed to record vitals')
+  1378→      const data = await res.json()
+  1379→      onVitalsRecorded(data.vitals)
+  1380→      triggerSaved()
+  1381→      toast.success(`Vitals recorded · Triage ${data.triageLevel}`, {
+  1382→        description: data.triageLevel === 'RED'
+  1383→          ? 'Critical — prioritize this patient'
+  1384→          : data.triageLevel === 'YELLOW'
+  1385→            ? 'Abnormal — clinical review advised'
+  1386→            : 'Within normal limits',
+  1387→      })
+  1388→      onAdvance()
+  1389→    } catch (e) {
+  1390→      toast.error('Save failed', { description: (e as Error).message })
+  1391→    } finally {
+  1392→      setSaving(false)
+  1393→    }
+  1394→  }
+  1395→
+  1396→  return (
+  1397→    <div className="space-y-4">
+  1398→      {/* Triage preview */}
+  1399→      <GlassPanel variant="subtle" className="flex items-center justify-between p-3">
+  1400→        <div className="flex items-center gap-2">
+
+[showing lines 701-1400 of 2530; use offset=1401 with limit to continue reading]

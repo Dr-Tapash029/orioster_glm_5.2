@@ -1,0 +1,1050 @@
+     1→     1→'use client'
+     2→     2→
+     3→     3→// ─────────────────────────────────────────────────────────────────────────────
+     4→     4→// ORIOSTER — Patient Detail View
+     5→     5→// Comprehensive patient record with 6 tabs:
+     6→     6→// Overview · Vitals · AI Results · Lab Reports · Invoices · Appointments
+     7→     7→// AI outputs shown here are ADVISORY ONLY — review by a human professional.
+     8→     8→// ─────────────────────────────────────────────────────────────────────────────
+     9→     9→
+    10→    10→import { useEffect, useMemo, useState } from 'react'
+    11→    11→import { motion, AnimatePresence } from 'framer-motion'
+    12→    12→import { toast } from 'sonner'
+    13→    13→import { formatDistanceToNow, format } from 'date-fns'
+    14→    14→import {
+    15→    15→  ArrowLeft, User, HeartPulse, Sparkles, FlaskConical, Receipt, CalendarClock,
+    16→    16→  Stethoscope, Pill, ClipboardList, ShieldAlert, Lock, CheckCircle2,
+    17→    17→  AlertTriangle, Activity, FileBadge, UserPlus, Phone, MapPin, Briefcase,
+    18→    18→  GraduationCap, Award, X,
+    19→    19→} from 'lucide-react'
+    20→    20→
+    21→    21→import { useAppStore } from '@/lib/store'
+    22→    22→import {
+    23→    23→  GlassPanel, SectionHeader, TriageBadge, RiskBadge, DisclaimerChip,
+    24→    24→  ConfidenceMeter, SyncStatusBadge, RoleBadge,
+    25→    25→} from '@/components/orioster/ui-primitives'
+    26→    26→import { Button } from '@/components/ui/button'
+    27→    27→import { Badge } from '@/components/ui/badge'
+    28→    28→import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+    29→    29→import { Separator } from '@/components/ui/separator'
+    30→    30→import { ScrollArea } from '@/components/ui/scroll-area'
+    31→    31→import { cn } from '@/lib/utils'
+    32→    32→import {
+    33→    33→  AI_TASK_LABELS, LAB_REPORT_LABELS, type AiOutput, type RiskLevel,
+    34→    34→  type TriageLevel,
+    35→    35→} from '@/lib/types'
+    36→    36→
+    37→    37→// ── Types ────────────────────────────────────────────────────────────────────
+    38→    38→interface VitalsRecord {
+    39→    39→  id: string
+    40→    40→  temperature: number | null
+    41→    41→  bpSystolic: number | null
+    42→    42→  bpDiastolic: number | null
+    43→    43→  heartRate: number | null
+    44→    44→  spo2: number | null
+    45→    45→  weightKg: number | null
+    46→    46→  heightCm: number | null
+    47→    47→  triageLevel: string | null
+    48→    48→  recordedAt: string
+    49→    49→  recordedBy: string
+    50→    50→}
+    51→    51→
+    52→    52→interface AppointmentRecord {
+    53→    53→  id: string
+    54→    54→  scheduledAt: string
+    55→    55→  status: string
+    56→    56→  reason: string | null
+    57→    57→  doctor: { id: string; name: string; role: string }
+    58→    58→}
+    59→    59→
+    60→    60→interface AiResultRecord {
+    61→    61→  id: string
+    62→    62→  taskType: string
+    63→    63→  summary: string
+    64→    64→  riskLevel: string
+    65→    65→  confidence: number
+    66→    66→  limitations: string
+    67→    67→  recommendationType: string
+    68→    68→  disclaimer: string
+    69→    69→  tierUsed: number
+    70→    70→  modelUsed: string | null
+    71→    71→  fullOutput: string
+    72→    72→  createdAt: string
+    73→    73→  createdByStaff?: { name: string }
+    74→    74→}
+    75→    75→
+    76→    76→interface LabReportRecord {
+    77→    77→  id: string
+    78→    78→  reportType: string
+    79→    79→  parameters: string
+    80→    80→  isNormal: boolean | null
+    81→    81→  aiFeedback: string | null
+    82→    82→  status: string
+    83→    83→  createdAt: string
+    84→    84→  createdByStaff?: { name: string }
+    85→    85→}
+    86→    86→
+    87→    87→interface InvoiceRecord {
+    88→    88→  id: string
+    89→    89→  invoiceNo: string
+    90→    90→  items: string
+    91→    91→  subtotal: number
+    92→    92→  tax: number
+    93→    93→  total: number
+    94→    94→  status: string
+    95→    95→  createdAt: string
+    96→    96→}
+    97→    97→
+    98→    98→interface PatientDetail {
+    99→    99→  id: string
+   100→   100→  localId: string
+   101→   101→  fullName: string
+   102→   102→  gender: string
+   103→   103→  dateOfBirth: string
+   104→   104→  age: number | null
+   105→   105→  contact: string | null
+   106→   106→  address: string | null
+   107→   107→  localIdNumber: string | null
+   108→   108→  bloodGroup: string | null
+   109→   109→  heightCm: number | null
+   110→   110→  weightKg: number | null
+   111→   111→  profession: string | null
+   112→   112→  education: string | null
+   113→   113→  consentGiven: boolean
+   114→   114→  syncStatus: string
+   115→   115→  status: string
+   116→   116→  chiefComplaint: string | null
+   117→   117→  pastHistory: string | null
+   118→   118→  ongoingMedications: string | null
+   119→   119→  allergies: string | null
+   120→   120→  localSummary: string | null
+   121→   121→  notificationStatus: string | null
+   122→   122→  createdAt: string
+   123→   123→  vitals: VitalsRecord[]
+   124→   124→  appointments: AppointmentRecord[]
+   125→   125→  aiResults: AiResultRecord[]
+   126→   126→  labReports: LabReportRecord[]
+   127→   127→  invoices: InvoiceRecord[]
+   128→   128→  createdByStaff: { name: string; role: string }
+   129→   129→}
+   130→   130→
+   131→   131→type TabKey = 'overview' | 'vitals' | 'ai' | 'labs' | 'invoices' | 'appointments'
+   132→   132→
+   133→   133→// ── Main View ────────────────────────────────────────────────────────────────
+   134→   134→export function PatientDetailView() {
+   135→   135→  const { activePatientId, setView, setActivePatient } = useAppStore()
+   136→   136→  const [patient, setPatient] = useState<PatientDetail | null>(null)
+   137→   137→  const [loading, setLoading] = useState(true)
+   138→   138→  const [tab, setTab] = useState<TabKey>('overview')
+   139→   139→
+   140→   140→  useEffect(() => {
+   141→   141→    if (!activePatientId) return
+   142→   142→    let cancelled = false
+   143→   143→    fetch(`/api/patients/${activePatientId}`)
+   144→   144→      .then((r) => r.json())
+   145→   145→      .then((d) => {
+   146→   146→        if (cancelled) return
+   147→   147→        if (d.patient) setPatient(d.patient as PatientDetail)
+   148→   148→        else toast.error('Patient not found')
+   149→   149→      })
+   150→   150→      .catch(() => toast.error('Failed to load patient'))
+   151→   151→      .finally(() => { if (!cancelled) setLoading(false) })
+   152→   152→    return () => { cancelled = true }
+   153→   153→  }, [activePatientId])
+   154→   154→
+   155→   155→  if (!activePatientId) {
+   156→   156→    return (
+   157→   157→      <GlassPanel className="flex flex-col items-center justify-center gap-3 p-12 text-center">
+   158→   158→        <User className="h-10 w-10 text-muted-foreground" />
+   159→   159→        <p className="font-semibold">No patient selected</p>
+   160→   160→        <p className="text-sm text-muted-foreground">Choose a patient from the list to view their record.</p>
+   161→   161→        <Button onClick={() => setView('patients')} className="gap-1.5">
+   162→   162→          <ArrowLeft className="h-4 w-4" /> Go to Patients
+   163→   163→        </Button>
+   164→   164→      </GlassPanel>
+   165→   165→    )
+   166→   166→  }
+   167→   167→
+   168→   168→  if (loading) {
+   169→   169→    return (
+   170→   170→      <div className="flex items-center justify-center py-24">
+   171→   171→        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+   172→   172→      </div>
+   173→   173→    )
+   174→   174→  }
+   175→   175→
+   176→   176→  if (!patient) {
+   177→   177→    return (
+   178→   178→      <GlassPanel className="flex flex-col items-center justify-center gap-3 p-12 text-center">
+   179→   179→        <User className="h-10 w-10 text-muted-foreground" />
+   180→   180→        <p className="font-semibold">Patient not found</p>
+   181→   181→        <p className="text-sm text-muted-foreground">The selected patient record could not be loaded.</p>
+   182→   182→        <Button onClick={() => setView('patients')} className="gap-1.5">
+   183→   183→          <ArrowLeft className="h-4 w-4" /> Go to Patients
+   184→   184→        </Button>
+   185→   185→      </GlassPanel>
+   186→   186→    )
+   187→   187→  }
+   188→   188→
+   189→   189→  const latestTriage = patient.vitals[0]?.triageLevel as TriageLevel | undefined
+   190→   190→  const firewallOk = !!patient.localSummary
+   191→   191→
+   192→   192→  return (
+   193→   193→    <div className="space-y-5">
+   194→   194→      {/* Back button */}
+   195→   195→      <Button
+   196→   196→        variant="ghost"
+   197→   197→        size="sm"
+   198→   198→        className="gap-1.5"
+   199→   199→        onClick={() => { setActivePatient(null); setView('patients') }}
+   200→   200→      >
+   201→   201→        <ArrowLeft className="h-4 w-4" /> Back to Patients
+   202→   202→      </Button>
+   203→   203→
+   204→   204→      {/* Header */}
+   205→   205→      <GlassPanel variant="strong" className="p-5 sm:p-6">
+   206→   206→        <div className="flex flex-wrap items-start justify-between gap-4">
+   207→   207→          <div className="flex items-start gap-3">
+   208→   208→            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-lg font-bold text-primary">
+   209→   209→              {patient.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
+   210→   210→            </div>
+   211→   211→            <div>
+   212→   212→              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{patient.fullName}</h1>
+   213→   213→              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+   214→   214→                <span className="font-mono text-xs">{patient.localId}</span>
+   215→   215→                <span>·</span>
+   216→   216→                <span>{patient.age ?? '?'}y · {patient.gender.toLowerCase()}</span>
+   217→   217→                {patient.bloodGroup && <><span>·</span><span>Blood {patient.bloodGroup}</span></>}
+   218→   218→              </div>
+   219→   219→              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+   220→   220→                <StatusBadge status={patient.status} />
+   221→   221→                <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
+   222→   222→                {latestTriage && <TriageBadge level={latestTriage} />}
+   223→   223→                {firewallOk ? (
+   224→   224→                  <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+   225→   225→                    <Lock className="h-3 w-3" /> Firewall Active
+   226→   226→                  </Badge>
+   227→   227→                ) : (
+   228→   228→                  <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+   229→   229→                    <ShieldAlert className="h-3 w-3" /> AI Disabled
+   230→   230→                  </Badge>
+   231→   231→                )}
+   232→   232→                {patient.notificationStatus && (
+   233→   233→                  <Badge variant="outline" className="gap-1">
+   234→   234→                    <CalendarClock className="h-3 w-3" /> Notify: {patient.notificationStatus}
+   235→   235→                  </Badge>
+   236→   236→                )}
+   237→   237→              </div>
+   238→   238→            </div>
+   239→   239→          </div>
+   240→   240→          <div className="text-right text-xs text-muted-foreground">
+   241→   241→            <p>Created {formatDistanceToNow(new Date(patient.createdAt), { addSuffix: true })}</p>
+   242→   242→            <p className="mt-0.5">by {patient.createdByStaff?.name ?? '—'} · <RoleBadge role={patient.createdByStaff?.role ?? 'ADMIN'} /></p>
+   243→   243→          </div>
+   244→   244→        </div>
+   245→   245→      </GlassPanel>
+   246→   246→
+   247→   247→      {/* Tabs */}
+   248→   248→      <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+   249→   249→        <div className="overflow-x-auto orio-scroll">
+   250→   250→          <TabsList className="grid w-full min-w-[640px] grid-cols-6">
+   251→   251→            <TabsTrigger value="overview" className="gap-1.5"><User className="h-3.5 w-3.5" /> Overview</TabsTrigger>
+   252→   252→            <TabsTrigger value="vitals" className="gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Vitals</TabsTrigger>
+   253→   253→            <TabsTrigger value="ai" className="gap-1.5"><Sparkles className="h-3.5 w-3.5" /> AI Results</TabsTrigger>
+   254→   254→            <TabsTrigger value="labs" className="gap-1.5"><FlaskConical className="h-3.5 w-3.5" /> Labs</TabsTrigger>
+   255→   255→            <TabsTrigger value="invoices" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Invoices</TabsTrigger>
+   256→   256→            <TabsTrigger value="appointments" className="gap-1.5"><CalendarClock className="h-3.5 w-3.5" /> Appts</TabsTrigger>
+   257→   257→          </TabsList>
+   258→   258→        </div>
+   259→   259→
+   260→   260→        <TabsContent value="overview" className="mt-4">
+   261→   261→          <OverviewTab patient={patient} onGoToWizard={() => { setView('patient-entry') }} />
+   262→   262→        </TabsContent>
+   263→   263→        <TabsContent value="vitals" className="mt-4">
+   264→   264→          <VitalsTab vitals={patient.vitals} />
+   265→   265→        </TabsContent>
+   266→   266→        <TabsContent value="ai" className="mt-4">
+   267→   267→          <AiResultsTab results={patient.aiResults} />
+   268→   268→        </TabsContent>
+   269→   269→        <TabsContent value="labs" className="mt-4">
+   270→   270→          <LabReportsTab reports={patient.labReports} />
+   271→   271→        </TabsContent>
+   272→   272→        <TabsContent value="invoices" className="mt-4">
+   273→   273→          <InvoicesTab invoices={patient.invoices} />
+   274→   274→        </TabsContent>
+   275→   275→        <TabsContent value="appointments" className="mt-4">
+   276→   276→          <AppointmentsTab appointments={patient.appointments} />
+   277→   277→        </TabsContent>
+   278→   278→      </Tabs>
+   279→   279→    </div>
+   280→   280→  )
+   281→   281→}
+   282→   282→
+   283→   283→// ── Overview Tab ─────────────────────────────────────────────────────────────
+   284→   284→function OverviewTab({
+   285→   285→  patient, onGoToWizard,
+   286→   286→}: {
+   287→   287→  patient: PatientDetail
+   288→   288→  onGoToWizard: () => void
+   289→   289→}) {
+   290→   290→  const pastHistory = safeParse<string[]>(patient.pastHistory, [])
+   291→   291→  const medications = safeParse<Array<Record<string, string>> | string[]>(patient.ongoingMedications, [])
+   292→   292→  const allergies = safeParse<Array<Record<string, string>> | string[]>(patient.allergies, [])
+   293→   293→
+   294→   294→  return (
+   295→   295→    <div className="grid gap-4 lg:grid-cols-3">
+   296→   296→      {/* Demographics */}
+   297→   297→      <GlassPanel className="p-5 lg:col-span-2">
+   298→   298→        <SectionHeader title="Patient Demographics" subtitle="General information captured at intake" />
+   299→   299→        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+   300→   300→          <Demographic icon={<Phone className="h-4 w-4" />} label="Contact" value={patient.contact ?? '—'} />
+   301→   301→          <Demographic icon={<MapPin className="h-4 w-4" />} label="Address" value={patient.address ?? '—'} />
+   302→   302→          <Demographic icon={<Award className="h-4 w-4" />} label="Local ID Number" value={patient.localIdNumber ?? '—'} />
+   303→   303→          <Demographic icon={<Briefcase className="h-4 w-4" />} label="Profession" value={patient.profession ?? '—'} />
+   304→   304→          <Demographic icon={<GraduationCap className="h-4 w-4" />} label="Education" value={patient.education ?? '—'} />
+   305→   305→          <Demographic
+   306→   306→            icon={<CheckCircle2 className="h-4 w-4" />}
+   307→   307→            label="Consent"
+   308→   308→            value={patient.consentGiven ? 'Given' : 'Not given'}
+   309→   309→          />
+   310→   310→        </div>
+   311→   311→        <Separator className="my-4" />
+   312→   312→        <div className="grid gap-4 sm:grid-cols-3">
+   313→   313→          <Demographic icon={<HeartPulse className="h-4 w-4" />} label="Blood Group" value={patient.bloodGroup ?? '—'} />
+   314→   314→          <Demographic icon={<User className="h-4 w-4" />} label="Height" value={patient.heightCm ? `${patient.heightCm} cm` : '—'} />
+   315→   315→          <Demographic icon={<User className="h-4 w-4" />} label="Weight" value={patient.weightKg ? `${patient.weightKg} kg` : '—'} />
+   316→   316→        </div>
+   317→   317→      </GlassPanel>
+   318→   318→
+   319→   319→      {/* Clinical snapshot */}
+   320→   320→      <GlassPanel className="p-5">
+   321→   321→        <SectionHeader title="Clinical Snapshot" />
+   322→   322→        <div className="mt-4 space-y-3">
+   323→   323→          <div>
+   324→   324→            <p className="text-xs font-medium text-muted-foreground">Chief Complaint</p>
+   325→   325→            <p className="mt-0.5 text-sm font-medium">{patient.chiefComplaint ?? '—'}</p>
+   326→   326→          </div>
+   327→   327→          <div>
+   328→   328→            <p className="text-xs font-medium text-muted-foreground">Past History</p>
+   329→   329→            {pastHistory.length > 0 ? (
+   330→   330→              <div className="mt-1 flex flex-wrap gap-1.5">
+   331→   331→                {pastHistory.map((h, i) => (
+   332→   332→                  <Badge key={i} variant="outline" className="text-[11px]">{h}</Badge>
+   333→   333→                ))}
+   334→   334→              </div>
+   335→   335→            ) : (
+   336→   336→              <p className="mt-0.5 text-sm text-muted-foreground">None recorded</p>
+   337→   337→            )}
+   338→   338→          </div>
+   339→   339→          <div>
+   340→   340→            <p className="text-xs font-medium text-muted-foreground">Allergies</p>
+   341→   341→            <AllergyList items={allergies} />
+   342→   342→          </div>
+   343→   343→          <div>
+   344→   344→            <p className="text-xs font-medium text-muted-foreground">Ongoing Medications</p>
+   345→   345→            <MedicationList items={medications} />
+   346→   346→          </div>
+   347→   347→        </div>
+   348→   348→      </GlassPanel>
+   349→   349→
+   350→   350→      {/* Privacy firewall / local summary */}
+   351→   351→      <GlassPanel variant={patient.localSummary ? 'strong' : 'default'} className="p-5 lg:col-span-3">
+   352→   352→        <SectionHeader
+   353→   353→          title="patient_summary_v1 — Privacy Firewall Output"
+   354→   354→          subtitle="De-identified, compressed summary that AI receives"
+   355→   355→          action={
+   356→   356→            patient.localSummary ? (
+   357→   357→              <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+   358→   358→                <Lock className="h-3 w-3" /> Generated
+   359→   359→              </Badge>
+   360→   360→            ) : (
+   361→   361→              <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+   362→   362→                <ShieldAlert className="h-3 w-3" /> Step 8 incomplete
+   363→   363→              </Badge>
+   364→   364→            )
+   365→   365→          }
+   366→   366→        />
+   367→   367→        {patient.localSummary ? (
+   368→   368→          <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
+   369→   369→            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+   370→   370→              <CheckCircle2 className="h-4 w-4" /> Local summary active — AI eligible
+   371→   371→            </div>
+   372→   372→            <p className="mt-2 whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/90">
+   373→   373→              {patient.localSummary}
+   374→   374→            </p>
+   375→   375→            <p className="mt-3 text-[11px] text-muted-foreground">
+   376→   376→              Raw PHI (name, contact, address, IDs) never leaves the device. The AI receives only this compressed summary.
+   377→   377→            </p>
+   378→   378→          </div>
+   379→   379→        ) : (
+   380→   380→          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+   381→   381→            <div className="flex items-start gap-3">
+   382→   382→              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-600 dark:text-red-400">
+   383→   383→                <ShieldAlert className="h-5 w-5" />
+   384→   384→              </div>
+   385→   385→              <div className="flex-1">
+   386→   386→                <p className="font-semibold text-red-700 dark:text-red-300">Step 8 not completed</p>
+   387→   387→                <p className="mt-1 text-sm text-muted-foreground">
+   388→   388→                  The local summary (privacy firewall) has not been generated. Orio AI tasks are hard-disabled for this patient until the wizard is completed through Step 8.
+   389→   389→                </p>
+   390→   390→                <Button size="sm" className="mt-3 gap-1.5" onClick={onGoToWizard}>
+   391→   391→                  <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
+   392→   392→                </Button>
+   393→   393→              </div>
+   394→   394→            </div>
+   395→   395→          </div>
+   396→   396→        )}
+   397→   397→      </GlassPanel>
+   398→   398→    </div>
+   399→   399→  )
+   400→   400→}
+   401→   401→
+   402→   402→// ── Vitals Tab ───────────────────────────────────────────────────────────────
+   403→   403→function VitalsTab({ vitals }: { vitals: VitalsRecord[] }) {
+   404→   404→  if (vitals.length === 0) {
+   405→   405→    return <EmptyState icon={<HeartPulse className="h-7 w-7" />} title="No vitals recorded" description="Vitals captured during the patient entry wizard will appear here." />
+   406→   406→  }
+   407→   407→  return (
+   408→   408→    <GlassPanel className="p-4 sm:p-5">
+   409→   409→      <SectionHeader title="Vitals History" subtitle={`${vitals.length} record(s) · latest first`} />
+   410→   410→      <div className="mt-4 overflow-x-auto orio-scroll">
+   411→   411→        <table className="w-full text-sm">
+   412→   412→          <thead>
+   413→   413→            <tr className="border-b text-left text-xs text-muted-foreground">
+   414→   414→              <th className="pb-2 pr-3 font-medium">Recorded</th>
+   415→   415→              <th className="pb-2 pr-3 font-medium">Triage</th>
+   416→   416→              <th className="pb-2 pr-3 font-medium">Temp</th>
+   417→   417→              <th className="pb-2 pr-3 font-medium">BP</th>
+   418→   418→              <th className="pb-2 pr-3 font-medium">HR</th>
+   419→   419→              <th className="pb-2 pr-3 font-medium">SpO₂</th>
+   420→   420→              <th className="pb-2 pr-3 font-medium">Weight</th>
+   421→   421→              <th className="pb-2 font-medium">By</th>
+   422→   422→            </tr>
+   423→   423→          </thead>
+   424→   424→          <tbody>
+   425→   425→            {vitals.map((v) => (
+   426→   426→              <tr key={v.id} className="border-b border-border/40 last:border-0">
+   427→   427→                <td className="py-2.5 pr-3 text-xs text-muted-foreground">
+   428→   428→                  {format(new Date(v.recordedAt), 'dd MMM yyyy, HH:mm')}
+   429→   429→                </td>
+   430→   430→                <td className="py-2.5 pr-3">
+   431→   431→                  <TriageBadge level={(v.triageLevel as TriageLevel) ?? null} />
+   432→   432→                </td>
+   433→   433→                <td className="py-2.5 pr-3 tabular-nums">
+   434→   434→                  {v.temperature != null ? `${v.temperature}°C` : '—'}
+   435→   435→                </td>
+   436→   436→                <td className="py-2.5 pr-3 tabular-nums">
+   437→   437→                  {v.bpSystolic != null && v.bpDiastolic != null ? `${v.bpSystolic}/${v.bpDiastolic}` : '—'}
+   438→   438→                </td>
+   439→   439→                <td className="py-2.5 pr-3 tabular-nums">
+   440→   440→                  {v.heartRate != null ? `${v.heartRate}` : '—'}
+   441→   441→                </td>
+   442→   442→                <td className="py-2.5 pr-3 tabular-nums">
+   443→   443→                  {v.spo2 != null ? `${v.spo2}%` : '—'}
+   444→   444→                </td>
+   445→   445→                <td className="py-2.5 pr-3 tabular-nums">
+   446→   446→                  {v.weightKg != null ? `${v.weightKg} kg` : '—'}
+   447→   447→                </td>
+   448→   448→                <td className="py-2.5 text-xs text-muted-foreground">
+   449→   449→                  {formatDistanceToNow(new Date(v.recordedAt), { addSuffix: true })}
+   450→   450→                </td>
+   451→   451→              </tr>
+   452→   452→            ))}
+   453→   453→          </tbody>
+   454→   454→        </table>
+   455→   455→      </div>
+   456→   456→    </GlassPanel>
+   457→   457→  )
+   458→   458→}
+   459→   459→
+   460→   460→// ── AI Results Tab ───────────────────────────────────────────────────────────
+   461→   461→function AiResultsTab({ results }: { results: AiResultRecord[] }) {
+   462→   462→  if (results.length === 0) {
+   463→   463→    return (
+   464→   464→      <EmptyState
+   465→   465→        icon={<Sparkles className="h-7 w-7" />}
+   466→   466→        title="No AI results yet"
+   467→   467→        description="Advisory outputs from Orio AI (diagnosis, treatment, prescriptions, etc.) will appear here. Run a task from the Orio AI module."
+   468→   468→      />
+   469→   469→    )
+   470→   470→  }
+   471→   471→  return (
+   472→   472→    <div className="space-y-4">
+   473→   473→      <SectionHeader title="AI Results" subtitle={`${results.length} advisory output(s) · all reviewed by human professional`} />
+   474→   474→      {results.map((r) => (
+   475→   475→        <AiResultCard key={r.id} result={r} />
+   476→   476→      ))}
+   477→   477→    </div>
+   478→   478→  )
+   479→   479→}
+   480→   480→
+   481→   481→function AiResultCard({ result }: { result: AiResultRecord }) {
+   482→   482→  const [expanded, setExpanded] = useState(false)
+   483→   483→  const output = safeParse<AiOutput>(result.fullOutput, {} as AiOutput)
+   484→   484→  const limitations = safeParse<string[]>(result.limitations, [])
+   485→   485→  const taskLabel = AI_TASK_LABELS[result.taskType as keyof typeof AI_TASK_LABELS] ?? result.taskType
+   486→   486→
+   487→   487→  return (
+   488→   488→    <GlassPanel className="p-4 sm:p-5">
+   489→   489→      <div className="flex flex-wrap items-start justify-between gap-3">
+   490→   490→        <div className="flex items-start gap-3">
+   491→   491→          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+   492→   492→            <TaskIcon taskType={result.taskType} />
+   493→   493→          </div>
+   494→   494→          <div>
+   495→   495→            <p className="font-semibold">{taskLabel}</p>
+   496→   496→            <p className="text-xs text-muted-foreground">
+   497→   497→              {format(new Date(result.createdAt), 'dd MMM yyyy, HH:mm')} · by {result.createdByStaff?.name ?? '—'}
+   498→   498→            </p>
+   499→   499→          </div>
+   500→   500→        </div>
+   501→   501→        <div className="flex flex-wrap items-center gap-1.5">
+   502→   502→          <RiskBadge level={(result.riskLevel as RiskLevel) ?? 'moderate'} />
+   503→   503→          <Badge variant="outline" className="gap-1 text-[10px]">
+   504→   504→            <Sparkles className="h-2.5 w-2.5" /> Tier {result.tierUsed}
+   505→   505→          </Badge>
+   506→   506→          <Badge variant="outline" className="text-[10px]">{result.recommendationType}</Badge>
+   507→   507→        </div>
+   508→   508→      </div>
+   509→   509→
+   510→   510→      <p className="mt-3 text-sm">{result.summary}</p>
+   511→   511→
+   512→   512→      <div className="mt-3 max-w-xs">
+   513→   513→        <div className="mb-1 flex items-center justify-between text-xs">
+   514→   514→          <span className="text-muted-foreground">Confidence</span>
+   515→   515→          <span className="font-semibold tabular-nums">{Math.round(result.confidence * 100)}%</span>
+   516→   516→        </div>
+   517→   517→        <ConfidenceMeter value={result.confidence} />
+   518→   518→      </div>
+   519→   519→
+   520→   520→      {/* Rich output */}
+   521→   521→      <AnimatePresence>
+   522→   522→        {expanded && (
+   523→   523→          <motion.div
+   524→   524→            initial={{ opacity: 0, height: 0 }}
+   525→   525→            animate={{ opacity: 1, height: 'auto' }}
+   526→   526→            exit={{ opacity: 0, height: 0 }}
+   527→   527→            className="mt-4 space-y-3 overflow-hidden"
+   528→   528→          >
+   529→   529→            {/* Diagnosis */}
+   530→   530→            {output.diagnosis && output.diagnosis.length > 0 && (
+   531→   531→              <RichBlock title="Differential Diagnosis" icon={<Stethoscope className="h-3.5 w-3.5" />}>
+   532→   532→                <div className="space-y-2">
+   533→   533→                  {output.diagnosis.map((d, i) => (
+   534→   534→                    <div key={i} className="rounded-md bg-muted/30 px-3 py-2">
+   535→   535→                      <div className="flex items-center justify-between">
+   536→   536→                        <span className="text-sm font-medium">{i + 1}. {d.condition}</span>
+   537→   537→                        <span className="text-xs font-semibold tabular-nums">{Math.round(d.probability * 100)}%</span>
+   538→   538→                      </div>
+   539→   539→                      <p className="mt-1 text-xs text-muted-foreground">{d.reasoning}</p>
+   540→   540→                    </div>
+   541→   541→                  ))}
+   542→   542→                </div>
+   543→   543→              </RichBlock>
+   544→   544→            )}
+   545→   545→
+   546→   546→            {/* Treatment plan */}
+   547→   547→            {output.treatment_plan && output.treatment_plan.length > 0 && (
+   548→   548→              <RichBlock title="Treatment Plan" icon={<ClipboardList className="h-3.5 w-3.5" />}>
+   549→   549→                <ListItems items={output.treatment_plan} />
+   550→   550→              </RichBlock>
+   551→   551→            )}
+   552→   552→
+   553→   553→            {/* Prescription */}
+   554→   554→            {output.prescription && output.prescription.length > 0 && (
+   555→   555→              <RichBlock title="Prescription" icon={<Pill className="h-3.5 w-3.5" />}>
+   556→   556→                <div className="overflow-x-auto orio-scroll">
+   557→   557→                  <table className="w-full text-xs">
+   558→   558→                    <thead>
+   559→   559→                      <tr className="border-b text-left text-muted-foreground">
+   560→   560→                        <th className="py-1 pr-2 font-medium">Drug</th>
+   561→   561→                        <th className="py-1 pr-2 font-medium">Dose</th>
+   562→   562→                        <th className="py-1 pr-2 font-medium">Freq</th>
+   563→   563→                        <th className="py-1 font-medium">Duration</th>
+   564→   564→                      </tr>
+   565→   565→                    </thead>
+   566→   566→                    <tbody>
+   567→   567→                      {output.prescription.map((rx, i) => (
+   568→   568→                        <tr key={i} className="border-b border-border/30 last:border-0">
+   569→   569→                          <td className="py-1.5 pr-2 font-medium">{rx.drug}</td>
+   570→   570→                          <td className="py-1.5 pr-2 tabular-nums">{rx.dosage}</td>
+   571→   571→                          <td className="py-1.5 pr-2">{rx.frequency}</td>
+   572→   572→                          <td className="py-1.5">{rx.duration}</td>
+   573→   573→                        </tr>
+   574→   574→                      ))}
+   575→   575→                    </tbody>
+   576→   576→                  </table>
+   577→   577→                </div>
+   578→   578→              </RichBlock>
+   579→   579→            )}
+   580→   580→
+   581→   581→            {/* Advice */}
+   582→   582→            {output.advice && output.advice.length > 0 && (
+   583→   583→              <RichBlock title="Advice" icon={<Activity className="h-3.5 w-3.5" />}>
+   584→   584→                <ListItems items={output.advice} />
+   585→   585→              </RichBlock>
+   586→   586→            )}
+   587→   587→
+   588→   588→            {/* Complications */}
+   589→   589→            {output.complications && output.complications.length > 0 && (
+   590→   590→              <RichBlock title="Possible Complications" icon={<AlertTriangle className="h-3.5 w-3.5" />}>
+   591→   591→                <ListItems items={output.complications} />
+   592→   592→              </RichBlock>
+   593→   593→            )}
+   594→   594→
+   595→   595→            {/* Interactions */}
+   596→   596→            {output.interactions && output.interactions.length > 0 && (
+   597→   597→              <RichBlock title="Drug Interactions" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
+   598→   598→                <ListItems items={output.interactions} />
+   599→   599→              </RichBlock>
+   600→   600→            )}
+   601→   601→
+   602→   602→            {/* Lab analysis */}
+   603→   603→            {output.parameters_analysis && output.parameters_analysis.length > 0 && (
+   604→   604→              <RichBlock title="Lab Analysis" icon={<FlaskConical className="h-3.5 w-3.5" />}>
+   605→   605→                <div className="space-y-1.5">
+   606→   606→                  {output.parameters_analysis.map((p, i) => (
+   607→   607→                    <div key={i} className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-1.5 text-xs">
+   608→   608→                      <span className="font-medium">{p.parameter}</span>
+   609→   609→                      <span className="tabular-nums text-muted-foreground">{p.value}</span>
+   610→   610→                      <span className={cn(
+   611→   611→                        'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase',
+   612→   612→                        p.status === 'normal' && 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+   613→   613→                        p.status === 'low' && 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+   614→   614→                        p.status === 'high' && 'bg-red-500/15 text-red-700 dark:text-red-300',
+   615→   615→                      )}>{p.status}</span>
+   616→   616→                    </div>
+   617→   617→                  ))}
+   618→   618→                </div>
+   619→   619→              </RichBlock>
+   620→   620→            )}
+   621→   621→
+   622→   622→            {/* Limitations */}
+   623→   623→            {limitations.length > 0 && (
+   624→   624→              <RichBlock title="Limitations" icon={<AlertTriangle className="h-3.5 w-3.5" />}>
+   625→   625→                <ListItems items={limitations} />
+   626→   626→              </RichBlock>
+   627→   627→            )}
+   628→   628→
+   629→   629→            <DisclaimerChip text={result.disclaimer} />
+   630→   630→          </motion.div>
+   631→   631→        )}
+   632→   632→      </AnimatePresence>
+   633→   633→
+   634→   634→      <div className="mt-3 flex items-center gap-2">
+   635→   635→        <Button variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)} className="gap-1 text-xs">
+   636→   636→          {expanded ? 'Hide details' : 'Show details'}
+   637→   637→        </Button>
+   638→   638→        <span className="text-[11px] text-muted-foreground">
+   639→   639→          {result.modelUsed ? `Model: ${result.modelUsed}` : ''}
+   640→   640→        </span>
+   641→   641→      </div>
+   642→   642→    </GlassPanel>
+   643→   643→  )
+   644→   644→}
+   645→   645→
+   646→   646→// ── Lab Reports Tab ──────────────────────────────────────────────────────────
+   647→   647→function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
+   648→   648→  if (reports.length === 0) {
+   649→   649→    return (
+   650→   650→      <EmptyState
+   651→   651→        icon={<FlaskConical className="h-7 w-7" />}
+   652→   652→        title="No lab reports"
+   653→   653→        description="Lab reports generated via the AI Hub or entered by lab technicians will appear here."
+   654→   654→      />
+   655→   655→    )
+   656→   656→  }
+   657→   657→  return (
+   658→   658→    <div className="space-y-4">
+   659→   659→      <SectionHeader title="Lab Reports" subtitle={`${reports.length} report(s)`} />
+   660→   660→      {reports.map((r) => {
+   661→   661→        const params = safeParse<Array<{ name: string; value: string; unit?: string; refRange?: string; status?: string; note?: string }>>(r.parameters, [])
+   662→   662→        const typeLabel = LAB_REPORT_LABELS[r.reportType] ?? r.reportType
+   663→   663→        return (
+   664→   664→          <GlassPanel key={r.id} className="p-4 sm:p-5">
+   665→   665→            <div className="flex flex-wrap items-start justify-between gap-3">
+   666→   666→              <div className="flex items-start gap-3">
+   667→   667→                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-600 dark:text-violet-300">
+   668→   668→                  <FlaskConical className="h-5 w-5" />
+   669→   669→                </div>
+   670→   670→                <div>
+   671→   671→                  <p className="font-semibold">{typeLabel}</p>
+   672→   672→                  <p className="text-xs text-muted-foreground">
+   673→   673→                    {format(new Date(r.createdAt), 'dd MMM yyyy, HH:mm')} · by {r.createdByStaff?.name ?? '—'}
+   674→   674→                  </p>
+   675→   675→                </div>
+   676→   676→              </div>
+   677→   677→              <div className="flex items-center gap-1.5">
+   678→   678→                {r.isNormal === null ? (
+   679→   679→                  <Badge variant="outline">Unknown</Badge>
+   680→   680→                ) : r.isNormal ? (
+   681→   681→                  <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+   682→   682→                    <CheckCircle2 className="h-3 w-3" /> All Normal
+   683→   683→                  </Badge>
+   684→   684→                ) : (
+   685→   685→                  <Badge className="gap-1 bg-amber-500/15 text-amber-700 dark:text-amber-300">
+   686→   686→                    <AlertTriangle className="h-3 w-3" /> Abnormal
+   687→   687→                  </Badge>
+   688→   688→                )}
+   689→   689→                <Badge variant="outline" className="text-[10px]">{r.status}</Badge>
+   690→   690→              </div>
+   691→   691→            </div>
+   692→   692→
+   693→   693→            {params.length > 0 && (
+   694→   694→              <div className="mt-3 overflow-x-auto orio-scroll">
+   695→   695→                <table className="w-full text-sm">
+   696→   696→                  <thead>
+   697→   697→                    <tr className="border-b text-left text-xs text-muted-foreground">
+   698→   698→                      <th className="pb-2 pr-3 font-medium">Parameter</th>
+   699→   699→                      <th className="pb-2 pr-3 font-medium">Value</th>
+   700→   700→                      <th className="pb-2 pr-3 font-medium">Unit</th>
+   701→   701→                      <th className="pb-2 pr-3 font-medium">Ref Range</th>
+   702→   702→                      <th className="pb-2 pr-3 font-medium">Status</th>
+   703→   703→                      <th className="pb-2 font-medium">Note</th>
+   704→   704→                    </tr>
+   705→   705→                  </thead>
+   706→   706→                  <tbody>
+   707→   707→                    {params.map((p, i) => (
+   708→   708→                      <tr key={i} className="border-b border-border/40 last:border-0">
+   709→   709→                        <td className="py-2 pr-3 font-medium">{p.name}</td>
+   710→   710→                        <td className="py-2 pr-3 tabular-nums">{p.value || '—'}</td>
+   711→   711→                        <td className="py-2 pr-3 text-muted-foreground">{p.unit || '—'}</td>
+   712→   712→                        <td className="py-2 pr-3 text-muted-foreground">{p.refRange || '—'}</td>
+   713→   713→                        <td className="py-2 pr-3">
+   714→   714→                          <LabStatus status={p.status} />
+   715→   715→                        </td>
+   716→   716→                        <td className="py-2 text-xs text-muted-foreground">{p.note || '—'}</td>
+   717→   717→                      </tr>
+   718→   718→                    ))}
+   719→   719→                  </tbody>
+   720→   720→                </table>
+   721→   721→              </div>
+   722→   722→            )}
+   723→   723→
+   724→   724→            {r.aiFeedback && (
+   725→   725→              <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+   726→   726→                <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+   727→   727→                  <Sparkles className="h-3.5 w-3.5" /> AI Feedback
+   728→   728→                </p>
+   729→   729→                <p className="mt-1 text-sm text-foreground/90">{r.aiFeedback}</p>
+   730→   730→                <DisclaimerChip text="AI feedback is advisory and must be reviewed by a human professional." />
+   731→   731→              </div>
+   732→   732→            )}
+   733→   733→          </GlassPanel>
+   734→   734→        )
+   735→   735→      })}
+   736→   736→    </div>
+   737→   737→  )
+   738→   738→}
+   739→   739→
+   740→   740→// ── Invoices Tab ─────────────────────────────────────────────────────────────
+   741→   741→function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
+   742→   742→  if (invoices.length === 0) {
+   743→   743→    return (
+   744→   744→      <EmptyState
+   745→   745→        icon={<Receipt className="h-7 w-7" />}
+   746→   746→        title="No invoices"
+   747→   747→        description="Invoices generated via the AI Hub or billing workflows will appear here."
+   748→   748→      />
+   749→   749→    )
+   750→   750→  }
+   751→   751→  return (
+   752→   752→    <div className="space-y-4">
+   753→   753→      <SectionHeader title="Invoices" subtitle={`${invoices.length} invoice(s)`} />
+   754→   754→      {invoices.map((inv) => {
+   755→   755→        const items = safeParse<Array<{ description: string; quantity: number; unit_price: number }>>(inv.items, [])
+   756→   756→        return (
+   757→   757→          <GlassPanel key={inv.id} className="p-4 sm:p-5">
+   758→   758→            <div className="flex flex-wrap items-start justify-between gap-3">
+   759→   759→              <div className="flex items-start gap-3">
+   760→   760→                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-300">
+   761→   761→                  <Receipt className="h-5 w-5" />
+   762→   762→                </div>
+   763→   763→                <div>
+   764→   764→                  <p className="font-semibold font-mono">{inv.invoiceNo}</p>
+   765→   765→                  <p className="text-xs text-muted-foreground">
+   766→   766→                    {format(new Date(inv.createdAt), 'dd MMM yyyy, HH:mm')}
+   767→   767→                  </p>
+   768→   768→                </div>
+   769→   769→              </div>
+   770→   770→              <div className="flex items-center gap-1.5">
+   771→   771→                <InvoiceStatus status={inv.status} />
+   772→   772→              </div>
+   773→   773→            </div>
+   774→   774→
+   775→   775→            {items.length > 0 && (
+   776→   776→              <div className="mt-3 overflow-x-auto orio-scroll">
+   777→   777→                <table className="w-full text-sm">
+   778→   778→                  <thead>
+   779→   779→                    <tr className="border-b text-left text-xs text-muted-foreground">
+   780→   780→                      <th className="pb-2 pr-3 font-medium">Description</th>
+   781→   781→                      <th className="pb-2 pr-3 text-right font-medium">Qty</th>
+   782→   782→                      <th className="pb-2 pr-3 text-right font-medium">Unit</th>
+   783→   783→                      <th className="pb-2 text-right font-medium">Amount</th>
+   784→   784→                    </tr>
+   785→   785→                  </thead>
+   786→   786→                  <tbody>
+   787→   787→                    {items.map((it, i) => (
+   788→   788→                      <tr key={i} className="border-b border-border/40 last:border-0">
+   789→   789→                        <td className="py-2 pr-3">{it.description}</td>
+   790→   790→                        <td className="py-2 pr-3 text-right tabular-nums">{it.quantity}</td>
+   791→   791→                        <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(it.unit_price)}</td>
+   792→   792→                        <td className="py-2 text-right font-medium tabular-nums">
+   793→   793→                          {formatCurrency((it.quantity ?? 0) * (it.unit_price ?? 0))}
+   794→   794→                        </td>
+   795→   795→                      </tr>
+   796→   796→                    ))}
+   797→   797→                  </tbody>
+   798→   798→                </table>
+   799→   799→              </div>
+   800→   800→            )}
+   801→   801→
+   802→   802→            <div className="mt-3 flex flex-wrap justify-end gap-x-6 gap-y-1 text-sm">
+   803→   803→              <span className="text-muted-foreground">Subtotal: <span className="font-medium text-foreground tabular-nums">{formatCurrency(inv.subtotal)}</span></span>
+   804→   804→              <span className="text-muted-foreground">Tax: <span className="font-medium text-foreground tabular-nums">{formatCurrency(inv.tax)}</span></span>
+   805→   805→              <span className="text-muted-foreground">Total: <span className="font-bold text-foreground tabular-nums">{formatCurrency(inv.total)}</span></span>
+   806→   806→            </div>
+   807→   807→          </GlassPanel>
+   808→   808→        )
+   809→   809→      })}
+   810→   810→    </div>
+   811→   811→  )
+   812→   812→}
+   813→   813→
+   814→   814→// ── Appointments Tab ─────────────────────────────────────────────────────────
+   815→   815→function AppointmentsTab({ appointments }: { appointments: AppointmentRecord[] }) {
+   816→   816→  if (appointments.length === 0) {
+   817→   817→    return (
+   818→   818→      <EmptyState
+   819→   819→        icon={<CalendarClock className="h-7 w-7" />}
+   820→   820→        title="No appointments"
+   821→   821→        description="Scheduled appointments with assigned doctors will appear here."
+   822→   822→      />
+   823→   823→    )
+   824→   824→  }
+   825→   825→  return (
+   826→   826→    <div className="space-y-4">
+   827→   827→      <SectionHeader title="Appointments" subtitle={`${appointments.length} appointment(s)`} />
+   828→   828→      <div className="grid gap-3 sm:grid-cols-2">
+   829→   829→        {appointments.map((a) => (
+   830→   830→          <GlassPanel key={a.id} className="p-4">
+   831→   831→            <div className="flex items-start justify-between gap-3">
+   832→   832→              <div className="flex items-start gap-3">
+   833→   833→                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+   834→   834→                  {a.doctor.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
+   835→   835→                </div>
+   836→   836→                <div>
+   837→   837→                  <p className="font-medium">{a.doctor.name}</p>
+   838→   838→                  <p className="text-xs text-muted-foreground">
+   839→   839→                    <RoleBadge role={a.doctor.role} />
+   840→   840→                  </p>
+   841→   841→                </div>
+   842→   842→              </div>
+   843→   843→              <ApptStatus status={a.status} />
+   844→   844→            </div>
+   845→   845→            <div className="mt-3 space-y-1 text-sm">
+   846→   846→              <p className="flex items-center gap-1.5 text-muted-foreground">
+   847→   847→                <CalendarClock className="h-3.5 w-3.5" />
+   848→   848→                {format(new Date(a.scheduledAt), 'dd MMM yyyy, HH:mm')}
+   849→   849→              </p>
+   850→   850→              {a.reason && (
+   851→   851→                <p className="text-xs text-muted-foreground">Reason: {a.reason}</p>
+   852→   852→              )}
+   853→   853→            </div>
+   854→   854→          </GlassPanel>
+   855→   855→        ))}
+   856→   856→      </div>
+   857→   857→    </div>
+   858→   858→  )
+   859→   859→}
+   860→   860→
+   861→   861→// ── Shared sub-components ────────────────────────────────────────────────────
+   862→   862→function Demographic({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+   863→   863→  return (
+   864→   864→    <div className="flex items-start gap-2.5">
+   865→   865→      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50 text-muted-foreground">
+   866→   866→        {icon}
+   867→   867→      </div>
+   868→   868→      <div className="min-w-0">
+   869→   869→        <p className="text-xs text-muted-foreground">{label}</p>
+   870→   870→        <p className="truncate text-sm font-medium">{value}</p>
+   871→   871→      </div>
+   872→   872→    </div>
+   873→   873→  )
+   874→   874→}
+   875→   875→
+   876→   876→function AllergyList({ items }: { items: Array<Record<string, string>> | string[] }) {
+   877→   877→  if (!items || items.length === 0) {
+   878→   878→    return <p className="mt-0.5 text-sm text-muted-foreground">None recorded</p>
+   879→   879→  }
+   880→   880→  return (
+   881→   881→    <div className="mt-1 flex flex-wrap gap-1.5">
+   882→   882→      {items.map((it, i) => {
+   883→   883→        if (typeof it === 'string') {
+   884→   884→          return <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-700 dark:text-red-300 text-[11px]">{it}</Badge>
+   885→   885→        }
+   886→   886→        return (
+   887→   887→          <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-700 dark:text-red-300 text-[11px]">
+   888→   888→            {it.allergen ?? it.name ?? '?'}
+   889→   889→            {it.severity && <span className="opacity-70">({it.severity})</span>}
+   890→   890→          </Badge>
+   891→   891→        )
+   892→   892→      })}
+   893→   893→    </div>
+   894→   894→  )
+   895→   895→}
+   896→   896→
+   897→   897→function MedicationList({ items }: { items: Array<Record<string, string>> | string[] }) {
+   898→   898→  if (!items || items.length === 0) {
+   899→   899→    return <p className="mt-0.5 text-sm text-muted-foreground">None recorded</p>
+   900→   900→  }
+   901→   901→  return (
+   902→   902→    <div className="mt-1 space-y-1">
+   903→   903→      {items.map((it, i) => {
+   904→   904→        if (typeof it === 'string') {
+   905→   905→          return <p key={i} className="text-sm">• {it}</p>
+   906→   906→        }
+   907→   907→        const parts = [it.drug ?? it.name, it.dose ?? it.dosage, it.frequency].filter(Boolean)
+   908→   908→        return <p key={i} className="text-sm">• {parts.join(' — ')}</p>
+   909→   909→      })}
+   910→   910→    </div>
+   911→   911→  )
+   912→   912→}
+   913→   913→
+   914→   914→function RichBlock({
+   915→   915→  title, icon, children,
+   916→   916→}: {
+   917→   917→  title: string
+   918→   918→  icon: React.ReactNode
+   919→   919→  children: React.ReactNode
+   920→   920→}) {
+   921→   921→  return (
+   922→   922→    <div className="rounded-lg border border-border/40 bg-muted/20 p-3">
+   923→   923→      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+   924→   924→        {icon} {title}
+   925→   925→      </p>
+   926→   926→      {children}
+   927→   927→    </div>
+   928→   928→  )
+   929→   929→}
+   930→   930→
+   931→   931→function ListItems({ items }: { items: string[] }) {
+   932→   932→  return (
+   933→   933→    <ul className="space-y-1">
+   934→   934→      {items.map((it, i) => (
+   935→   935→        <li key={i} className="text-sm text-foreground/90">• {it}</li>
+   936→   936→      ))}
+   937→   937→    </ul>
+   938→   938→  )
+   939→   939→}
+   940→   940→
+   941→   941→function TaskIcon({ taskType }: { taskType: string }) {
+   942→   942→  const icon = useMemo(() => {
+   943→   943→    switch (taskType) {
+   944→   944→      case 'DIAGNOSIS': return <Stethoscope className="h-5 w-5" />
+   945→   945→      case 'TREATMENT': return <ClipboardList className="h-5 w-5" />
+   946→   946→      case 'RX_GENERATION': return <Pill className="h-5 w-5" />
+   947→   947→      case 'LAB_ANALYSIS': return <FlaskConical className="h-5 w-5" />
+   948→   948→      case 'INVOICE': return <Receipt className="h-5 w-5" />
+   949→   949→      case 'CERTIFICATE': return <FileBadge className="h-5 w-5" />
+   950→   950→      case 'NOTIFY_DOCTOR': return <CalendarClock className="h-5 w-5" />
+   951→   951→      default: return <Sparkles className="h-5 w-5" />
+   952→   952→    }
+   953→   953→  }, [taskType])
+   954→   954→  return <>{icon}</>
+   955→   955→}
+   956→   956→
+   957→   957→function StatusBadge({ status }: { status: string }) {
+   958→   958→  const map: Record<string, string> = {
+   959→   959→    DRAFT: 'bg-muted/60 text-muted-foreground border-border',
+   960→   960→    IN_PROGRESS: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+   961→   961→    COMPLETED: 'bg-primary/15 text-primary border-primary/30',
+   962→   962→    REVIEWED: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+   963→   963→  }
+   964→   964→  return (
+   965→   965→    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium', map[status] ?? map.DRAFT)}>
+   966→   966→      {status.replace('_', ' ')}
+   967→   967→    </span>
+   968→   968→  )
+   969→   969→}
+   970→   970→
+   971→   971→function LabStatus({ status }: { status?: string }) {
+   972→   972→  if (!status) return <span className="text-xs text-muted-foreground">—</span>
+   973→   973→  const map: Record<string, string> = {
+   974→   974→    normal: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+   975→   975→    low: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+   976→   976→    high: 'bg-red-500/15 text-red-700 dark:text-red-300',
+   977→   977→  }
+   978→   978→  return (
+   979→   979→    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase', map[status] ?? 'bg-muted text-muted-foreground')}>
+   980→   980→      {status}
+   981→   981→    </span>
+   982→   982→  )
+   983→   983→}
+   984→   984→
+   985→   985→function InvoiceStatus({ status }: { status: string }) {
+   986→   986→  const map: Record<string, { cls: string; icon: React.ReactNode }> = {
+   987→   987→    PENDING: { cls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300', icon: <AlertTriangle className="h-3 w-3" /> },
+   988→   988→    PAID: { cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
+   989→   989→    CANCELLED: { cls: 'bg-red-500/15 text-red-700 dark:text-red-300', icon: <X className="h-3 w-3" /> },
+   990→   990→  }
+   991→   991→  const c = map[status] ?? map.PENDING
+   992→   992→  return (
+   993→   993→    <Badge variant="outline" className={cn('gap-1', c.cls)}>
+   994→   994→      {c.icon} {status}
+   995→   995→    </Badge>
+   996→   996→  )
+   997→   997→}
+   998→   998→
+   999→   999→function ApptStatus({ status }: { status: string }) {
+  1000→  1000→  const map: Record<string, string> = {
+  1001→  1001→    SCHEDULED: 'bg-primary/15 text-primary border-primary/30',
+  1002→  1002→    IN_PROGRESS: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+  1003→  1003→    COMPLETED: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+  1004→  1004→    CANCELLED: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
+  1005→  1005→  }
+  1006→  1006→  return (
+  1007→  1007→    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', map[status] ?? map.SCHEDULED)}>
+  1008→  1008→      {status}
+  1009→  1009→    </span>
+  1010→  1010→  )
+  1011→  1011→}
+  1012→  1012→
+  1013→  1013→function EmptyState({
+  1014→  1014→  icon, title, description,
+  1015→  1015→}: {
+  1016→  1016→  icon: React.ReactNode
+  1017→  1017→  title: string
+  1018→  1018→  description: string
+  1019→  1019→}) {
+  1020→  1020→  return (
+  1021→  1021→    <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-10 text-center">
+  1022→  1022→      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50 text-muted-foreground">
+  1023→  1023→        {icon}
+  1024→  1024→      </div>
+  1025→  1025→      <div>
+  1026→  1026→        <p className="font-semibold">{title}</p>
+  1027→  1027→        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+  1028→  1028→      </div>
+  1029→  1029→    </GlassPanel>
+  1030→  1030→  )
+  1031→  1031→}
+  1032→  1032→
+  1033→  1033→// ── Helpers ──────────────────────────────────────────────────────────────────
+  1034→  1034→function safeParse<T>(s: string | null | undefined, fallback: T): T {
+  1035→  1035→  if (!s) return fallback
+  1036→  1036→  try {
+  1037→  1037→    return JSON.parse(s) as T
+  1038→  1038→  } catch {
+  1039→  1039→    return fallback
+  1040→  1040→  }
+  1041→  1041→}
+  1042→  1042→
+  1043→  1043→function formatCurrency(n: number): string {
+  1044→  1044→  return new Intl.NumberFormat('en-IN', {
+  1045→  1045→    style: 'currency',
+  1046→  1046→    currency: 'INR',
+  1047→  1047→    maximumFractionDigits: 2,
+  1048→  1048→  }).format(n ?? 0)
+  1049→  1049→}
+  1050→  1050→

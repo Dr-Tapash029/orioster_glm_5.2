@@ -34,10 +34,10 @@ interface Patient { id: string; fullName: string; localId: string }
 interface Doctor { id: string; name: string }
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-  SCHEDULED: { label: 'Scheduled', cls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300', icon: <Clock className="h-3 w-3" /> },
-  IN_PROGRESS: { label: 'In Progress', cls: 'bg-primary/15 text-primary', icon: <Activity className="h-3 w-3" /> },
-  COMPLETED: { label: 'Completed', cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
-  CANCELLED: { label: 'Cancelled', cls: 'bg-red-500/15 text-red-700 dark:text-red-300', icon: <XCircle className="h-3 w-3" /> },
+  SCHEDULED: { label: 'Scheduled', cls: 'bg-amber-500/15 text-amber-300', icon: <Clock className="h-3 w-3" /> },
+  IN_PROGRESS: { label: 'In Progress', cls: 'bg-cyan-500/15 text-cyan-300', icon: <Activity className="h-3 w-3" /> },
+  COMPLETED: { label: 'Completed', cls: 'bg-emerald-500/15 text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
+  CANCELLED: { label: 'Cancelled', cls: 'bg-red-500/15 text-red-400', icon: <XCircle className="h-3 w-3" /> },
 }
 
 export function AppointmentsView() {
@@ -122,7 +122,7 @@ export function AppointmentsView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="btn-cyan gap-2">
                 <Plus className="h-4 w-4" />
                 Schedule
               </Button>
@@ -180,7 +180,7 @@ export function AppointmentsView() {
                     placeholder="Consultation"
                   />
                 </div>
-                <Button onClick={createAppt} className="w-full">Schedule Appointment</Button>
+                <Button onClick={createAppt} className="btn-cyan w-full">Schedule Appointment</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -195,8 +195,8 @@ export function AppointmentsView() {
             className={cn(
               'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
               statusFilter === s
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-card/50 hover:bg-muted'
+                ? 'border-cyan-500/30 bg-cyan-500/15 text-cyan-300'
+                : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
             )}
           >
             {s === 'ALL' ? 'All' : STATUS_CONFIG[s]?.label ?? s}
@@ -206,16 +206,16 @@ export function AppointmentsView() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
         </div>
       ) : appointments.length === 0 ? (
         <GlassPanel className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-            <CalendarClock className="h-7 w-7 text-muted-foreground" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
+            <CalendarClock className="h-7 w-7 text-slate-500" />
           </div>
           <div>
-            <p className="font-medium">No appointments</p>
-            <p className="text-sm text-muted-foreground">Schedule a new appointment to get started.</p>
+            <p className="font-medium text-slate-100">No appointments</p>
+            <p className="text-sm text-slate-400">Schedule a new appointment to get started.</p>
           </div>
         </GlassPanel>
       ) : (
@@ -230,11 +230,11 @@ export function AppointmentsView() {
                   <div className="min-w-0">
                     <button
                       onClick={() => { setActivePatient(a.patientId); setView('patient-detail') }}
-                      className="truncate text-left font-semibold hover:underline"
+                      className="truncate text-left font-semibold text-slate-100 hover:text-cyan-300 hover:underline"
                     >
                       {a.patient.fullName}
                     </button>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-[11px] text-slate-400">
                       {a.patient.localId} · {a.patient.age ?? '?'}y · {a.patient.gender.toLowerCase()}
                     </p>
                   </div>
@@ -245,34 +245,34 @@ export function AppointmentsView() {
                 </div>
 
                 {a.patient.chiefComplaint && (
-                  <p className="mt-2 truncate text-sm text-muted-foreground">{a.patient.chiefComplaint}</p>
+                  <p className="mt-2 truncate text-sm text-slate-400">{a.patient.chiefComplaint}</p>
                 )}
 
-                <div className="mt-3 flex items-center gap-2 text-sm">
-                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                <div className="mt-3 flex items-center gap-2 text-sm text-slate-100">
+                  <CalendarClock className="h-4 w-4 text-slate-400" />
                   <span>{dt ? format(dt, 'MMM d, yyyy') : '—'}</span>
-                  <span className="text-muted-foreground">·</span>
+                  <span className="text-slate-400">·</span>
                   <span>{dt ? format(dt, 'h:mm a') : '—'}</span>
                 </div>
 
                 <div className="mt-2 flex items-center gap-2">
                   <RoleBadge role={a.doctor.role} />
-                  <span className="text-sm text-muted-foreground">{a.doctor.name}</span>
+                  <span className="text-sm text-slate-300">{a.doctor.name}</span>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {a.status === 'SCHEDULED' && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'IN_PROGRESS')} className="h-7 text-xs">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'IN_PROGRESS')} className="h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
                       Start
                     </Button>
                   )}
                   {a.status === 'IN_PROGRESS' && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'COMPLETED')} className="h-7 text-xs">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'COMPLETED')} className="h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
                       Complete
                     </Button>
                   )}
                   {(a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS') && (
-                    <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, 'CANCELLED')} className="h-7 text-xs text-red-500">
+                    <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, 'CANCELLED')} className="h-7 text-xs text-red-400">
                       Cancel
                     </Button>
                   )}
@@ -280,7 +280,7 @@ export function AppointmentsView() {
                     size="sm"
                     variant="ghost"
                     onClick={() => { setActivePatient(a.patientId); setView('patient-detail') }}
-                    className="ml-auto h-7 text-xs"
+                    className="ml-auto h-7 text-xs text-slate-300 hover:text-slate-100"
                   >
                     View <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>

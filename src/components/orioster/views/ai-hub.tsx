@@ -122,7 +122,7 @@ const DOC_CARDS: Array<{
     title: 'Invoice',
     description: 'AI-generated itemized billing from service summary. Save to patient record.',
     icon: <Receipt className="h-5 w-5" />,
-    accent: 'bg-amber-500/15 text-amber-600 dark:text-amber-300',
+    accent: 'bg-amber-500/15 text-amber-300',
     task: 'INVOICE',
   },
   {
@@ -130,7 +130,7 @@ const DOC_CARDS: Array<{
     title: 'Lab Report',
     description: 'Enter parameters, AI analyzes normal/abnormal values, save report to patient.',
     icon: <FlaskConical className="h-5 w-5" />,
-    accent: 'bg-violet-500/15 text-violet-600 dark:text-violet-300',
+    accent: 'bg-violet-500/15 text-violet-300',
     task: 'LAB_ANALYSIS',
   },
   {
@@ -138,7 +138,7 @@ const DOC_CARDS: Array<{
     title: 'Prescription',
     description: 'AI generates an advisory prescription with dosage, frequency, and notes.',
     icon: <Pill className="h-5 w-5" />,
-    accent: 'bg-primary/15 text-primary',
+    accent: 'bg-cyan-500/15 text-cyan-300',
     task: 'RX_GENERATION',
   },
   {
@@ -146,7 +146,7 @@ const DOC_CARDS: Array<{
     title: 'Medical Certificate',
     description: 'AI drafts certificate content — doctor reviews and finalizes before signing.',
     icon: <FileBadge className="h-5 w-5" />,
-    accent: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300',
+    accent: 'bg-emerald-500/15 text-emerald-300',
     task: 'CERTIFICATE',
   },
 ]
@@ -186,17 +186,17 @@ export function AiHubView() {
       <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
               <LayoutGrid className="h-6 w-6" />
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight sm:text-2xl">AI Hub — Document Generation Center</h1>
-              <p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
+              <p className="mt-0.5 max-w-2xl text-sm text-slate-400">
                 Generate documents through fixed AI templates. Every output is advisory — review before saving or dispensing.
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300">
             <ShieldAlert className="h-3 w-3" /> Advisory Templates
           </Badge>
         </div>
@@ -223,14 +223,14 @@ export function AiHubView() {
                 {card.icon}
               </div>
               <h3 className="mt-3 text-base font-semibold">{card.title}</h3>
-              <p className="mt-1 flex-1 text-sm text-muted-foreground">{card.description}</p>
+              <p className="mt-1 flex-1 text-sm text-slate-400">{card.description}</p>
               <div className="mt-3 flex items-center justify-between">
-                <span className="text-[11px] text-muted-foreground">
-                  Task: <code className="rounded bg-muted px-1 py-0.5">{card.task}</code>
+                <span className="text-[11px] text-slate-400">
+                  Task: <code className="rounded bg-white/5 px-1 py-0.5">{card.task}</code>
                 </span>
               </div>
               <Button
-                className="mt-4 w-full gap-1.5"
+                className="btn-cyan mt-4 w-full gap-1.5"
                 onClick={() => setActiveDoc(card.type)}
                 disabled={loadingPatients}
               >
@@ -244,7 +244,7 @@ export function AiHubView() {
       </div>
 
       {/* Footer note */}
-      <p className="px-1 text-center text-[11px] text-muted-foreground">
+      <p className="px-1 text-center text-[11px] text-slate-400">
         AI Hub · {user?.name ?? 'User'} · All outputs include the mandatory disclaimer · Privacy firewall enforced server-side
       </p>
 
@@ -407,7 +407,7 @@ function DocWorkflow({
 
   return (
     <>
-      <DialogHeader className="border-b border-border/40 px-5 py-4">
+      <DialogHeader className="border-b border-white/10 px-5 py-4">
         <div className="flex items-center gap-3">
           <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', card.accent)}>
             {card.icon}
@@ -425,7 +425,7 @@ function DocWorkflow({
         <div className="space-y-4 px-5 py-4">
           {/* Patient selection */}
           <div>
-            <Label className="text-xs font-medium text-muted-foreground">Patient</Label>
+            <Label className="text-xs font-medium text-slate-400">Patient</Label>
             <div className="mt-1.5">
               <PatientPickerInline
                 patients={patients}
@@ -437,8 +437,8 @@ function DocWorkflow({
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                 <TriageBadge level={(patient.vitals[0]?.triageLevel as TriageLevel) ?? null} />
                 <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
-                <span className="text-muted-foreground">· {patient.age ?? '?'}y {patient.gender.toLowerCase()}</span>
-                <span className="text-muted-foreground">· {patient.chiefComplaint ?? 'No complaint'}</span>
+                <span className="text-slate-400">· {patient.age ?? '?'}y {patient.gender.toLowerCase()}</span>
+                <span className="text-slate-400">· {patient.chiefComplaint ?? 'No complaint'}</span>
               </div>
             )}
           </div>
@@ -446,10 +446,10 @@ function DocWorkflow({
           {/* Firewall check */}
           {patient && !firewallOk && (
             <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-xs">
-              <p className="flex items-center gap-1.5 font-semibold text-red-700 dark:text-red-300">
+              <p className="flex items-center gap-1.5 font-semibold text-red-400">
                 <ShieldAlert className="h-3.5 w-3.5" /> AI disabled for this patient
               </p>
-              <p className="mt-1 text-muted-foreground">
+              <p className="mt-1 text-slate-400">
                 patient_summary_v1 not generated. Complete Step 8 of the Patient Entry Wizard first.
               </p>
             </div>
@@ -468,7 +468,7 @@ function DocWorkflow({
           {/* Generate button */}
           {firewallOk && (
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={runAi} disabled={loading} className="gap-1.5">
+              <Button onClick={runAi} disabled={loading} className="btn-cyan gap-1.5">
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {result ? 'Regenerate' : 'Generate with AI'}
               </Button>
@@ -477,7 +477,7 @@ function DocWorkflow({
                   <RefreshCw className="h-3.5 w-3.5" /> Clear
                 </Button>
               )}
-              <span className="ml-auto text-[11px] text-muted-foreground">
+              <span className="ml-auto text-[11px] text-slate-400">
                 {loading ? '4-tier failover active…' : 'Non-blocking'}
               </span>
             </div>
@@ -485,11 +485,11 @@ function DocWorkflow({
 
           {/* Loading inline */}
           {loading && !result && (
-            <div className="flex items-center justify-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-10">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <div className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-10">
+              <Loader2 className="h-5 w-5 animate-spin text-cyan-300" />
               <div>
                 <p className="text-sm font-medium">Generating {card.title.toLowerCase()}…</p>
-                <p className="text-[11px] text-muted-foreground">AI is processing the de-identified summary</p>
+                <p className="text-[11px] text-slate-400">AI is processing the de-identified summary</p>
               </div>
             </div>
           )}
@@ -507,14 +507,14 @@ function DocWorkflow({
 
                 {/* Save actions */}
                 {(docType === 'INVOICE' || docType === 'LAB_REPORT') && (
-                  <div className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 px-3 py-2.5">
+                  <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
                     <div className="text-xs">
                       <p className="font-medium">
                         {saved
                           ? (docType === 'INVOICE' ? 'Invoice saved to patient record' : 'Lab report saved to patient record')
                           : (docType === 'INVOICE' ? 'Save this invoice to the patient record?' : 'Save this lab report?')}
                       </p>
-                      <p className="text-muted-foreground">
+                      <p className="text-slate-400">
                         {saved ? 'You can view it under Patient Detail → Invoices / Lab Reports.' : 'Records the generated document with the AI advisory attached.'}
                       </p>
                     </div>
@@ -522,7 +522,7 @@ function DocWorkflow({
                       size="sm"
                       onClick={docType === 'INVOICE' ? saveInvoice : saveLabReport}
                       disabled={saving || saved}
-                      className="gap-1.5"
+                      className="btn-cyan gap-1.5"
                     >
                       {saved ? <CheckCircle2 className="h-3.5 w-3.5" /> : saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                       {saved ? 'Saved' : saving ? 'Saving…' : 'Save'}
@@ -554,7 +554,7 @@ function LabReportConfig({
     <GlassPanel variant="subtle" className="p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-[200px] flex-1">
-          <Label className="text-xs font-medium text-muted-foreground">Report Type</Label>
+          <Label className="text-xs font-medium text-slate-400">Report Type</Label>
           <Select value={reportType} onValueChange={onReportTypeChange}>
             <SelectTrigger className="mt-1.5">
               <SelectValue />
@@ -576,7 +576,7 @@ function LabReportConfig({
           <div key={t.name} className="space-y-1">
             <Label className="text-xs">
               {t.name}
-              <span className="ml-1 text-[10px] text-muted-foreground">
+              <span className="ml-1 text-[10px] text-slate-400">
                 {t.unit && `(${t.unit})`} · ref {t.refRange}
               </span>
             </Label>
@@ -591,7 +591,7 @@ function LabReportConfig({
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <p className="mt-2 text-[11px] text-slate-400">
         Leave blank if not measured. AI will analyze entered values against reference ranges.
       </p>
     </GlassPanel>
@@ -613,7 +613,7 @@ function ResultDisplay({
       <GlassPanel variant="subtle" className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+            <p className="text-xs font-medium text-slate-400">AI Summary</p>
             <p className="mt-1 text-sm">{o.summary}</p>
           </div>
           <div className="flex flex-col items-end gap-1.5">
@@ -623,7 +623,7 @@ function ResultDisplay({
         </div>
         <div className="mt-3">
           <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Confidence</span>
+            <span className="text-slate-400">Confidence</span>
             <span className="font-semibold tabular-nums">{Math.round(o.confidence * 100)}%</span>
           </div>
           <ConfidenceMeter value={o.confidence} />
@@ -633,15 +633,15 @@ function ResultDisplay({
       {/* Invoice */}
       {docType === 'INVOICE' && (
         <GlassPanel className="overflow-hidden p-0">
-          <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Line Items · {o.line_items?.length ?? 0}
             </p>
           </div>
           <div className="overflow-x-auto orio-scroll">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="border-b text-left text-xs text-slate-400">
                   <th className="px-4 py-2 font-medium">Description</th>
                   <th className="px-4 py-2 text-right font-medium">Qty</th>
                   <th className="px-4 py-2 text-right font-medium">Unit Price</th>
@@ -650,7 +650,7 @@ function ResultDisplay({
               </thead>
               <tbody>
                 {o.line_items?.map((it, i) => (
-                  <tr key={i} className="border-b border-border/40 last:border-0">
+                  <tr key={i} className="border-b border-white/10 last:border-0">
                     <td className="px-4 py-2.5">{it.description}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{it.quantity}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{formatCurrency(it.unit_price)}</td>
@@ -660,20 +660,20 @@ function ResultDisplay({
                   </tr>
                 ))}
                 {(!o.line_items || o.line_items.length === 0) && (
-                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-muted-foreground">No items.</td></tr>
+                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-slate-400">No items.</td></tr>
                 )}
               </tbody>
               {o.line_items && o.line_items.length > 0 && (
                 <tfoot>
-                  <tr className="border-t bg-muted/20">
-                    <td colSpan={3} className="px-4 py-2.5 text-right text-xs text-muted-foreground">
+                  <tr className="border-t bg-white/5">
+                    <td colSpan={3} className="px-4 py-2.5 text-right text-xs text-slate-400">
                       Subtotal · Tax (5%) · Total
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm font-bold tabular-nums">
                       {formatCurrency(
                         o.line_items.reduce((s, it) => s + (it.quantity ?? 0) * (it.unit_price ?? 0), 0)
                       )}
-                      <span className="block text-[11px] font-normal text-muted-foreground">
+                      <span className="block text-[11px] font-normal text-slate-400">
                         +5% tax on save
                       </span>
                     </td>
@@ -688,15 +688,15 @@ function ResultDisplay({
       {/* Lab report */}
       {docType === 'LAB_REPORT' && (
         <GlassPanel className="overflow-hidden p-0">
-          <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {LAB_REPORT_LABELS[labReportType]} · AI Parameter Analysis
             </p>
           </div>
           <div className="overflow-x-auto orio-scroll">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="border-b text-left text-xs text-slate-400">
                   <th className="px-4 py-2 font-medium">Parameter</th>
                   <th className="px-4 py-2 font-medium">Value</th>
                   <th className="px-4 py-2 font-medium">Status</th>
@@ -705,27 +705,27 @@ function ResultDisplay({
               </thead>
               <tbody>
                 {o.parameters_analysis?.map((p, i) => (
-                  <tr key={i} className="border-b border-border/40 last:border-0">
+                  <tr key={i} className="border-b border-white/10 last:border-0">
                     <td className="px-4 py-2.5 font-medium">{p.parameter}</td>
                     <td className="px-4 py-2.5 tabular-nums">{p.value}</td>
                     <td className="px-4 py-2.5"><ParamStatus status={p.status} /></td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{p.note}</td>
+                    <td className="px-4 py-2.5 text-slate-400">{p.note}</td>
                   </tr>
                 ))}
                 {(!o.parameters_analysis || o.parameters_analysis.length === 0) && (
-                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-muted-foreground">No analysis.</td></tr>
+                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-slate-400">No analysis.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
           {o.advice && o.advice.length > 0 && (
-            <div className="border-t border-border/40 px-4 py-3">
-              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <div className="border-t border-white/10 px-4 py-3">
+              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
                 <Activity className="h-3.5 w-3.5" /> Advisory
               </p>
               <ul className="space-y-1">
                 {o.advice.map((a, i) => (
-                  <li key={i} className="text-xs text-foreground/90">• {a}</li>
+                  <li key={i} className="text-xs text-slate-100/90">• {a}</li>
                 ))}
               </ul>
             </div>
@@ -736,15 +736,15 @@ function ResultDisplay({
       {/* Prescription */}
       {docType === 'PRESCRIPTION' && (
         <GlassPanel className="overflow-hidden p-0">
-          <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Rx · {o.prescription?.length ?? 0} item(s)
             </p>
           </div>
           <div className="overflow-x-auto orio-scroll">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="border-b text-left text-xs text-slate-400">
                   <th className="px-4 py-2 font-medium">Drug</th>
                   <th className="px-4 py-2 font-medium">Dosage</th>
                   <th className="px-4 py-2 font-medium">Frequency</th>
@@ -754,28 +754,28 @@ function ResultDisplay({
               </thead>
               <tbody>
                 {o.prescription?.map((rx, i) => (
-                  <tr key={i} className="border-b border-border/40 last:border-0">
+                  <tr key={i} className="border-b border-white/10 last:border-0">
                     <td className="px-4 py-2.5 font-medium">{rx.drug}</td>
                     <td className="px-4 py-2.5 tabular-nums">{rx.dosage}</td>
                     <td className="px-4 py-2.5">{rx.frequency}</td>
                     <td className="px-4 py-2.5">{rx.duration}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{rx.notes ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-slate-400">{rx.notes ?? '—'}</td>
                   </tr>
                 ))}
                 {(!o.prescription || o.prescription.length === 0) && (
-                  <tr><td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">No prescription items.</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-sm text-slate-400">No prescription items.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
           {o.advice && o.advice.length > 0 && (
-            <div className="border-t border-border/40 px-4 py-3">
-              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <div className="border-t border-white/10 px-4 py-3">
+              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
                 <Activity className="h-3.5 w-3.5" /> Patient Advice
               </p>
               <ul className="space-y-1">
                 {o.advice.map((a, i) => (
-                  <li key={i} className="text-xs text-foreground/90">• {a}</li>
+                  <li key={i} className="text-xs text-slate-100/90">• {a}</li>
                 ))}
               </ul>
             </div>
@@ -786,18 +786,18 @@ function ResultDisplay({
       {/* Certificate */}
       {docType === 'CERTIFICATE' && (
         <GlassPanel className="p-5">
-          <div className="flex items-center gap-2 border-b border-border/40 pb-3">
-            <FileBadge className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+            <FileBadge className="h-5 w-5 text-cyan-300" />
             <p className="text-sm font-semibold">Medical Certificate — Draft</p>
             <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
               <AlertTriangle className="h-2.5 w-2.5" /> Requires doctor signature
             </Badge>
           </div>
           <div className="mt-3 space-y-3 text-sm">
-            <p className="text-foreground/90">{o.summary}</p>
+            <p className="text-slate-100/90">{o.summary}</p>
             {o.treatment_plan && o.treatment_plan.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recommended Rest / Recovery</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Recommended Rest / Recovery</p>
                 <ul className="mt-1 space-y-1">
                   {o.treatment_plan.map((p, i) => (
                     <li key={i} className="text-sm">• {p}</li>
@@ -807,7 +807,7 @@ function ResultDisplay({
             )}
             {o.advice && o.advice.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Certificate Recommendation</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Certificate Recommendation</p>
                 <ul className="mt-1 space-y-1">
                   {o.advice.map((a, i) => (
                     <li key={i} className="text-sm">• {a}</li>
@@ -822,12 +822,12 @@ function ResultDisplay({
       {/* Limitations */}
       {o.limitations && o.limitations.length > 0 && (
         <GlassPanel variant="subtle" className="p-3">
-          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
             <AlertTriangle className="h-3.5 w-3.5" /> AI Limitations
           </p>
           <ul className="space-y-1">
             {o.limitations.map((it, i) => (
-              <li key={i} className="text-xs text-muted-foreground">• {it}</li>
+              <li key={i} className="text-xs text-slate-400">• {it}</li>
             ))}
           </ul>
         </GlassPanel>
@@ -866,17 +866,17 @@ function PatientPickerInline({
         {selected ? (
           <span className="flex items-center gap-2 truncate">
             <span className="truncate">{selected.fullName}</span>
-            <span className="text-[11px] text-muted-foreground">· {selected.localId}</span>
+            <span className="text-[11px] text-slate-400">· {selected.localId}</span>
           </span>
         ) : (
-          <span className="text-muted-foreground">Select patient…</span>
+          <span className="text-slate-400">Select patient…</span>
         )}
         <ChevronRight className={cn('h-4 w-4 opacity-50 transition-transform', open && 'rotate-90')} />
       </Button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover p-2 shadow-lg">
+          <div className="absolute z-50 mt-1 w-full rounded-lg border border-white/10 bg-popover p-2 shadow-lg">
             <Input
               autoFocus
               placeholder="Search patient…"
@@ -886,20 +886,20 @@ function PatientPickerInline({
             />
             <div className="mt-2 max-h-60 overflow-y-auto orio-scroll">
               {filtered.length === 0 ? (
-                <p className="py-4 text-center text-xs text-muted-foreground">No patient found.</p>
+                <p className="py-4 text-center text-xs text-slate-400">No patient found.</p>
               ) : (
                 filtered.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => { onChange(p.id); setOpen(false); setSearch('') }}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/5"
                   >
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-[10px] font-semibold text-cyan-300">
                       {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{p.fullName}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">
+                      <p className="truncate text-[11px] text-slate-400">
                         {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? 'No complaint'}
                       </p>
                     </div>
@@ -921,10 +921,10 @@ function PatientPickerInline({
 
 function TierBadge({ tier }: { tier: number }) {
   const cls = tier === 1
-    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
     : tier === 2
-      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
-      : 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30'
+      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+      : 'bg-red-500/15 text-red-400 border-red-500/30'
   return (
     <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', cls)}>
       <Sparkles className="h-2.5 w-2.5" />
@@ -935,9 +935,9 @@ function TierBadge({ tier }: { tier: number }) {
 
 function ParamStatus({ status }: { status: string }) {
   const map: Record<string, string> = {
-    normal: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
-    low: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
-    high: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
+    normal: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+    low: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    high: 'bg-red-500/15 text-red-400 border-red-500/30',
   }
   return (
     <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase', map[status] ?? map.normal)}>
@@ -955,12 +955,12 @@ function MiniStat({
   accent?: 'default' | 'emerald' | 'red'
 }) {
   const cls = accent === 'emerald'
-    ? 'text-emerald-600 dark:text-emerald-300'
+    ? 'text-emerald-400'
     : accent === 'red'
-      ? 'text-red-600 dark:text-red-300'
-      : 'text-muted-foreground'
+      ? 'text-red-400'
+      : 'text-slate-400'
   return (
-    <div className="rounded-lg border border-border/40 bg-muted/20 px-3 py-2">
+    <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
       <p className={cn('flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide', cls)}>
         {icon} {label}
       </p>

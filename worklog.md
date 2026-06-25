@@ -138,3 +138,158 @@ Stage Summary:
 - Fixed the `addAllergy is not defined` runtime crash in the Patient Entry Wizard
 - The wizard now works through Step 6 (Allergies) without crashing
 - Both screenshots' errors (the dev overlay and the production crash page) are resolved
+
+---
+Task ID: THEME-2
+Agent: Theme Update Subagent (Z.ai Code)
+Task: Update 5 view components (patients-list, patient-detail, appointments, lab-reports, invoices) to new Muslim Hands dark-navy + cyan glow glassmorphism theme — visual/CSS only, no logic changes
+
+Work Log:
+- Read worklog.md to understand prior work (Task 1 foundation, Task 7 AI views, Task 5 wizard, FINAL build, FIX-1 bugfix); confirmed all 5 target files exist in src/components/orioster/views/
+- Read full contents of all 5 target files to inventory every old color class
+- Confirmed globals.css exposes .btn-cyan, .glow-cyan, .glow-cyan-strong, .glass, .glass-strong, .mh-scroll, etc. as advertised in the brief
+- Applied the color mapping systematically to each file (text-muted-foreground → text-slate-400, bg-muted → bg-white/5, border-border → border-white/10, bg-primary → bg-cyan-500/15, text-primary → text-cyan-300/400, emerald-700 dark:emerald-300 → emerald-300, amber-700 dark:amber-300 → amber-300, red-700 dark:red-300 → red-400, text-foreground → text-slate-100, primary action buttons → btn-cyan class)
+
+File-by-file:
+1. **patients-list.tsx** — Add Patient button → btn-cyan; table thead → bg-white/5 border-white/10 text-slate-400; row hover → hover:bg-white/5; row border → border-white/10; avatar → bg-cyan-500/15 text-cyan-300; AI results sparkles icon → text-cyan-400; StatusPill status config DRAFT→bg-white/5 text-slate-400, IN_PROGRESS→amber-300, COMPLETED→emerald-300, REVIEWED→cyan-300; loading spinner → border-cyan-500; empty-state icon container → bg-white/5 text-slate-500; bottom hint text → text-slate-500; body text → text-slate-100/400
+2. **patient-detail.tsx** (largest, 1049 lines) —
+   - "No patient selected" and "Patient not found" fallbacks → btn-cyan, text-slate-100/400/500
+   - Header avatar → bg-cyan-500/15 text-cyan-300; name → text-slate-100; meta → text-slate-400; Firewall Active badge → cyan instead of emerald; AI Disabled badge → text-red-400; Notify badge → border-white/10 text-slate-300
+   - Loading spinner → border-cyan-500
+   - patient_summary_v1 box: present state now uses `border border-cyan-500/25 bg-cyan-500/5 glow-cyan` with `text-cyan-300` header (replacing old emerald); absent state uses `text-red-300` header, red-400 icon, btn-cyan CTA button
+   - Open Patient Entry Wizard button → btn-cyan
+   - Clinical Snapshot labels → text-slate-400, values → text-slate-100; Past History chips → border-white/10 text-slate-300
+   - Demographic sub-component → bg-white/5 text-slate-400 / text-slate-100
+   - AllergyList badges → text-red-300 (was text-red-700 dark: red-300)
+   - MedicationList items → text-slate-100
+   - Vitals table → border-white/10, slate-400 headers, slate-100 values
+   - AI Result card icon box → bg-cyan-500/15 text-cyan-300; Tier badge → border-cyan-500/30 text-cyan-300; recommendation badge → border-white/10 text-slate-300; RichBlock header → text-cyan-300 with white/10 border, white/5 bg
+   - Diagnosis items → bg-white/5 with cyan-300 probability %
+   - Prescription table → border-white/10, slate headers, slate-100 drug names
+   - Lab Analysis rows → bg-white/5; status pills → emerald-300/amber-300/red-400
+   - Lab report card icon → bg-cyan-500/15 text-cyan-300 (was violet-500/15)
+   - Lab parameter table → border-white/10, slate-400/100 colors
+   - AI Feedback box → border-cyan-500/20 bg-cyan-500/5 with text-cyan-300 header (was amber border)
+   - Invoice icon box → text-amber-300 (was text-amber-600 dark:amber-300)
+   - Invoice item rows → slate-100 description, cyan-300 amount emphasis; totals → Total in cyan-300
+   - Appointment doctor avatar → bg-cyan-500/15 text-cyan-300
+   - StatusBadge / LabStatus / InvoiceStatus / ApptStatus helper maps: DRAFT→white/5+slate-400, IN_PROGRESS→amber-300, SCHEDULED→cyan-300, COMPLETED→emerald-300 (was primary), CANCELLED→red-400, PAID→emerald-300, PENDING→amber-300, normal→emerald-300, low→amber-300, high→red-400
+   - EmptyState icon container → bg-white/5 text-slate-500
+3. **appointments.tsx** — Schedule button → btn-cyan; full Schedule Appointment button → btn-cyan; STATUS_CONFIG IN_PROGRESS→cyan-300, COMPLETED→emerald-300, CANCELLED→red-400 (was red-700 dark:red-300); status filter chips → active = border-cyan-500/30 bg-cyan-500/15 text-cyan-300, inactive = border-white/10 bg-white/5 text-slate-300 hover:bg-white/10; loading spinner → border-cyan-500; empty-state icon → bg-white/5 text-slate-500; appointment card patient name → text-slate-100 hover:text-cyan-300; chief complaint → text-slate-400; date row → text-slate-100; doctor name → text-slate-300; Start/Complete outline buttons → border-white/10 text-slate-300 hover:bg-white/5; Cancel → text-red-400; View → text-slate-300 hover:text-slate-100
+4. **lab-reports.tsx** — New Report button → btn-cyan; Generate Report & Analyze button → btn-cyan; parameter template box → border-white/10 bg-white/5 text-slate-400 labels, text-slate-100 names; AI advisory preview box → border-cyan-500/20 bg-cyan-500/5 text-cyan-400 icon (was bg-primary/5 text-primary); loading spinner → border-cyan-500; empty-state → bg-white/5 text-slate-500; report card header icon → text-cyan-400 (was text-primary), title → text-slate-100; patient link → text-slate-300 hover:text-cyan-300; isNormal pill → emerald-300/amber-300; table → border-white/10; status badges (N/L/H) → emerald-300/amber-300/red-400 (was -600 colors); AI Advisory Analysis box → border-cyan-500/20 bg-cyan-500/5 text-cyan-300 header (was border-primary/20 bg-primary/5 text-primary); meta row → text-slate-400
+5. **invoices.tsx** — New Invoice button → btn-cyan; Generate Invoice button → btn-cyan; Line Items panel → border-white/10 bg-white/5 text-slate-400 labels; Add button → text-slate-300 hover:text-slate-100; remove icon → text-red-400 (was text-red-500); totals block → border-white/10 dividers, slate-100 values, Total in cyan-300; AI checkbox label → border-cyan-500/20 bg-cyan-500/5 text-cyan-400 sparkles icon, accent-cyan-500 checkbox (was accent-primary); loading spinner → border-cyan-500; empty-state → bg-white/5 text-slate-500; invoice card header Receipt icon → text-cyan-400 (was text-primary); invoice no → text-slate-100; patient link → text-slate-300 hover:text-cyan-300; status badges → emerald-300 / red-400 / amber-300 (was -700 dark:-300); line-item desc → text-slate-200; amounts → text-slate-400; Subtotal/Tax → slate-100; Total → cyan-300 emphasis; date row → text-slate-400; Print button → text-slate-300 hover:text-slate-100
+
+Verification:
+- `bun run lint` → exit 0, no errors, no warnings ✓
+- `tail -20 /home/z/my-project/dev.log` → only "✓ Compiled in Nms" messages, no errors ✓
+- Grep audit of all 5 files for remaining old-theme tokens (text-muted-foreground, bg-muted, text-foreground, border-border, emerald-700/amber-700/red-700, emerald-600/amber-600/red-600, text-red-500, bg-primary, text-primary, violet-500/600, bg-sidebar, text-sidebar) → all 5 files report "clean" ✓
+- No imports were added or removed; no logic / state / API calls touched
+- All 5 components remain 'use client' with identical prop signatures
+
+Stage Summary:
+- 5 view components successfully re-themed to the Muslim Hands cyan-on-dark-navy glassmorphism design system
+- Primary actions (Add Patient, Schedule, New Report, New Invoice, Schedule Appointment, Generate Report & Analyze, Generate Invoice) all use the btn-cyan class
+- patient_summary_v1 privacy firewall box now uses cyan glow border (replacing old emerald) to match the AI accent color in the new theme
+- AI Advisory Analysis blocks across lab-reports and patient-detail use consistent border-cyan-500/20 bg-cyan-500/5 with text-cyan-300 headers
+- All status pill maps converted to dark-mode text colors (emerald-300 / amber-300 / cyan-300 / red-400) — no more `dark:` prefix redundancy
+- App is ready for preview in the Preview Panel
+
+---
+Task ID: THEME-1
+Agent: Theme Migration Agent (Z.ai Code)
+Task: Update 3 view components (patient-entry-wizard.tsx, orio-ai.tsx, ai-hub.tsx) to Muslim Hands cyan-on-dark-navy theme
+
+Work Log:
+- Read worklog.md to understand prior agent work (Task IDs 1, 7, 5, FINAL, FIX-1)
+- Read all 3 target files in full (patient-entry-wizard = 2530 lines, orio-ai = 989 lines, ai-hub = 979 lines)
+- Read globals.css and ui-primitives.tsx to confirm the new dark navy + cyan glow design system already in place
+- Color mapping applied across all 3 files (per spec):
+  • bg-primary → bg-cyan-500/15 (or bg-cyan-400 for dot indicators / bg-cyan-500 for filled badges)
+  • text-primary → text-cyan-300
+  • bg-primary text-primary-foreground (buttons) → btn-cyan class
+  • border-primary bg-primary text-primary-foreground (step badges) → border-cyan-400 bg-cyan-500 text-cyan-950
+  • border-primary/* → border-cyan-500/30 (or /50 for ring effects)
+  • bg-muted, bg-muted/* → bg-white/5 (or bg-white/10 for stronger)
+  • text-muted-foreground → text-slate-400 (and /50 → text-slate-500)
+  • border-border, border-border/* → border-white/10
+  • text-foreground/* → text-slate-100/* (text-slate-100/90, /80 preserved)
+  • bg-accent/15 text-accent-foreground → bg-emerald-500/15 text-emerald-300
+  • Stripped all `dark:text-*` variants (app is permanently dark — the dark: prefix is now redundant)
+  • Converted text-emerald-700 → text-emerald-300, text-emerald-600 → text-emerald-400
+  • Converted text-amber-700 → text-amber-300, text-amber-600 → text-amber-400, text-amber-800 → text-amber-300
+  • Converted text-red-700 → text-red-400, text-red-600 → text-red-400
+  • Converted text-violet-700 → text-violet-300, text-violet-600 → text-violet-400
+
+- Specific visual updates:
+  • patient-entry-wizard.tsx:
+    - Step 8 (Privacy Firewall) indicator: emerald → cyan with `glow-cyan` effect
+    - Step 8 firewall banner: emerald border/bg → cyan border/bg with `glow-cyan`
+    - Step 8 firewall "Complete" badge: emerald → cyan
+    - Step 8 spinner: emerald → cyan-300
+    - Step 8 firewall lock icon: emerald → cyan-300
+    - Step 9 (AI) indicator: kept violet (per spec "cyan/violet glow"), added `glow-cyan` to banner
+    - Stepper progress rail: current = filled cyan (border-cyan-400 bg-cyan-500 text-cyan-950), done = emerald, locked/future = white/10
+    - All "Continue" buttons and final "Submit & Complete" button: added `btn-cyan` class
+    - PAST_HISTORY tag button (active non-None): cyan filled (border-cyan-400 bg-cyan-500 text-cyan-950)
+    - Checklist auto-verified items kept emerald (success state); manually-checked items use cyan border
+  • orio-ai.tsx:
+    - Privacy Firewall status panel badge (active): emerald → cyan with `glow-cyan` and border-cyan-500/30
+    - Privacy Firewall status panel badge (blocked): kept red (per spec "amber/red when blocked") with text-red-400
+    - Firewall summary box (when active): emerald → cyan with `glow-cyan`
+    - "Select as confirmed" diagnosis button: btn-cyan applied conditionally when confirmed
+    - Diagnosis number circle: isConfirmed ? bg-cyan-500 text-cyan-950 : bg-cyan-500/15 text-cyan-300
+    - Probability bars: bg-primary → bg-cyan-500 (gradient cyan look for top-3 ranked diagnoses)
+    - TreatmentCard accents: primary=cyan, accent=emerald, amber=amber-300, red=red-400 (all dark-mode safe)
+    - TierBadge: stripped dark: variants, kept emerald/amber/red status colors
+    - Run AI / Generate Plan / Generate Rx / Open Patient Entry Wizard buttons: all `btn-cyan`
+  • ai-hub.tsx:
+    - 4 DOC_CARDS accents (per spec "subtle different accent on dark glass"):
+      • INVOICE → amber (bg-amber-500/15 text-amber-300)
+      • LAB_REPORT → violet (bg-violet-500/15 text-violet-300)
+      • PRESCRIPTION → cyan (bg-cyan-500/15 text-cyan-300) — was primary
+      • CERTIFICATE → emerald (bg-emerald-500/15 text-emerald-300)
+    - Generate / Generate with AI / Save buttons: all `btn-cyan`
+    - TierBadge and ParamStatus: stripped dark: variants, dark-mode-safe colors
+    - MiniStat emerald/red accents: text-emerald-300/text-red-300 (dark mode)
+    - bg-popover kept as-is (popover CSS var is already dark navy in globals.css)
+
+- All 3 files verified clean (0 matches for old color tokens): bg-primary, text-primary, bg-muted, text-muted-foreground, border-border, text-foreground, dark:text-*, bg-accent, text-accent-foreground, text-*-700, text-*-600, text-amber-800
+- Ran `bun run lint` → 0 errors, 0 warnings (exit 0)
+- Checked `/home/z/my-project/dev.log` → all "✓ Compiled in XXms" entries, no compile errors
+
+Stage Summary:
+- All 3 ORIOSTER view components successfully migrated to Muslim Hands cyan-on-dark-navy theme
+- No component logic, API calls, state management, or data flow was changed
+- File structure unchanged — only CSS classes, color values, and visual styling were updated
+- Privacy firewall visual identity (Step 8) now uses cyan glow instead of emerald (per spec)
+- AI step (Step 9) keeps violet identity with cyan glow halo
+- All primary action buttons (Continue, Submit, Run AI, Generate, Save) use `btn-cyan` class
+- Status badges (emerald/amber/red) preserved for semantic meaning (success/warning/critical) but dark-mode text colors fixed (-300/-400 variants)
+- Code lints clean, dev server compiles clean — ready for visual verification in Preview Panel
+
+---
+Task ID: THEME-FINAL
+Agent: Main (Z.ai Code)
+Task: Redesign entire UI to match Muslim Hands AI-Powered HMS design language
+
+Work Log:
+- Analyzed 3 uploaded files: DESIGN.md (Warp-inspired warm-dark spec), README.md (pointer), App - UI design.pdf (Muslim Hands official design language v1.0)
+- The App UI design PDF defines the target aesthetic: dark navy humanitarian command center with cyan branding
+- Rewrote globals.css with 5-layer background system (deep navy + mesh gradient + Islamic geometric pattern + glass surfaces + AI lighting), Muslim Hands cyan palette (#36B8D8 primary, #73E8FF glow, #061425 background, #0A1B31 surface), glassmorphism specs (24px blur, cyan-tinted borders), KPI gradient cards (kpi-cyan/amber/turquoise/critical with breathing animation), glow shadows, logo breathing glow, staggered load animations, shadcn dark overrides
+- Updated layout.tsx: Inter + JetBrains Mono fonts, Muslim Hands metadata, forced dark theme
+- Rewrote ui-primitives.tsx: all components use cyan-on-dark-navy colors, KPI StatCard with gradient+glow variants, status badges with dark-mode text colors
+- Rewrote app-shell.tsx: TOP NAV BAR (not sidebar) — logo with breathing glow (left), global search "Search patients, beneficiaries, programs, cases, reports..." (center), notifications/AI assistant/profile/sign-out icons (right), horizontal nav tabs below
+- Rewrote login-screen.tsx: MUSLIM HANDS branding, moving cyan light rays, ORIO AI orb decoration, "Assalamu Alaikum" toast greeting
+- Rewrote dashboard.tsx: 4 KPI gradient cards (Patients Served=cyan, Active Cases=amber, Beneficiaries=turquoise, AI Alerts=critical), "Assalamu Alaikum" greeting, "Here is today's humanitarian health operations overview" subtitle, Humanitarian Trends area chart + Triage Distribution donut, staggered load animation
+- Delegated 3 view updates (wizard, orio-ai, ai-hub) to subagent THEME-1 — all completed with cyan-on-dark theme, btn-cyan buttons, glow effects
+- Delegated 5 view updates (patients-list, patient-detail, appointments, lab-reports, invoices) to subagent THEME-2 — all completed with dark-mode color tokens
+- Verified with Agent Browser: login screen (dark navy + cyan + glass), dashboard (KPI gradient cards with glow, top nav with search, Assalamu Alaikum greeting), patients list (dark table with cyan accents), wizard (dark stepper with cyan highlights), Orio AI (dark with cyan privacy firewall) — all match the Muslim Hands design spec
+- Zero browser errors, sticky footer verified, lint clean
+
+Stage Summary:
+- Complete UI redesign from light teal to Muslim Hands dark navy + cyan glow glassmorphism
+- All 10 view files updated to the new theme
+- Top navigation bar replaces left sidebar per design spec
+- KPI cards with gradient fills + breathing glow animations
+- "Assalamu Alaikum" humanitarian greeting throughout
+- Design matches: "futuristic UN humanitarian command center" aesthetic

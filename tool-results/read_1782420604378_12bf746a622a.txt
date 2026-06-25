@@ -1,0 +1,989 @@
+     1→     1→'use client'
+     2→     2→
+     3→     3→// ─────────────────────────────────────────────────────────────────────────────
+     4→     4→// ORIOSTER — Orio AI Module (Clinical Decision Support)
+     5→     5→// AI is ADVISORY ONLY. The doctor always has the final say.
+     6→     6→// AI receives ONLY de-identified patient_summary_v1 (privacy firewall).
+     7→     7→// AI is HARD-DISABLED until Step 8 (Local Summary) is complete.
+     8→     8→// ─────────────────────────────────────────────────────────────────────────────
+     9→     9→
+    10→    10→import { useCallback, useEffect, useMemo, useState } from 'react'
+    11→    11→import { motion, AnimatePresence } from 'framer-motion'
+    12→    12→import { toast } from 'sonner'
+    13→    13→import {
+    14→    14→  Sparkles, ShieldAlert, Stethoscope, Pill, ClipboardList, RefreshCw,
+    15→    15→  CheckCircle2, Loader2, ChevronRight, Lock, Printer,
+    16→    16→  AlertTriangle, Brain, Activity, UserPlus, Wand2,
+    17→    17→} from 'lucide-react'
+    18→    18→
+    19→    19→import { useAppStore } from '@/lib/store'
+    20→    20→import {
+    21→    21→  GlassPanel, SectionHeader, TriageBadge, RiskBadge, DisclaimerChip,
+    22→    22→  ConfidenceMeter, SyncStatusBadge,
+    23→    23→} from '@/components/orioster/ui-primitives'
+    24→    24→import { Button } from '@/components/ui/button'
+    25→    25→import { Badge } from '@/components/ui/badge'
+    26→    26→import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+    27→    27→import {
+    28→    28→  Popover, PopoverTrigger, PopoverContent,
+    29→    29→} from '@/components/ui/popover'
+    30→    30→import {
+    31→    31→  Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem,
+    32→    32→} from '@/components/ui/command'
+    33→    33→import { Separator } from '@/components/ui/separator'
+    34→    34→import { cn } from '@/lib/utils'
+    35→    35→import {
+    36→    36→  MANDATORY_DISCLAIMER, type AiTaskType, type AiOutput, type RiskLevel,
+    37→    37→  type TriageLevel, AI_TASK_LABELS,
+    38→    38→} from '@/lib/types'
+    39→    39→
+    40→    40→// ── Types ────────────────────────────────────────────────────────────────────
+    41→    41→interface PickerPatient {
+    42→    42→  id: string
+    43→    43→  localId: string
+    44→    44→  fullName: string
+    45→    45→  gender: string
+    46→    46→  age: number | null
+    47→    47→  chiefComplaint: string | null
+    48→    48→  localSummary: string | null
+    49→    49→  status: string
+    50→    50→  syncStatus: string
+    51→    51→  vitals: Array<{ triageLevel: string | null }>
+    52→    52→}
+    53→    53→
+    54→    54→interface AiCallResult {
+    55→    55→  output: AiOutput
+    56→    56→  tierUsed: number
+    57→    57→  modelUsed: string
+    58→    58→  disclaimer: string
+    59→    59→  createdAt?: string
+    60→    60→}
+    61→    61→
+    62→    62→type Cache = Partial<Record<AiTaskType, AiCallResult>>
+    63→    63→
+    64→    64→// ── Main View ────────────────────────────────────────────────────────────────
+    65→    65→export function OrioAiView() {
+    66→    66→  const { user, setView, setActivePatient, activePatientId } = useAppStore()
+    67→    67→  const [patients, setPatients] = useState<PickerPatient[]>([])
+    68→    68→  const [loadingPatients, setLoadingPatients] = useState(true)
+    69→    69→  const [selectedId, setSelectedId] = useState<string | null>(activePatientId)
+    70→    70→  const [cache, setCache] = useState<Cache>({})
+    71→    71→  const [loadingTask, setLoadingTask] = useState<AiTaskType | null>(null)
+    72→    72→  const [confirmedDx, setConfirmedDx] = useState<string | null>(null)
+    73→    73→  const [tab, setTab] = useState<'DIAGNOSIS' | 'TREATMENT' | 'RX_GENERATION'>('DIAGNOSIS')
+    74→    74→
+    75→    75→  // Fetch patient list once
+    76→    76→  useEffect(() => {
+    77→    77→    let cancelled = false
+    78→    78→    fetch('/api/patients?limit=200')
+    79→    79→      .then((r) => r.json())
+    80→    80→      .then((d) => {
+    81→    81→        if (cancelled) return
+    82→    82→        const list: PickerPatient[] = (d.patients ?? []).map((p: PickerPatient) => ({
+    83→    83→          id: p.id, localId: p.localId, fullName: p.fullName, gender: p.gender,
+    84→    84→          age: p.age, chiefComplaint: p.chiefComplaint, localSummary: p.localSummary,
+    85→    85→          status: p.status, syncStatus: p.syncStatus, vitals: p.vitals ?? [],
+    86→    86→        }))
+    87→    87→        setPatients(list)
+    88→    88→        // If store has an active patient that exists in the list, keep it
+    89→    89→        if (activePatientId && list.some((p) => p.id === activePatientId)) {
+    90→    90→          setSelectedId(activePatientId)
+    91→    91→        } else if (list.length > 0) {
+    92→    92→          setSelectedId(list[0].id)
+    93→    93→        }
+    94→    94→      })
+    95→    95→      .catch(() => toast.error('Failed to load patients'))
+    96→    96→      .finally(() => { if (!cancelled) setLoadingPatients(false) })
+    97→    97→    return () => { cancelled = true }
+    98→    98→  }, [activePatientId])
+    99→    99→
+   100→   100→  const selected = useMemo(
+   101→   101→    () => patients.find((p) => p.id === selectedId) ?? null,
+   102→   102→    [patients, selectedId]
+   103→   103→  )
+   104→   104→
+   105→   105→  // Reset cache + confirmed diagnosis when patient changes
+   106→   106→  const onSelectPatient = useCallback((id: string) => {
+   107→   107→    setSelectedId(id)
+   108→   108→    setActivePatient(id)
+   109→   109→    setCache({})
+   110→   110→    setConfirmedDx(null)
+   111→   111→    setTab('DIAGNOSIS')
+   112→   112→  }, [setActivePatient])
+   113→   113→
+   114→   114→  const firewallOk = !!selected?.localSummary
+   115→   115→
+   116→   116→  // ── AI call helper ──
+   117→   117→  const runTask = useCallback(
+   118→   118→    async (task: AiTaskType, customSummary?: string) => {
+   119→   119→      if (!selectedId) {
+   120→   120→        toast.error('Select a patient first')
+   121→   121→        return
+   122→   122→      }
+   123→   123→      // Optimistic: set loading marker
+   124→   124→      setLoadingTask(task)
+   125→   125→      try {
+   126→   126→        const res = await fetch('/api/orio-ai', {
+   127→   127→          method: 'POST',
+   128→   128→          headers: { 'Content-Type': 'application/json' },
+   129→   129→          body: JSON.stringify({ patientId: selectedId, task, customSummary }),
+   130→   130→        })
+   131→   131→        const data = await res.json()
+   132→   132→        if (data.blocked) {
+   133→   133→          toast.error('AI is disabled — patient_summary_v1 not generated.')
+   134→   134→          setCache((c) => ({ ...c, [task]: undefined }))
+   135→   135→          return
+   136→   136→        }
+   137→   137→        if (!res.ok) {
+   138→   138→          throw new Error(data.error ?? 'AI request failed')
+   139→   139→        }
+   140→   140→        const result: AiCallResult = {
+   141→   141→          output: data.output,
+   142→   142→          tierUsed: data.tierUsed,
+   143→   143→          modelUsed: data.modelUsed,
+   144→   144→          disclaimer: data.disclaimer ?? MANDATORY_DISCLAIMER,
+   145→   145→          createdAt: new Date().toISOString(),
+   146→   146→        }
+   147→   147→        setCache((c) => ({ ...c, [task]: result }))
+   148→   148→        toast.success(`${AI_TASK_LABELS[task]} generated — Tier ${result.tierUsed}`)
+   149→   149→      } catch (e) {
+   150→   150→        setCache((c) => ({ ...c, [task]: undefined }))
+   151→   151→        toast.error((e as Error).message)
+   152→   152→      } finally {
+   153→   153→        setLoadingTask(null)
+   154→   154→      }
+   155→   155→    },
+   156→   156→    [selectedId]
+   157→   157→  )
+   158→   158→
+   159→   159→  if (loadingPatients) {
+   160→   160→    return (
+   161→   161→      <div className="flex items-center justify-center py-24">
+   162→   162→        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+   163→   163→      </div>
+   164→   164→    )
+   165→   165→  }
+   166→   166→
+   167→   167→  return (
+   168→   168→    <div className="space-y-5">
+   169→   169→      {/* Header */}
+   170→   170→      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
+   171→   171→        <div className="flex flex-wrap items-start justify-between gap-4">
+   172→   172→          <div className="flex items-start gap-3">
+   173→   173→            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+   174→   174→              <Sparkles className="h-6 w-6" />
+   175→   175→            </div>
+   176→   176→            <div>
+   177→   177→              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Orio AI — Clinical Decision Support</h1>
+   178→   178→              <p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
+   179→   179→                Advisory-only clinical intelligence. AI receives only de-identified{' '}
+   180→   180→                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">patient_summary_v1</code>. The doctor always has the final say.
+   181→   181→              </p>
+   182→   182→            </div>
+   183→   183→          </div>
+   184→   184→          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+   185→   185→            <ShieldAlert className="h-3 w-3" /> Advisory Mode
+   186→   186→          </Badge>
+   187→   187→        </div>
+   188→   188→      </GlassPanel>
+   189→   189→
+   190→   190→      {/* Patient selector + firewall status */}
+   191→   191→      <div className="grid gap-4 lg:grid-cols-3">
+   192→   192→        <GlassPanel className="p-4 sm:p-5 lg:col-span-1">
+   193→   193→          <SectionHeader title="Select Patient" subtitle="Choose a patient for AI assistance" />
+   194→   194→          <div className="mt-3">
+   195→   195→            <PatientPicker
+   196→   196→              patients={patients}
+   197→   197→              value={selectedId}
+   198→   198→              onChange={onSelectPatient}
+   199→   199→            />
+   200→   200→          </div>
+   201→   201→          {selected && (
+   202→   202→            <div className="mt-4 space-y-2.5 border-t border-border/40 pt-3">
+   203→   203→              <Row label="Local ID" value={selected.localId} />
+   204→   204→              <Row label="Age / Sex" value={`${selected.age ?? '?'}y · ${selected.gender.toLowerCase()}`} />
+   205→   205→              <Row label="Status" value={selected.status} />
+   206→   206→              <div className="flex items-center justify-between">
+   207→   207→                <span className="text-xs text-muted-foreground">Triage</span>
+   208→   208→                <TriageBadge level={(selected.vitals[0]?.triageLevel as TriageLevel) ?? null} />
+   209→   209→              </div>
+   210→   210→              <div className="flex items-center justify-between">
+   211→   211→                <span className="text-xs text-muted-foreground">Sync</span>
+   212→   212→                <SyncStatusBadge status={selected.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
+   213→   213→              </div>
+   214→   214→              <div>
+   215→   215→                <span className="text-xs text-muted-foreground">Chief Complaint</span>
+   216→   216→                <p className="mt-0.5 text-sm font-medium">{selected.chiefComplaint ?? '—'}</p>
+   217→   217→              </div>
+   218→   218→            </div>
+   219→   219→          )}
+   220→   220→        </GlassPanel>
+   221→   221→
+   222→   222→        {/* Firewall status panel */}
+   223→   223→        <GlassPanel className="p-4 sm:p-5 lg:col-span-2">
+   224→   224→          <SectionHeader
+   225→   225→            title="Privacy Firewall"
+   226→   226→            subtitle="AI is hard-disabled until patient_summary_v1 exists"
+   227→   227→            action={
+   228→   228→              firewallOk ? (
+   229→   229→                <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+   230→   230→                  <Lock className="h-3 w-3" /> Firewall Active
+   231→   231→                </Badge>
+   232→   232→              ) : (
+   233→   233→                <Badge variant="outline" className="gap-1.5 border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300">
+   234→   234→                  <ShieldAlert className="h-3 w-3" /> AI Disabled
+   235→   235→                </Badge>
+   236→   236→              )
+   237→   237→            }
+   238→   238→          />
+   239→   239→          {!selected ? (
+   240→   240→            <p className="mt-4 text-sm text-muted-foreground">Select a patient to view firewall status.</p>
+   241→   241→          ) : !firewallOk ? (
+   242→   242→            <FirewallWarning onGoToWizard={() => {
+   243→   243→              setActivePatient(selected.id)
+   244→   244→              setView('patient-entry')
+   245→   245→            }} />
+   246→   246→          ) : (
+   247→   247→            <div className="mt-4 space-y-3">
+   248→   248→              <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3">
+   249→   249→                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+   250→   250→                  <CheckCircle2 className="h-4 w-4" />
+   251→   251→                  patient_summary_v1 generated
+   252→   252→                </div>
+   253→   253→                <p className="mt-1.5 line-clamp-3 text-[11px] leading-relaxed text-muted-foreground">
+   254→   254→                  {selected.localSummary}
+   255→   255→                </p>
+   256→   256→              </div>
+   257→   257→              <p className="text-[11px] text-muted-foreground">
+   258→   258→                Raw PHI never leaves the device. The AI receives only the compressed, de-identified summary above. Outputs are advisory and must be reviewed by a human professional.
+   259→   259→              </p>
+   260→   260→            </div>
+   261→   261→          )}
+   262→   262→        </GlassPanel>
+   263→   263→      </div>
+   264→   264→
+   265→   265→      {/* AI task panel — only when firewall active */}
+   266→   266→      {selected && firewallOk && (
+   267→   267→        <GlassPanel className="p-4 sm:p-5">
+   268→   268→          <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+   269→   269→            <div className="overflow-x-auto orio-scroll">
+   270→   270→              <TabsList className="grid w-full min-w-[560px] grid-cols-3">
+   271→   271→                <TabsTrigger value="DIAGNOSIS" className="gap-1.5">
+   272→   272→                  <Stethoscope className="h-3.5 w-3.5" /> Differential Diagnosis
+   273→   273→                </TabsTrigger>
+   274→   274→                <TabsTrigger value="TREATMENT" className="gap-1.5">
+   275→   275→                  <ClipboardList className="h-3.5 w-3.5" /> Treatment Plan
+   276→   276→                </TabsTrigger>
+   277→   277→                <TabsTrigger value="RX_GENERATION" className="gap-1.5">
+   278→   278→                  <Pill className="h-3.5 w-3.5" /> Prescription
+   279→   279→                </TabsTrigger>
+   280→   280→              </TabsList>
+   281→   281→            </div>
+   282→   282→
+   283→   283→            <TabsContent value="DIAGNOSIS" className="mt-4">
+   284→   284→              <DiagnosisPanel
+   285→   285→                loading={loadingTask === 'DIAGNOSIS'}
+   286→   286→                result={cache.DIAGNOSIS}
+   287→   287→                confirmedDx={confirmedDx}
+   288→   288→                onRun={() => runTask('DIAGNOSIS')}
+   289→   289→                onConfirm={setConfirmedDx}
+   290→   290→                onReset={() => { setCache((c) => ({ ...c, DIAGNOSIS: undefined })); setConfirmedDx(null) }}
+   291→   291→              />
+   292→   292→            </TabsContent>
+   293→   293→
+   294→   294→            <TabsContent value="TREATMENT" className="mt-4">
+   295→   295→              <TreatmentPanel
+   296→   296→                loading={loadingTask === 'TREATMENT'}
+   297→   297→                result={cache.TREATMENT}
+   298→   298→                confirmedDx={confirmedDx}
+   299→   299→                onRun={() => runTask('TREATMENT', confirmedDx ? `Confirmed diagnosis (doctor-selected): ${confirmedDx}` : undefined)}
+   300→   300→                onReset={() => setCache((c) => ({ ...c, TREATMENT: undefined }))}
+   301→   301→                onGoToDiagnosis={() => setTab('DIAGNOSIS')}
+   302→   302→              />
+   303→   303→            </TabsContent>
+   304→   304→
+   305→   305→            <TabsContent value="RX_GENERATION" className="mt-4">
+   306→   306→              <PrescriptionPanel
+   307→   307→                loading={loadingTask === 'RX_GENERATION'}
+   308→   308→                result={cache.RX_GENERATION}
+   309→   309→                onRun={() => runTask('RX_GENERATION', confirmedDx ? `Confirmed diagnosis: ${confirmedDx}` : undefined)}
+   310→   310→                onReset={() => setCache((c) => ({ ...c, RX_GENERATION: undefined }))}
+   311→   311→              />
+   312→   312→            </TabsContent>
+   313→   313→          </Tabs>
+   314→   314→        </GlassPanel>
+   315→   315→      )}
+   316→   316→
+   317→   317→      {/* Footer note */}
+   318→   318→      <p className="px-1 text-center text-[11px] text-muted-foreground">
+   319→   319→        ORIO AI · 4-tier failover · Privacy firewall enforced server-side · {user?.name ?? 'Doctor'}
+   320→   320→      </p>
+   321→   321→    </div>
+   322→   322→  )
+   323→   323→}
+   324→   324→
+   325→   325→// ── Firewall warning ─────────────────────────────────────────────────────────
+   326→   326→function FirewallWarning({ onGoToWizard }: { onGoToWizard: () => void }) {
+   327→   327→  return (
+   328→   328→    <motion.div
+   329→   329→      initial={{ opacity: 0, y: 6 }}
+   330→   330→      animate={{ opacity: 1, y: 0 }}
+   331→   331→      className="mt-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4"
+   332→   332→    >
+   333→   333→      <div className="flex items-start gap-3">
+   334→   334→        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-600 dark:text-red-400">
+   335→   335→          <ShieldAlert className="h-5 w-5" />
+   336→   336→        </div>
+   337→   337→        <div className="flex-1">
+   338→   338→          <p className="font-semibold text-red-700 dark:text-red-300">AI is disabled — patient_summary_v1 not generated</p>
+   339→   339→          <p className="mt-1 text-sm text-muted-foreground">
+   340→   340→            Complete the Patient Entry Wizard through <span className="font-medium">Step 8 (Local Summary)</span> first.
+   341→   341→            The privacy firewall requires a de-identified summary before any AI task can run.
+   342→   342→          </p>
+   343→   343→          <Button size="sm" className="mt-3 gap-1.5" onClick={onGoToWizard}>
+   344→   344→            <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
+   345→   345→          </Button>
+   346→   346→        </div>
+   347→   347→      </div>
+   348→   348→    </motion.div>
+   349→   349→  )
+   350→   350→}
+   351→   351→
+   352→   352→// ── Patient Picker (combobox) ────────────────────────────────────────────────
+   353→   353→function PatientPicker({
+   354→   354→  patients, value, onChange,
+   355→   355→}: {
+   356→   356→  patients: PickerPatient[]
+   357→   357→  value: string | null
+   358→   358→  onChange: (id: string) => void
+   359→   359→}) {
+   360→   360→  const [open, setOpen] = useState(false)
+   361→   361→  const [search, setSearch] = useState('')
+   362→   362→  const selected = patients.find((p) => p.id === value) ?? null
+   363→   363→  const filtered = patients.filter((p) => {
+   364→   364→    const q = search.toLowerCase()
+   365→   365→    return (
+   366→   366→      p.fullName.toLowerCase().includes(q) ||
+   367→   367→      p.localId.toLowerCase().includes(q) ||
+   368→   368→      (p.chiefComplaint ?? '').toLowerCase().includes(q)
+   369→   369→    )
+   370→   370→  })
+   371→   371→
+   372→   372→  return (
+   373→   373→    <Popover open={open} onOpenChange={setOpen}>
+   374→   374→      <PopoverTrigger asChild>
+   375→   375→        <Button
+   376→   376→          variant="outline"
+   377→   377→          role="combobox"
+   378→   378→          aria-expanded={open}
+   379→   379→          className="w-full justify-between font-normal"
+   380→   380→        >
+   381→   381→          {selected ? (
+   382→   382→            <span className="flex items-center gap-2 truncate">
+   383→   383→              <span className="truncate">{selected.fullName}</span>
+   384→   384→              <span className="text-[11px] text-muted-foreground">· {selected.localId}</span>
+   385→   385→            </span>
+   386→   386→          ) : (
+   387→   387→            <span className="text-muted-foreground">Search patient…</span>
+   388→   388→          )}
+   389→   389→          <ChevronRight className={cn('h-4 w-4 opacity-50 transition-transform', open && 'rotate-90')} />
+   390→   390→        </Button>
+   391→   391→      </PopoverTrigger>
+   392→   392→      <PopoverContent className="w-[380px] p-0" align="start">
+   393→   393→        <Command shouldFilter={false}>
+   394→   394→          <CommandInput
+   395→   395→            placeholder="Search by name, ID, or complaint…"
+   396→   396→            value={search}
+   397→   397→            onValueChange={setSearch}
+   398→   398→          />
+   399→   399→          <CommandList className="max-h-72">
+   400→   400→            <CommandEmpty>No patient found.</CommandEmpty>
+   401→   401→            <CommandGroup>
+   402→   402→              {filtered.map((p) => {
+   403→   403→                const hasSummary = !!p.localSummary
+   404→   404→                return (
+   405→   405→                  <CommandItem
+   406→   406→                    key={p.id}
+   407→   407→                    value={p.id}
+   408→   408→                    onSelect={() => { onChange(p.id); setOpen(false); setSearch('') }}
+   409→   409→                    className="gap-2"
+   410→   410→                  >
+   411→   411→                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+   412→   412→                      {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
+   413→   413→                    </div>
+   414→   414→                    <div className="min-w-0 flex-1">
+   415→   415→                      <p className="truncate text-sm font-medium">{p.fullName}</p>
+   416→   416→                      <p className="truncate text-[11px] text-muted-foreground">
+   417→   417→                        {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? 'No complaint'}
+   418→   418→                      </p>
+   419→   419→                    </div>
+   420→   420→                    {hasSummary ? (
+   421→   421→                      <Lock className="h-3.5 w-3.5 text-emerald-500" />
+   422→   422→                    ) : (
+   423→   423→                      <ShieldAlert className="h-3.5 w-3.5 text-red-500" />
+   424→   424→                    )}
+   425→   425→                  </CommandItem>
+   426→   426→                )
+   427→   427→              })}
+   428→   428→            </CommandGroup>
+   429→   429→          </CommandList>
+   430→   430→        </Command>
+   431→   431→      </PopoverContent>
+   432→   432→    </Popover>
+   433→   433→  )
+   434→   434→}
+   435→   435→
+   436→   436→// ── Diagnosis Panel ──────────────────────────────────────────────────────────
+   437→   437→function DiagnosisPanel({
+   438→   438→  loading, result, confirmedDx, onRun, onConfirm, onReset,
+   439→   439→}: {
+   440→   440→  loading: boolean
+   441→   441→  result: AiCallResult | undefined
+   442→   442→  confirmedDx: string | null
+   443→   443→  onRun: () => void
+   444→   444→  onConfirm: (dx: string) => void
+   445→   445→  onReset: () => void
+   446→   446→}) {
+   447→   447→  return (
+   448→   448→    <div className="space-y-4">
+   449→   449→      <div className="flex flex-wrap items-center justify-between gap-3">
+   450→   450→        <div>
+   451→   451→          <h3 className="text-base font-semibold">Differential Diagnosis</h3>
+   452→   452→          <p className="text-sm text-muted-foreground">
+   453→   453→            AI suggests the 3 most probable diagnoses from the de-identified summary.
+   454→   454→          </p>
+   455→   455→        </div>
+   456→   456→        <div className="flex gap-2">
+   457→   457→          {result && (
+   458→   458→            <Button variant="outline" size="sm" onClick={onReset} className="gap-1.5">
+   459→   459→              <RefreshCw className="h-3.5 w-3.5" /> Clear
+   460→   460→            </Button>
+   461→   461→          )}
+   462→   462→          <Button size="sm" onClick={onRun} disabled={loading} className="gap-1.5">
+   463→   463→            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+   464→   464→            {result ? 'Regenerate' : 'Run AI'}
+   465→   465→          </Button>
+   466→   466→        </div>
+   467→   467→      </div>
+   468→   468→
+   469→   469→      <AnimatePresence mode="wait">
+   470→   470→        {loading && !result ? (
+   471→   471→          <InlineLoader label="Running differential diagnosis through the privacy firewall…" key="loader" />
+   472→   472→        ) : result ? (
+   473→   473→          <motion.div
+   474→   474→            key="result"
+   475→   475→            initial={{ opacity: 0, y: 6 }}
+   476→   476→            animate={{ opacity: 1, y: 0 }}
+   477→   477→            exit={{ opacity: 0 }}
+   478→   478→            className="space-y-4"
+   479→   479→          >
+   480→   480→            {/* Summary header */}
+   481→   481→            <GlassPanel variant="subtle" className="p-4">
+   482→   482→              <div className="flex flex-wrap items-start justify-between gap-3">
+   483→   483→                <div className="min-w-0 flex-1">
+   484→   484→                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+   485→   485→                  <p className="mt-1 text-sm">{result.output.summary}</p>
+   486→   486→                </div>
+   487→   487→                <div className="flex flex-col items-end gap-1.5">
+   488→   488→                  <RiskBadge level={(result.output.risk_level as RiskLevel) ?? 'moderate'} />
+   489→   489→                  <TierBadge tier={result.tierUsed} model={result.modelUsed} />
+   490→   490→                </div>
+   491→   491→              </div>
+   492→   492→              <div className="mt-3">
+   493→   493→                <div className="mb-1 flex items-center justify-between text-xs">
+   494→   494→                  <span className="text-muted-foreground">Overall confidence</span>
+   495→   495→                  <span className="font-semibold tabular-nums">{Math.round(result.output.confidence * 100)}%</span>
+   496→   496→                </div>
+   497→   497→                <ConfidenceMeter value={result.output.confidence} />
+   498→   498→              </div>
+   499→   499→            </GlassPanel>
+   500→   500→
+   501→   501→            {/* Diagnosis list */}
+   502→   502→            <div className="space-y-3">
+   503→   503→              {result.output.diagnosis?.slice(0, 3).map((d, i) => {
+   504→   504→                const isConfirmed = confirmedDx === d.condition
+   505→   505→                return (
+   506→   506→                  <GlassPanel
+   507→   507→                    key={i}
+   508→   508→                    variant={isConfirmed ? 'strong' : 'default'}
+   509→   509→                    className={cn('p-4 transition-all', isConfirmed && 'ring-2 ring-primary/50')}
+   510→   510→                  >
+   511→   511→                    <div className="flex flex-wrap items-start justify-between gap-3">
+   512→   512→                      <div className="flex items-start gap-3">
+   513→   513→                        <div className={cn(
+   514→   514→                          'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold',
+   515→   515→                          isConfirmed ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
+   516→   516→                        )}>
+   517→   517→                          {i + 1}
+   518→   518→                        </div>
+   519→   519→                        <div>
+   520→   520→                          <p className="font-semibold leading-tight">{d.condition}</p>
+   521→   521→                          <p className="mt-1 text-sm text-muted-foreground">{d.reasoning}</p>
+   522→   522→                        </div>
+   523→   523→                      </div>
+   524→   524→                      <div className="flex flex-col items-end gap-2">
+   525→   525→                        <span className="text-sm font-bold tabular-nums">{Math.round(d.probability * 100)}%</span>
+   526→   526→                        <Button
+   527→   527→                          size="sm"
+   528→   528→                          variant={isConfirmed ? 'default' : 'outline'}
+   529→   529→                          className="gap-1.5"
+   530→   530→                          onClick={() => onConfirm(d.condition)}
+   531→   531→                        >
+   532→   532→                          {isConfirmed ? (
+   533→   533→                            <><CheckCircle2 className="h-3.5 w-3.5" /> Confirmed</>
+   534→   534→                          ) : (
+   535→   535→                            <><Stethoscope className="h-3.5 w-3.5" /> Select as confirmed</>
+   536→   536→                          )}
+   537→   537→                        </Button>
+   538→   538→                      </div>
+   539→   539→                    </div>
+   540→   540→                    <div className="mt-3">
+   541→   541→                      <ProbabilityBar value={d.probability} rank={i} />
+   542→   542→                    </div>
+   543→   543→                  </GlassPanel>
+   544→   544→                )
+   545→   545→              })}
+   546→   546→            </div>
+   547→   547→
+   548→   548→            {/* Limitations */}
+   549→   549→            {result.output.limitations?.length > 0 && (
+   550→   550→              <LimitationsList items={result.output.limitations} />
+   551→   551→            )}
+   552→   552→
+   553→   553→            <DisclaimerChip text={result.disclaimer} />
+   554→   554→
+   555→   555→            {confirmedDx && (
+   556→   556→              <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+   557→   557→                <CheckCircle2 className="h-4 w-4 text-primary" />
+   558→   558→                <span>
+   559→   559→                  <span className="font-semibold">{confirmedDx}</span> marked as confirmed diagnosis.
+   560→   560→                  Proceed to <span className="font-medium">Treatment Plan</span> to generate a plan based on this selection.
+   561→   561→                </span>
+   562→   562→              </div>
+   563→   563→            )}
+   564→   564→          </motion.div>
+   565→   565→        ) : (
+   566→   566→          <EmptyTask
+   567→   567→            icon={<Brain className="h-7 w-7" />}
+   568→   568→            title="No diagnosis generated yet"
+   569→   569→            description="Click Run AI to generate a differential diagnosis. The output is advisory and must be reviewed by a human professional."
+   570→   570→          />
+   571→   571→        )}
+   572→   572→      </AnimatePresence>
+   573→   573→    </div>
+   574→   574→  )
+   575→   575→}
+   576→   576→
+   577→   577→// ── Treatment Panel ──────────────────────────────────────────────────────────
+   578→   578→function TreatmentPanel({
+   579→   579→  loading, result, confirmedDx, onRun, onReset, onGoToDiagnosis,
+   580→   580→}: {
+   581→   581→  loading: boolean
+   582→   582→  result: AiCallResult | undefined
+   583→   583→  confirmedDx: string | null
+   584→   584→  onRun: () => void
+   585→   585→  onReset: () => void
+   586→   586→  onGoToDiagnosis: () => void
+   587→   587→}) {
+   588→   588→  return (
+   589→   589→    <div className="space-y-4">
+   590→   590→      <div className="flex flex-wrap items-center justify-between gap-3">
+   591→   591→        <div>
+   592→   592→          <h3 className="text-base font-semibold">Treatment Plan</h3>
+   593→   593→          <p className="text-sm text-muted-foreground">
+   594→   594→            Requires a confirmed diagnosis selected from the differential step.
+   595→   595→          </p>
+   596→   596→        </div>
+   597→   597→        <div className="flex gap-2">
+   598→   598→          {result && (
+   599→   599→            <Button variant="outline" size="sm" onClick={onReset} className="gap-1.5">
+   600→   600→              <RefreshCw className="h-3.5 w-3.5" /> Clear
+   601→   601→            </Button>
+   602→   602→          )}
+   603→   603→          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="gap-1.5">
+   604→   604→            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ClipboardList className="h-3.5 w-3.5" />}
+   605→   605→            {result ? 'Regenerate' : 'Generate Plan'}
+   606→   606→          </Button>
+   607→   607→        </div>
+   608→   608→      </div>
+   609→   609→
+   610→   610→      {/* Confirmed diagnosis chip */}
+   611→   611→      {confirmedDx ? (
+   612→   612→        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs">
+   613→   613→          <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+   614→   614→          <span className="text-muted-foreground">Confirmed diagnosis:</span>
+   615→   615→          <span className="font-semibold">{confirmedDx}</span>
+   616→   616→        </div>
+   617→   617→      ) : (
+   618→   618→        <GlassPanel variant="subtle" className="flex flex-wrap items-center justify-between gap-3 p-4">
+   619→   619→          <div className="flex items-start gap-3">
+   620→   620→            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
+   621→   621→            <div>
+   622→   622→              <p className="text-sm font-medium">No confirmed diagnosis selected</p>
+   623→   623→              <p className="text-xs text-muted-foreground">
+   624→   624→                Run Differential Diagnosis and select a condition first. The treatment plan is contextual to the doctor-confirmed diagnosis.
+   625→   625→              </p>
+   626→   626→            </div>
+   627→   627→          </div>
+   628→   628→          <Button size="sm" variant="outline" onClick={onGoToDiagnosis} className="gap-1.5">
+   629→   629→            <Stethoscope className="h-3.5 w-3.5" /> Go to Diagnosis
+   630→   630→          </Button>
+   631→   631→        </GlassPanel>
+   632→   632→      )}
+   633→   633→
+   634→   634→      <AnimatePresence mode="wait">
+   635→   635→        {loading && !result ? (
+   636→   636→          <InlineLoader label="Generating treatment plan with complications & interactions…" key="loader" />
+   637→   637→        ) : result ? (
+   638→   638→          <motion.div
+   639→   639→            key="result"
+   640→   640→            initial={{ opacity: 0, y: 6 }}
+   641→   641→            animate={{ opacity: 1, y: 0 }}
+   642→   642→            exit={{ opacity: 0 }}
+   643→   643→            className="space-y-4"
+   644→   644→          >
+   645→   645→            {/* Summary */}
+   646→   646→            <GlassPanel variant="subtle" className="p-4">
+   647→   647→              <div className="flex flex-wrap items-start justify-between gap-3">
+   648→   648→                <div className="min-w-0 flex-1">
+   649→   649→                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+   650→   650→                  <p className="mt-1 text-sm">{result.output.summary}</p>
+   651→   651→                </div>
+   652→   652→                <div className="flex flex-col items-end gap-1.5">
+   653→   653→                  <RiskBadge level={(result.output.risk_level as RiskLevel) ?? 'moderate'} />
+   654→   654→                  <TierBadge tier={result.tierUsed} model={result.modelUsed} />
+   655→   655→                </div>
+   656→   656→              </div>
+   657→   657→              <div className="mt-3">
+   658→   658→                <div className="mb-1 flex items-center justify-between text-xs">
+   659→   659→                  <span className="text-muted-foreground">Overall confidence</span>
+   660→   660→                  <span className="font-semibold tabular-nums">{Math.round(result.output.confidence * 100)}%</span>
+   661→   661→                </div>
+   662→   662→                <ConfidenceMeter value={result.output.confidence} />
+   663→   663→              </div>
+   664→   664→            </GlassPanel>
+   665→   665→
+   666→   666→            <div className="grid gap-4 md:grid-cols-2">
+   667→   667→              <TreatmentCard
+   668→   668→                icon={<ClipboardList className="h-4 w-4" />}
+   669→   669→                title="Treatment Steps"
+   670→   670→                items={result.output.treatment_plan}
+   671→   671→                accent="primary"
+   672→   672→              />
+   673→   673→              <TreatmentCard
+   674→   674→                icon={<Activity className="h-4 w-4" />}
+   675→   675→                title="Patient Advice"
+   676→   676→                items={result.output.advice}
+   677→   677→                accent="accent"
+   678→   678→              />
+   679→   679→              <TreatmentCard
+   680→   680→                icon={<AlertTriangle className="h-4 w-4" />}
+   681→   681→                title="Possible Complications"
+   682→   682→                items={result.output.complications}
+   683→   683→                accent="amber"
+   684→   684→              />
+   685→   685→              <TreatmentCard
+   686→   686→                icon={<ShieldAlert className="h-4 w-4" />}
+   687→   687→                title="Drug Interactions"
+   688→   688→                items={result.output.interactions}
+   689→   689→                accent="red"
+   690→   690→              />
+   691→   691→            </div>
+   692→   692→
+   693→   693→            {result.output.limitations?.length > 0 && (
+   694→   694→              <LimitationsList items={result.output.limitations} />
+   695→   695→            )}
+   696→   696→
+   697→   697→            <DisclaimerChip text={result.disclaimer} />
+   698→   698→          </motion.div>
+   699→   699→        ) : (
+   700→   700→          <EmptyTask
+   701→   701→            icon={<ClipboardList className="h-7 w-7" />}
+   702→   702→            title="No treatment plan yet"
+   703→   703→            description={confirmedDx
+   704→   704→              ? 'Click Generate Plan to produce an advisory treatment plan, complications, and drug interactions for the confirmed diagnosis.'
+   705→   705→              : 'Select a confirmed diagnosis first to enable treatment plan generation.'
+   706→   706→            }
+   707→   707→          />
+   708→   708→        )}
+   709→   709→      </AnimatePresence>
+   710→   710→    </div>
+   711→   711→  )
+   712→   712→}
+   713→   713→
+   714→   714→// ── Prescription Panel ───────────────────────────────────────────────────────
+   715→   715→function PrescriptionPanel({
+   716→   716→  loading, result, onRun, onReset,
+   717→   717→}: {
+   718→   718→  loading: boolean
+   719→   719→  result: AiCallResult | undefined
+   720→   720→  onRun: () => void
+   721→   721→  onReset: () => void
+   722→   722→}) {
+   723→   723→  return (
+   724→   724→    <div className="space-y-4">
+   725→   725→      <div className="flex flex-wrap items-center justify-between gap-3">
+   726→   726→        <div>
+   727→   727→          <h3 className="text-base font-semibold">Prescription Generation</h3>
+   728→   728→          <p className="text-sm text-muted-foreground">
+   729→   729→            AI generates an advisory prescription reviewed against allergies and current medications.
+   730→   730→          </p>
+   731→   731→        </div>
+   732→   732→        <div className="flex gap-2">
+   733→   733→          {result && (
+   734→   734→            <>
+   735→   735→              <Button variant="outline" size="sm" onClick={onReset} className="gap-1.5">
+   736→   736→                <RefreshCw className="h-3.5 w-3.5" /> Clear
+   737→   737→              </Button>
+   738→   738→              <Button
+   739→   739→                variant="outline"
+   740→   740→                size="sm"
+   741→   741→                onClick={() => { toast.success('Prescription sent to print queue'); window.print() }}
+   742→   742→                className="gap-1.5"
+   743→   743→              >
+   744→   744→                <Printer className="h-3.5 w-3.5" /> Print
+   745→   745→              </Button>
+   746→   746→            </>
+   747→   747→          )}
+   748→   748→          <Button size="sm" onClick={onRun} disabled={loading} className="gap-1.5">
+   749→   749→            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pill className="h-3.5 w-3.5" />}
+   750→   750→            {result ? 'Regenerate' : 'Generate Rx'}
+   751→   751→          </Button>
+   752→   752→        </div>
+   753→   753→      </div>
+   754→   754→
+   755→   755→      <AnimatePresence mode="wait">
+   756→   756→        {loading && !result ? (
+   757→   757→          <InlineLoader label="Generating prescription with allergy & interaction checks…" key="loader" />
+   758→   758→        ) : result ? (
+   759→   759→          <motion.div
+   760→   760→            key="result"
+   761→   761→            initial={{ opacity: 0, y: 6 }}
+   762→   762→            animate={{ opacity: 1, y: 0 }}
+   763→   763→            exit={{ opacity: 0 }}
+   764→   764→            className="space-y-4"
+   765→   765→          >
+   766→   766→            {/* Summary */}
+   767→   767→            <GlassPanel variant="subtle" className="p-4">
+   768→   768→              <div className="flex flex-wrap items-start justify-between gap-3">
+   769→   769→                <div className="min-w-0 flex-1">
+   770→   770→                  <p className="text-xs font-medium text-muted-foreground">AI Summary</p>
+   771→   771→                  <p className="mt-1 text-sm">{result.output.summary}</p>
+   772→   772→                </div>
+   773→   773→                <div className="flex flex-col items-end gap-1.5">
+   774→   774→                  <RiskBadge level={(result.output.risk_level as RiskLevel) ?? 'moderate'} />
+   775→   775→                  <TierBadge tier={result.tierUsed} model={result.modelUsed} />
+   776→   776→                </div>
+   777→   777→              </div>
+   778→   778→              <div className="mt-3">
+   779→   779→                <div className="mb-1 flex items-center justify-between text-xs">
+   780→   780→                  <span className="text-muted-foreground">Overall confidence</span>
+   781→   781→                  <span className="font-semibold tabular-nums">{Math.round(result.output.confidence * 100)}%</span>
+   782→   782→                </div>
+   783→   783→                <ConfidenceMeter value={result.output.confidence} />
+   784→   784→              </div>
+   785→   785→            </GlassPanel>
+   786→   786→
+   787→   787→            {/* Prescription table */}
+   788→   788→            <GlassPanel className="overflow-hidden p-0">
+   789→   789→              <div className="border-b border-border/40 bg-muted/30 px-4 py-2.5">
+   790→   790→                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+   791→   791→                  Rx · {result.output.prescription?.length ?? 0} item(s)
+   792→   792→                </p>
+   793→   793→              </div>
+   794→   794→              <div className="overflow-x-auto orio-scroll">
+   795→   795→                <table className="w-full text-sm">
+   796→   796→                  <thead>
+   797→   797→                    <tr className="border-b text-left text-xs text-muted-foreground">
+   798→   798→                      <th className="px-4 py-2 font-medium">Drug</th>
+   799→   799→                      <th className="px-4 py-2 font-medium">Dosage</th>
+   800→   800→                      <th className="px-4 py-2 font-medium">Frequency</th>
+   801→   801→                      <th className="px-4 py-2 font-medium">Duration</th>
+   802→   802→                      <th className="px-4 py-2 font-medium">Notes</th>
+   803→   803→                    </tr>
+   804→   804→                  </thead>
+   805→   805→                  <tbody>
+   806→   806→                    {result.output.prescription?.map((rx, i) => (
+   807→   807→                      <tr key={i} className="border-b border-border/40 last:border-0">
+   808→   808→                        <td className="px-4 py-2.5 font-medium">{rx.drug}</td>
+   809→   809→                        <td className="px-4 py-2.5 tabular-nums">{rx.dosage}</td>
+   810→   810→                        <td className="px-4 py-2.5">{rx.frequency}</td>
+   811→   811→                        <td className="px-4 py-2.5">{rx.duration}</td>
+   812→   812→                        <td className="px-4 py-2.5 text-muted-foreground">{rx.notes ?? '—'}</td>
+   813→   813→                      </tr>
+   814→   814→                    ))}
+   815→   815→                    {(!result.output.prescription || result.output.prescription.length === 0) && (
+   816→   816→                      <tr>
+   817→   817→                        <td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">
+   818→   818→                          No prescription items returned.
+   819→   819→                        </td>
+   820→   820→                      </tr>
+   821→   821→                    )}
+   822→   822→                  </tbody>
+   823→   823→                </table>
+   824→   824→              </div>
+   825→   825→            </GlassPanel>
+   826→   826→
+   827→   827→            {/* Advice */}
+   828→   828→            {result.output.advice && result.output.advice.length > 0 && (
+   829→   829→              <TreatmentCard
+   830→   830→                icon={<Activity className="h-4 w-4" />}
+   831→   831→                title="Patient Advice"
+   832→   832→                items={result.output.advice}
+   833→   833→                accent="accent"
+   834→   834→              />
+   835→   835→            )}
+   836→   836→
+   837→   837→            {result.output.limitations?.length > 0 && (
+   838→   838→              <LimitationsList items={result.output.limitations} />
+   839→   839→            )}
+   840→   840→
+   841→   841→            <DisclaimerChip text={result.disclaimer} />
+   842→   842→          </motion.div>
+   843→   843→        ) : (
+   844→   844→          <EmptyTask
+   845→   845→            icon={<Pill className="h-7 w-7" />}
+   846→   846→            title="No prescription generated yet"
+   847→   847→            description="Click Generate Rx to produce an advisory prescription. Verify dosages against patient allergies and current medications before dispensing."
+   848→   848→          />
+   849→   849→        )}
+   850→   850→      </AnimatePresence>
+   851→   851→    </div>
+   852→   852→  )
+   853→   853→}
+   854→   854→
+   855→   855→// ── Shared sub-components ────────────────────────────────────────────────────
+   856→   856→function TierBadge({ tier, model }: { tier: number; model?: string }) {
+   857→   857→  const cls = tier === 1
+   858→   858→    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+   859→   859→    : tier === 2
+   860→   860→      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+   861→   861→      : 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30'
+   862→   862→  return (
+   863→   863→    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', cls)}>
+   864→   864→      <Sparkles className="h-2.5 w-2.5" />
+   865→   865→      Tier {tier} {tier === 1 ? '— Success' : `— Failover ${tier}`}
+   866→   866→    </span>
+   867→   867→  )
+   868→   868→}
+   869→   869→
+   870→   870→function ProbabilityBar({ value, rank }: { value: number; rank: number }) {
+   871→   871→  const pct = Math.round(Math.max(0, Math.min(1, value)) * 100)
+   872→   872→  const colors = ['bg-primary', 'bg-primary/70', 'bg-primary/45']
+   873→   873→  return (
+   874→   874→    <div className="flex items-center gap-2">
+   875→   875→      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+   876→   876→        <div
+   877→   877→          className={cn('h-full rounded-full transition-all duration-500', colors[rank] ?? colors[2])}
+   878→   878→          style={{ width: `${pct}%` }}
+   879→   879→        />
+   880→   880→      </div>
+   881→   881→      <span className="w-10 text-right text-[11px] font-semibold tabular-nums">{pct}%</span>
+   882→   882→    </div>
+   883→   883→  )
+   884→   884→}
+   885→   885→
+   886→   886→function TreatmentCard({
+   887→   887→  icon, title, items, accent,
+   888→   888→}: {
+   889→   889→  icon: React.ReactNode
+   890→   890→  title: string
+   891→   891→  items?: string[]
+   892→   892→  accent: 'primary' | 'accent' | 'amber' | 'red'
+   893→   893→}) {
+   894→   894→  const accents = {
+   895→   895→    primary: 'bg-primary/10 text-primary',
+   896→   896→    accent: 'bg-accent/15 text-accent-foreground',
+   897→   897→    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-300',
+   898→   898→    red: 'bg-red-500/10 text-red-600 dark:text-red-300',
+   899→   899→  }
+   900→   900→  return (
+   901→   901→    <GlassPanel className="p-4">
+   902→   902→      <div className="flex items-center gap-2">
+   903→   903→        <div className={cn('flex h-7 w-7 items-center justify-center rounded-lg', accents[accent])}>
+   904→   904→          {icon}
+   905→   905→        </div>
+   906→   906→        <p className="text-sm font-semibold">{title}</p>
+   907→   907→        <span className="ml-auto text-[11px] text-muted-foreground">{items?.length ?? 0}</span>
+   908→   908→      </div>
+   909→   909→      <Separator className="my-3" />
+   910→   910→      {items && items.length > 0 ? (
+   911→   911→        <ul className="space-y-1.5">
+   912→   912→          {items.map((it, i) => (
+   913→   913→            <li key={i} className="flex items-start gap-2 text-sm">
+   914→   914→              <span className={cn('mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full', accents[accent].split(' ')[0])} />
+   915→   915→              <span className="text-foreground/90">{it}</span>
+   916→   916→            </li>
+   917→   917→          ))}
+   918→   918→        </ul>
+   919→   919→      ) : (
+   920→   920→        <p className="text-sm text-muted-foreground">No items.</p>
+   921→   921→      )}
+   922→   922→    </GlassPanel>
+   923→   923→  )
+   924→   924→}
+   925→   925→
+   926→   926→function LimitationsList({ items }: { items: string[] }) {
+   927→   927→  return (
+   928→   928→    <GlassPanel variant="subtle" className="p-3">
+   929→   929→      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+   930→   930→        <AlertTriangle className="h-3.5 w-3.5" /> AI Limitations
+   931→   931→      </p>
+   932→   932→      <ul className="space-y-1">
+   933→   933→        {items.map((it, i) => (
+   934→   934→          <li key={i} className="text-xs text-muted-foreground">• {it}</li>
+   935→   935→        ))}
+   936→   936→      </ul>
+   937→   937→    </GlassPanel>
+   938→   938→  )
+   939→   939→}
+   940→   940→
+   941→   941→function InlineLoader({ label }: { label: string }) {
+   942→   942→  return (
+   943→   943→    <motion.div
+   944→   944→      initial={{ opacity: 0 }}
+   945→   945→      animate={{ opacity: 1 }}
+   946→   946→      exit={{ opacity: 0 }}
+   947→   947→      className="flex items-center justify-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-10"
+   948→   948→    >
+   949→   949→      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+   950→   950→      <div>
+   951→   951→        <p className="text-sm font-medium">{label}</p>
+   952→   952→        <p className="text-[11px] text-muted-foreground">4-tier failover active · non-blocking</p>
+   953→   953→      </div>
+   954→   954→    </motion.div>
+   955→   955→  )
+   956→   956→}
+   957→   957→
+   958→   958→function EmptyTask({
+   959→   959→  icon, title, description,
+   960→   960→}: {
+   961→   961→  icon: React.ReactNode
+   962→   962→  title: string
+   963→   963→  description: string
+   964→   964→}) {
+   965→   965→  return (
+   966→   966→    <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-10 text-center">
+   967→   967→      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+   968→   968→        {icon}
+   969→   969→      </div>
+   970→   970→      <div>
+   971→   971→        <p className="font-semibold">{title}</p>
+   972→   972→        <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+   973→   973→      </div>
+   974→   974→      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+   975→   975→        <Wand2 className="h-3 w-3" /> Outputs are advisory — review before action
+   976→   976→      </div>
+   977→   977→    </GlassPanel>
+   978→   978→  )
+   979→   979→}
+   980→   980→
+   981→   981→function Row({ label, value }: { label: string; value: string }) {
+   982→   982→  return (
+   983→   983→    <div className="flex items-center justify-between gap-2">
+   984→   984→      <span className="text-xs text-muted-foreground">{label}</span>
+   985→   985→      <span className="text-sm font-medium">{value}</span>
+   986→   986→    </div>
+   987→   987→  )
+   988→   988→}
+   989→   989→

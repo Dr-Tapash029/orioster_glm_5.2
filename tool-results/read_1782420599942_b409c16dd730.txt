@@ -1,0 +1,2002 @@
+     1→'use client'
+     2→
+     3→// ORIOSTER — Patient Entry Wizard (10-step offline-first intake)
+     4→// Task ID: 5 — Patient Entry Wizard
+     5→// Critical module: privacy firewall at Step 8, AI hard-disabled until then.
+     6→
+     7→import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
+     8→import { motion, AnimatePresence } from 'framer-motion'
+     9→import { useAppStore } from '@/lib/store'
+    10→import {
+    11→  WIZARD_STEPS,
+    12→  CHIEF_COMPLAINTS,
+    13→  PAST_HISTORY_TAGS,
+    14→  COMMON_MEDICATIONS,
+    15→  ALLERGY_SEVERITIES,
+    16→  MANDATORY_DISCLAIMER,
+    17→  computeTriageLevel,
+    18→  type AppRole,
+    19→  type TriageLevel,
+    20→} from '@/lib/types'
+    21→import {
+    22→  GlassPanel,
+    23→  TriageBadge,
+    24→  DisclaimerChip,
+    25→  ConfidenceMeter,
+    26→  SyncStatusBadge,
+    27→} from '@/components/orioster/ui-primitives'
+    28→import { Button } from '@/components/ui/button'
+    29→import { Input } from '@/components/ui/input'
+    30→import { Label } from '@/components/ui/label'
+    31→import { Textarea } from '@/components/ui/textarea'
+    32→import { Checkbox } from '@/components/ui/checkbox'
+    33→import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+    34→import { Badge } from '@/components/ui/badge'
+    35→import { ScrollArea } from '@/components/ui/scroll-area'
+    36→import { Progress } from '@/components/ui/progress'
+    37→import {
+    38→  Select,
+    39→  SelectContent,
+    40→  SelectItem,
+    41→  SelectTrigger,
+    42→  SelectValue,
+    43→} from '@/components/ui/select'
+    44→import {
+    45→  ChevronLeft,
+    46→  ChevronRight,
+    47→  Check,
+    48→  Loader2,
+    49→  Save,
+    50→  ShieldCheck,
+    51→  Lock,
+    52→  Sparkles,
+    53→  AlertTriangle,
+    54→  Plus,
+    55→  Trash2,
+    56→  WifiOff,
+    57→  FileText,
+    58→  Calendar,
+    59→  Stethoscope,
+    60→  Send,
+    61→  ClipboardCheck,
+    62→  Activity,
+    63→  Pill,
+    64→  Wind,
+    65→  HeartPulse,
+    66→  Thermometer,
+    67→  Ruler,
+    68→  Weight,
+    69→  Droplet,
+    70→  GraduationCap,
+    71→  Briefcase,
+    72→  Phone,
+    73→  MapPin,
+    74→  User,
+    75→  RotateCcw,
+    76→  CloudUpload,
+    77→} from 'lucide-react'
+    78→import { toast } from 'sonner'
+    79→import { cn } from '@/lib/utils'
+    80→
+    81→// ─────────────────────────────────────────────────────────────
+    82→// Types
+    83→// ─────────────────────────────────────────────────────────────
+    84→
+    85→interface Doctor {
+    86→  id: string
+    87→  name: string
+    88→  email: string
+    89→  role: string
+    90→}
+    91→
+    92→interface MedicationEntry {
+    93→  drug: string
+    94→  dose: string
+    95→  frequency: string
+    96→  custom?: boolean
+    97→}
+    98→
+    99→interface AllergyEntry {
+   100→  allergen: string
+   101→  severity: string
+   102→}
+   103→
+   104→interface PatientRecord {
+   105→  id: string
+   106→  localId: string
+   107→  fullName: string
+   108→  gender: string
+   109→  dateOfBirth: string
+   110→  age: number | null
+   111→  contact: string | null
+   112→  address: string | null
+   113→  localIdNumber: string | null
+   114→  bloodGroup: string | null
+   115→  heightCm: number | null
+   116→  weightKg: number | null
+   117→  profession: string | null
+   118→  education: string | null
+   119→  consentGiven: boolean
+   120→  chiefComplaint: string | null
+   121→  pastHistory: string | null
+   122→  ongoingMedications: string | null
+   123→  allergies: string | null
+   124→  localSummary: string | null
+   125→  status: string
+   126→  syncStatus: string
+   127→  notificationStatus: string | null
+   128→}
+   129→
+   130→interface VitalsRecord {
+   131→  id: string
+   132→  temperature: number | null
+   133→  bpSystolic: number | null
+   134→  bpDiastolic: number | null
+   135→  heartRate: number | null
+   136→  spo2: number | null
+   137→  weightKg: number | null
+   138→  heightCm: number | null
+   139→  triageLevel: string | null
+   140→}
+   141→
+   142→interface SummaryResponse {
+   143→  summary: string
+   144→  compressionRatio: number
+   145→  summaryId: string
+   146→  message?: string
+   147→}
+   148→
+   149→interface AiNotifyResponse {
+   150→  result?: { id: string }
+   151→  output?: {
+   152→    summary: string
+   153→    risk_level: 'low' | 'moderate' | 'high'
+   154→    confidence: number
+   155→    limitations: string[]
+   156→    advice?: string[]
+   157→    recommendation_type: string
+   158→  }
+   159→  tierUsed?: number
+   160→  modelUsed?: string
+   161→  disclaimer?: string
+   162→  error?: string
+   163→  blocked?: boolean
+   164→}
+   165→
+   166→interface StepProps {
+   167→  patient: PatientRecord | null
+   168→  user: { id: string; name: string; email: string; role: AppRole }
+   169→  online: boolean
+   170→  onPatientCreated: (p: PatientRecord) => void
+   171→  onPatientUpdated: (patch: Partial<PatientRecord>) => void
+   172→  onVitalsRecorded: (v: VitalsRecord) => void
+   173→  onAdvance: () => void
+   174→  triggerSaved: () => void
+   175→}
+   176→
+   177→// ─────────────────────────────────────────────────────────────
+   178→// Helpers
+   179→// ─────────────────────────────────────────────────────────────
+   180→
+   181→function generateLocalId(): string {
+   182→  const t = Date.now().toString(36).toUpperCase().slice(-6)
+   183→  const r = Math.random().toString(36).toUpperCase().slice(2, 5)
+   184→  return `PT-${t}${r}`
+   185→}
+   186→
+   187→function safeParse<T>(str: string | null | undefined, fallback: T): T {
+   188→  if (!str) return fallback
+   189→  try {
+   190→    return JSON.parse(str) as T
+   191→  } catch {
+   192→    return fallback
+   193→  }
+   194→}
+   195→
+   196→function isValidStep(step: number, patient: PatientRecord | null): boolean {
+   197→  // Used by parent to decide if a step's data is already present.
+   198→  if (!patient) return step === 1
+   199→  switch (step) {
+   200→    case 1:
+   201→      return !!patient.fullName && !!patient.gender && patient.consentGiven
+   202→    case 2:
+   203→      return !!patient.chiefComplaint
+   204→    case 3:
+   205→      return !!patient.pastHistory
+   206→    case 4:
+   207→      return !!patient.ongoingMedications
+   208→    case 5:
+   209→      // We rely on completedSteps set for vitals (no field on patient)
+   210→      return false
+   211→    case 6:
+   212→      return !!patient.allergies
+   213→    case 7:
+   214→      // appointments live in their own table; rely on completedSteps
+   215→      return false
+   216→    case 8:
+   217→      return !!patient.localSummary
+   218→    case 9:
+   219→      return patient.notificationStatus === 'SENT' || patient.notificationStatus === 'QUEUED'
+   220→    case 10:
+   221→      return patient.status === 'COMPLETED'
+   222→    default:
+   223→      return false
+   224→  }
+   225→}
+   226→
+   227→// ─────────────────────────────────────────────────────────────
+   228→// MAIN WIZARD COMPONENT
+   229→// ─────────────────────────────────────────────────────────────
+   230→
+   231→export function PatientEntryWizard() {
+   232→  const { user, setView, wizardPatientId, setWizardPatientId, online } = useAppStore()
+   233→  const [patient, setPatient] = useState<PatientRecord | null>(null)
+   234→  const [vitals, setVitals] = useState<VitalsRecord | null>(null)
+   235→  const [currentStep, setCurrentStep] = useState(1)
+   236→  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+   237→  const [loading, setLoading] = useState(true)
+   238→  const [saving, setSaving] = useState(false)
+   239→  const [savedAt, setSavedAt] = useState<number | null>(null)
+   240→  const [submitting, setSubmitting] = useState(false)
+   241→  const [errorBanner, setErrorBanner] = useState<string | null>(null)
+   242→
+   243→  // ── Restore in-progress patient if wizardPatientId set ──
+   244→  useEffect(() => {
+   245→    if (!user) return
+   246→    if (wizardPatientId) {
+   247→      fetch(`/api/patients/${wizardPatientId}`)
+   248→        .then((r) => r.json())
+   249→        .then((data) => {
+   250→          if (data.patient) {
+   251→            const p = data.patient as PatientRecord
+   252→            setPatient(p)
+   253→            // Restore completed steps based on data presence
+   254→            const completed = new Set<number>()
+   255→            for (const s of WIZARD_STEPS) {
+   256→              if (isValidStep(s.id, p)) completed.add(s.id)
+   257→            }
+   258→            // Vitals / appointments: check via relations
+   259→            if (data.patient.vitals?.length > 0) {
+   260→              completed.add(5)
+   261→              setVitals(data.patient.vitals[0])
+   262→            }
+   263→            if (data.patient.appointments?.length > 0) {
+   264→              completed.add(7)
+   265→            }
+   266→            setCompletedSteps(completed)
+   267→            // Resume at first non-completed step
+   268→            const next = WIZARD_STEPS.find((s) => !completed.has(s.id))
+   269→            setCurrentStep(next ? next.id : 10)
+   270→          }
+   271→        })
+   272→        .catch(() => toast.error('Failed to restore in-progress patient.'))
+   273→        .finally(() => setLoading(false))
+   274→    } else {
+   275→      setLoading(false)
+   276→    }
+   277→  }, [user, wizardPatientId])
+   278→
+   279→  // ── Saved indicator fade ──
+   280→  useEffect(() => {
+   281→    if (!savedAt) return
+   282→    const t = setTimeout(() => setSavedAt(null), 3500)
+   283→    return () => clearTimeout(t)
+   284→  }, [savedAt])
+   285→
+   286→  const triggerSaved = useCallback(() => {
+   287→    setSaving(true)
+   288→    setSavedAt(Date.now())
+   289→    setTimeout(() => setSaving(false), 600)
+   290→  }, [])
+   291→
+   292→  const handlePatientCreated = useCallback(
+   293→    (p: PatientRecord) => {
+   294→      setPatient(p)
+   295→      setWizardPatientId(p.id)
+   296→    },
+   297→    [setWizardPatientId]
+   298→  )
+   299→
+   300→  const handlePatientUpdated = useCallback((patch: Partial<PatientRecord>) => {
+   301→    setPatient((prev) => (prev ? { ...prev, ...patch } : prev))
+   302→  }, [])
+   303→
+   304→  const handleVitalsRecorded = useCallback((v: VitalsRecord) => {
+   305→    setVitals(v)
+   306→  }, [])
+   307→
+   308→  const advance = useCallback(() => {
+   309→    setCompletedSteps((prev) => {
+   310→      const next = new Set(prev)
+   311→      next.add(currentStep)
+   312→      return next
+   313→    })
+   314→    if (currentStep < 10) {
+   315→      setCurrentStep((s) => s + 1)
+   316→      window.scrollTo({ top: 0, behavior: 'smooth' })
+   317→    }
+   318→  }, [currentStep])
+   319→
+   320→  const goBack = useCallback(() => {
+   321→    if (currentStep > 1) {
+   322→      setCurrentStep((s) => s - 1)
+   323→      window.scrollTo({ top: 0, behavior: 'smooth' })
+   324→    }
+   325→  }, [currentStep])
+   326→
+   327→  // ── Submit final (Step 10) ──
+   328→  const handleFinalSubmit = useCallback(async () => {
+   329→    if (!patient) return
+   330→    setSubmitting(true)
+   331→    try {
+   332→      const res = await fetch(`/api/patients/${patient.id}`, {
+   333→        method: 'PATCH',
+   334→        headers: { 'Content-Type': 'application/json' },
+   335→        body: JSON.stringify({
+   336→          status: 'COMPLETED',
+   337→          syncStatus: 'QUEUED',
+   338→        }),
+   339→      })
+   340→      if (!res.ok) throw new Error('Failed to finalize patient')
+   341→      const data = await res.json()
+   342→      handlePatientUpdated(data.patient)
+   343→      toast.success('Patient intake completed', {
+   344→        description: `${patient.fullName} has been queued for sync.`,
+   345→      })
+   346→      setWizardPatientId(null)
+   347→      setTimeout(() => setView('patients'), 700)
+   348→    } catch (e) {
+   349→      toast.error('Submit failed', { description: (e as Error).message })
+   350→    } finally {
+   351→      setSubmitting(false)
+   352→    }
+   353→  }, [patient, handlePatientUpdated, setWizardPatientId, setView])
+   354→
+   355→  // ── Cancel wizard ──
+   356→  const handleCancel = useCallback(() => {
+   357→    if (
+   358→      patient &&
+   359→      !confirm('Discard this patient intake? The draft will be saved locally and you can resume later.')
+   360→    ) {
+   361→      return
+   362→    }
+   363→    setWizardPatientId(null)
+   364→    setView('patients')
+   365→  }, [patient, setWizardPatientId, setView])
+   366→
+   367→  const stepPropsBase: Omit<StepProps, 'patient'> = useMemo(
+   368→    () => ({
+   369→      user: user!,
+   370→      online,
+   371→      onPatientCreated: handlePatientCreated,
+   372→      onPatientUpdated: handlePatientUpdated,
+   373→      onVitalsRecorded: handleVitalsRecorded,
+   374→      onAdvance: advance,
+   375→      triggerSaved,
+   376→    }),
+   377→    [user, online, handlePatientCreated, handlePatientUpdated, handleVitalsRecorded, advance, triggerSaved]
+   378→  )
+   379→
+   380→  if (loading || !user) {
+   381→    return (
+   382→      <div className="flex items-center justify-center py-20">
+   383→        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+   384→      </div>
+   385→    )
+   386→  }
+   387→
+   388→  const currentStepMeta = WIZARD_STEPS.find((s) => s.id === currentStep)!
+   389→  const progressPct = ((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100
+   390→
+   391→  return (
+   392→    <div className="space-y-4">
+   393→      {/* Header */}
+   394→      <div className="flex flex-wrap items-end justify-between gap-3">
+   395→        <div>
+   396→          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Patient Entry Wizard</h1>
+   397→          <p className="mt-0.5 text-sm text-muted-foreground">
+   398→            10-step offline-first intake · privacy firewall at Step 8 · AI advisory only
+   399→          </p>
+   400→        </div>
+   401→        <div className="flex items-center gap-2">
+   402→          {patient && (
+   403→            <Badge variant="outline" className="gap-1.5 font-mono text-[11px]">
+   404→              <FileText className="h-3 w-3" />
+   405→              {patient.localId}
+   406→            </Badge>
+   407→          )}
+   408→          {patient && <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />}
+   409→          <Button variant="ghost" size="sm" onClick={handleCancel} className="text-muted-foreground">
+   410→            Exit
+   411→          </Button>
+   412→        </div>
+   413→      </div>
+   414→
+   415→      {/* Progress rail — desktop vertical, mobile horizontal scroller */}
+   416→      <ProgressRail
+   417→        currentStep={currentStep}
+   418→        completedSteps={completedSteps}
+   419→        onJump={(id) => {
+   420→          // Cannot skip ahead — only allow jumping to completed or current
+   421→          if (id <= currentStep || completedSteps.has(id)) {
+   422→            setCurrentStep(id)
+   423→            window.scrollTo({ top: 0, behavior: 'smooth' })
+   424→          }
+   425→        }}
+   426→      />
+   427→
+   428→      <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+   429→        {/* Desktop vertical stepper */}
+   430→        <aside className="hidden lg:block">
+   431→          <VerticalStepper
+   432→            currentStep={currentStep}
+   433→            completedSteps={completedSteps}
+   434→            onJump={(id) => {
+   435→              if (id <= currentStep || completedSteps.has(id)) {
+   436→                setCurrentStep(id)
+   437→                window.scrollTo({ top: 0, behavior: 'smooth' })
+   438→              }
+   439→            }}
+   440→          />
+   441→        </aside>
+   442→
+   443→        {/* Step content */}
+   444→        <div className="space-y-3">
+   445→          <GlassPanel variant="strong" className="p-5 sm:p-6">
+   446→            {/* Step header */}
+   447→            <div className="mb-5 flex items-start gap-3 border-b border-border/40 pb-4">
+   448→              <div
+   449→                className={cn(
+   450→                  'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold',
+   451→                  currentStep === 8
+   452→                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+   453→                    : currentStep === 9
+   454→                      ? 'bg-violet-500/15 text-violet-700 dark:text-violet-300'
+   455→                      : 'bg-primary/15 text-primary'
+   456→                )}
+   457→              >
+   458→                {completedSteps.has(currentStep) ? <Check className="h-5 w-5" /> : currentStep}
+   459→              </div>
+   460→              <div className="min-w-0 flex-1">
+   461→                <div className="flex flex-wrap items-center gap-2">
+   462→                  <h2 className="text-base font-semibold sm:text-lg">{currentStepMeta.title}</h2>
+   463→                  {currentStep === 8 && (
+   464→                    <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
+   465→                      <ShieldCheck className="h-3 w-3" /> Privacy Firewall
+   466→                    </Badge>
+   467→                  )}
+   468→                  {currentStep === 9 && (
+   469→                    <Badge className="gap-1 bg-violet-500/15 text-violet-700 hover:bg-violet-500/20 dark:text-violet-300">
+   470→                      <Sparkles className="h-3 w-3" /> AI-Assisted
+   471→                    </Badge>
+   472→                  )}
+   473→                </div>
+   474→                <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+   475→                  {stepDescription(currentStep)}
+   476→                </p>
+   477→              </div>
+   478→            </div>
+   479→
+   480→            {/* Step body */}
+   481→            <AnimatePresence mode="wait" initial={false}>
+   482→              <motion.div
+   483→                key={currentStep}
+   484→                initial={{ opacity: 0, x: 12 }}
+   485→                animate={{ opacity: 1, x: 0 }}
+   486→                exit={{ opacity: 0, x: -12 }}
+   487→                transition={{ duration: 0.22, ease: 'easeOut' }}
+   488→              >
+   489→                {currentStep === 1 && (
+   490→                  <StepGeneral {...stepPropsBase} patient={patient} />
+   491→                )}
+   492→                {currentStep === 2 && (
+   493→                  <StepComplaint {...stepPropsBase} patient={patient} />
+   494→                )}
+   495→                {currentStep === 3 && (
+   496→                  <StepHistory {...stepPropsBase} patient={patient} />
+   497→                )}
+   498→                {currentStep === 4 && (
+   499→                  <StepMedications {...stepPropsBase} patient={patient} />
+   500→                )}
+   501→                {currentStep === 5 && (
+   502→                  <StepVitals
+   503→                    {...stepPropsBase}
+   504→                    patient={patient}
+   505→                    existingVitals={vitals}
+   506→                  />
+   507→                )}
+   508→                {currentStep === 6 && (
+   509→                  <StepAllergies {...stepPropsBase} patient={patient} />
+   510→                )}
+   511→                {currentStep === 7 && (
+   512→                  <StepDoctor {...stepPropsBase} patient={patient} />
+   513→                )}
+   514→                {currentStep === 8 && (
+   515→                  <StepSummary {...stepPropsBase} patient={patient} />
+   516→                )}
+   517→                {currentStep === 9 && (
+   518→                  <StepNotify {...stepPropsBase} patient={patient} />
+   519→                )}
+   520→                {currentStep === 10 && (
+   521→                  <StepReview
+   522→                    {...stepPropsBase}
+   523→                    patient={patient}
+   524→                    vitals={vitals}
+   525→                    onSubmit={handleFinalSubmit}
+   526→                    submitting={submitting}
+   527→                  />
+   528→                )}
+   529→              </motion.div>
+   530→            </AnimatePresence>
+   531→          </GlassPanel>
+   532→
+   533→          {/* Nav row — Back on left, Saved indicator on right (Continue is inside step) */}
+   534→          <div className="flex items-center justify-between gap-3">
+   535→            <Button
+   536→              variant="outline"
+   537→              onClick={goBack}
+   538→              disabled={currentStep === 1}
+   539→              className="gap-1.5"
+   540→            >
+   541→              <ChevronLeft className="h-4 w-4" />
+   542→              Back
+   543→            </Button>
+   544→            <SavedIndicator saving={saving} savedAt={savedAt} />
+   545→          </div>
+   546→        </div>
+   547→      </div>
+   548→    </div>
+   549→  )
+   550→}
+   551→
+   552→// ─────────────────────────────────────────────────────────────
+   553→// Progress Rail (mobile horizontal scroller)
+   554→// ─────────────────────────────────────────────────────────────
+   555→
+   556→function ProgressRail({
+   557→  currentStep,
+   558→  completedSteps,
+   559→  onJump,
+   560→}: {
+   561→  currentStep: number
+   562→  completedSteps: Set<number>
+   563→  onJump: (id: number) => void
+   564→}) {
+   565→  return (
+   566→    <div className="lg:hidden">
+   567→      <div className="mb-2 flex items-center justify-between">
+   568→        <span className="text-xs font-medium text-muted-foreground">
+   569→          Step {currentStep} of {WIZARD_STEPS.length}
+   570→        </span>
+   571→        <span className="text-xs font-semibold text-primary">
+   572→          {Math.round(((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100)}% complete
+   573→        </span>
+   574→      </div>
+   575→      <Progress value={(currentStep / WIZARD_STEPS.length) * 100} className="h-1.5" />
+   576→      <ScrollArea className="mt-2 w-full whitespace-nowrap">
+   577→        <div className="flex gap-2 pb-2">
+   578→          {WIZARD_STEPS.map((s) => {
+   579→            const isCurrent = s.id === currentStep
+   580→            const isDone = completedSteps.has(s.id)
+   581→            const canJump = isDone || s.id <= currentStep
+   582→            return (
+   583→              <button
+   584→                key={s.id}
+   585→                disabled={!canJump}
+   586→                onClick={() => onJump(s.id)}
+   587→                className={cn(
+   588→                  'inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
+   589→                  isCurrent && 'border-primary bg-primary text-primary-foreground',
+   590→                  !isCurrent && isDone && 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+   591→                  !isCurrent && !isDone && canJump && 'border-border bg-muted/40 text-muted-foreground',
+   592→                  !canJump && 'border-border/50 bg-muted/20 text-muted-foreground/50 cursor-not-allowed'
+   593→                )}
+   594→              >
+   595→                {isDone ? <Check className="h-3 w-3" /> : <span className="tabular-nums">{s.id}</span>}
+   596→                {s.short}
+   597→              </button>
+   598→            )
+   599→          })}
+   600→        </div>
+   601→      </ScrollArea>
+   602→    </div>
+   603→  )
+   604→}
+   605→
+   606→// ─────────────────────────────────────────────────────────────
+   607→// Vertical Stepper (desktop sidebar)
+   608→// ─────────────────────────────────────────────────────────────
+   609→
+   610→function VerticalStepper({
+   611→  currentStep,
+   612→  completedSteps,
+   613→  onJump,
+   614→}: {
+   615→  currentStep: number
+   616→  completedSteps: Set<number>
+   617→  onJump: (id: number) => void
+   618→}) {
+   619→  return (
+   620→    <GlassPanel variant="subtle" className="p-3">
+   621→      <ol className="space-y-1">
+   622→        {WIZARD_STEPS.map((s, idx) => {
+   623→          const isCurrent = s.id === currentStep
+   624→          const isDone = completedSteps.has(s.id)
+   625→          const canJump = isDone || s.id <= currentStep
+   626→          const isLocked = !canJump
+   627→          const isFirewall = s.id === 8
+   628→          const isAi = s.id === 9
+   629→          return (
+   630→            <li key={s.id} className="relative">
+   631→              {idx < WIZARD_STEPS.length - 1 && (
+   632→                <span
+   633→                  className={cn(
+   634→                    'absolute left-[14px] top-7 h-[calc(100%-4px)] w-px',
+   635→                    isDone ? 'bg-emerald-500/40' : 'bg-border/60'
+   636→                  )}
+   637→                />
+   638→              )}
+   639→              <button
+   640→                disabled={isLocked}
+   641→                onClick={() => onJump(s.id)}
+   642→                className={cn(
+   643→                  'group flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors',
+   644→                  isCurrent && 'bg-primary/10',
+   645→                  !isCurrent && !isLocked && 'hover:bg-muted/50',
+   646→                  isLocked && 'cursor-not-allowed opacity-60'
+   647→                )}
+   648→              >
+   649→                <span
+   650→                  className={cn(
+   651→                    'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border text-[11px] font-bold',
+   652→                    isDone && 'border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+   653→                    !isDone && isCurrent && 'border-primary bg-primary text-primary-foreground',
+   654→                    !isDone && !isCurrent && 'border-border bg-background text-muted-foreground'
+   655→                  )}
+   656→                >
+   657→                  {isDone ? <Check className="h-3.5 w-3.5" /> : isLocked ? <Lock className="h-3 w-3" /> : s.id}
+   658→                </span>
+   659→                <span className="min-w-0 flex-1">
+   660→                  <span
+   661→                    className={cn(
+   662→                      'block truncate text-xs font-medium',
+   663→                      isCurrent ? 'text-foreground' : 'text-muted-foreground'
+   664→                    )}
+   665→                  >
+   666→                    {s.title}
+   667→                  </span>
+   668→                  {(isFirewall || isAi) && (
+   669→                    <span
+   670→                      className={cn(
+   671→                        'mt-0.5 flex items-center gap-1 text-[10px] font-medium',
+   672→                        isFirewall ? 'text-emerald-600 dark:text-emerald-400' : 'text-violet-600 dark:text-violet-400'
+   673→                      )}
+   674→                    >
+   675→                      {isFirewall ? <ShieldCheck className="h-2.5 w-2.5" /> : <Sparkles className="h-2.5 w-2.5" />}
+   676→                      {isFirewall ? 'Firewall' : 'AI step'}
+   677→                    </span>
+   678→                  )}
+   679→                </span>
+   680→              </button>
+   681→            </li>
+   682→          )
+   683→        })}
+   684→      </ol>
+   685→    </GlassPanel>
+   686→  )
+   687→}
+   688→
+   689→// ─────────────────────────────────────────────────────────────
+   690→// Saved Indicator
+   691→// ─────────────────────────────────────────────────────────────
+   692→
+   693→function SavedIndicator({ saving, savedAt }: { saving: boolean; savedAt: number | null }) {
+   694→  if (saving) {
+   695→    return (
+   696→      <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+   697→        <Loader2 className="h-3 w-3 animate-spin" />
+   698→        Saving locally…
+   699→      </span>
+   700→    )
+   701→  }
+   702→  if (savedAt) {
+   703→    return (
+   704→      <motion.span
+   705→        initial={{ opacity: 0, y: 4 }}
+   706→        animate={{ opacity: 1, y: 0 }}
+   707→        className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400"
+   708→      >
+   709→        <Save className="h-3 w-3" />
+   710→        Saved locally
+   711→      </motion.span>
+   712→    )
+   713→  }
+   714→  return null
+   715→}
+   716→
+   717→// ─────────────────────────────────────────────────────────────
+   718→// STEP 1 — General Information
+   719→// ─────────────────────────────────────────────────────────────
+   720→
+   721→function StepGeneral({ patient, user, onPatientCreated, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+   722→  const [fullName, setFullName] = useState(patient?.fullName ?? '')
+   723→  const [gender, setGender] = useState(patient?.gender ?? '')
+   724→  const [age, setAge] = useState<string>(patient?.age != null ? String(patient.age) : '')
+   725→  const [dateOfBirth, setDateOfBirth] = useState(patient?.dateOfBirth ?? '')
+   726→  const [contact, setContact] = useState(patient?.contact ?? '')
+   727→  const [address, setAddress] = useState(patient?.address ?? '')
+   728→  const [localIdNumber, setLocalIdNumber] = useState(patient?.localIdNumber ?? '')
+   729→  const [bloodGroup, setBloodGroup] = useState(patient?.bloodGroup ?? '')
+   730→  const [heightCm, setHeightCm] = useState(patient?.heightCm != null ? String(patient.heightCm) : '')
+   731→  const [weightKg, setWeightKg] = useState(patient?.weightKg != null ? String(patient.weightKg) : '')
+   732→  const [profession, setProfession] = useState(patient?.profession ?? '')
+   733→  const [education, setEducation] = useState(patient?.education ?? '')
+   734→  const [consentGiven, setConsentGiven] = useState(patient?.consentGiven ?? false)
+   735→  const [saving, setSaving] = useState(false)
+   736→  const [error, setError] = useState<string | null>(null)
+   737→
+   738→  const validate = (): string | null => {
+   739→    if (!fullName.trim()) return 'Full name is required'
+   740→    if (!gender) return 'Gender is required'
+   741→    if (!consentGiven) return 'Patient consent is required to proceed'
+   742→    if (age && (isNaN(Number(age)) || Number(age) < 0 || Number(age) > 130)) {
+   743→      return 'Please enter a valid age (0–130)'
+   744→    }
+   745→    return null
+   746→  }
+   747→
+   748→  const handleContinue = async () => {
+   749→    const err = validate()
+   750→    if (err) {
+   751→      setError(err)
+   752→      toast.error(err)
+   753→      return
+   754→    }
+   755→    setError(null)
+   756→    setSaving(true)
+   757→    try {
+   758→      const payload = {
+   759→        localId: patient?.localId ?? generateLocalId(),
+   760→        fullName: fullName.trim(),
+   761→        gender,
+   762→        dateOfBirth: dateOfBirth || '',
+   763→        age: age ? Number(age) : null,
+   764→        contact: contact || null,
+   765→        address: address || null,
+   766→        localIdNumber: localIdNumber || null,
+   767→        bloodGroup: bloodGroup || null,
+   768→        heightCm: heightCm ? Number(heightCm) : null,
+   769→        weightKg: weightKg ? Number(weightKg) : null,
+   770→        profession: profession || null,
+   771→        education: education || null,
+   772→        consentGiven,
+   773→        status: patient?.status ?? 'DRAFT',
+   774→        syncStatus: patient?.syncStatus ?? 'DRAFT',
+   775→        createdBy: user.id,
+   776→      }
+   777→
+   778→      if (patient) {
+   779→        // PATCH existing
+   780→        const res = await fetch(`/api/patients/${patient.id}`, {
+   781→          method: 'PATCH',
+   782→          headers: { 'Content-Type': 'application/json' },
+   783→          body: JSON.stringify(payload),
+   784→        })
+   785→        if (!res.ok) throw new Error('Failed to save')
+   786→        const data = await res.json()
+   787→        onPatientUpdated(data.patient)
+   788→      } else {
+   789→        // POST new
+   790→        const res = await fetch('/api/patients', {
+   791→          method: 'POST',
+   792→          headers: { 'Content-Type': 'application/json' },
+   793→          body: JSON.stringify(payload),
+   794→        })
+   795→        if (!res.ok) throw new Error('Failed to create patient')
+   796→        const data = await res.json()
+   797→        onPatientCreated(data.patient)
+   798→      }
+   799→      triggerSaved()
+   800→      toast.success('General information saved')
+   801→      onAdvance()
+   802→    } catch (e) {
+   803→      toast.error('Save failed', { description: (e as Error).message })
+   804→    } finally {
+   805→      setSaving(false)
+   806→    }
+   807→  }
+   808→
+   809→  return (
+   810→    <div className="space-y-5">
+   811→      {error && (
+   812→        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300">
+   813→          <AlertTriangle className="h-3.5 w-3.5" />
+   814→          {error}
+   815→        </div>
+   816→      )}
+   817→
+   818→      <div className="grid gap-4 sm:grid-cols-2">
+   819→        <Field label="Full name" icon={<User className="h-3.5 w-3.5" />} required>
+   820→          <Input
+   821→            value={fullName}
+   822→            onChange={(e) => setFullName(e.target.value)}
+   823→            placeholder="e.g. Aisha Rahman"
+   824→          />
+   825→        </Field>
+   826→        <Field label="Gender" required>
+   827→          <RadioGroup
+   828→            value={gender}
+   829→            onValueChange={setGender}
+   830→            className="flex gap-4 pt-1.5"
+   831→          >
+   832→            <div className="flex items-center gap-2">
+   833→              <RadioGroupItem value="FEMALE" id="g-f" />
+   834→              <Label htmlFor="g-f">Female</Label>
+   835→            </div>
+   836→            <div className="flex items-center gap-2">
+   837→              <RadioGroupItem value="MALE" id="g-m" />
+   838→              <Label htmlFor="g-m">Male</Label>
+   839→            </div>
+   840→            <div className="flex items-center gap-2">
+   841→              <RadioGroupItem value="OTHER" id="g-o" />
+   842→              <Label htmlFor="g-o">Other</Label>
+   843→            </div>
+   844→          </RadioGroup>
+   845→        </Field>
+   846→        <Field label="Age" icon={<Activity className="h-3.5 w-3.5" />}>
+   847→          <Input
+   848→            type="number"
+   849→            min={0}
+   850→            max={130}
+   851→            value={age}
+   852→            onChange={(e) => setAge(e.target.value)}
+   853→            placeholder="e.g. 34"
+   854→          />
+   855→        </Field>
+   856→        <Field label="Date of birth">
+   857→          <Input
+   858→            type="date"
+   859→            value={dateOfBirth}
+   860→            onChange={(e) => setDateOfBirth(e.target.value)}
+   861→          />
+   862→        </Field>
+   863→        <Field label="Contact number" icon={<Phone className="h-3.5 w-3.5" />}>
+   864→          <Input
+   865→            value={contact}
+   866→            onChange={(e) => setContact(e.target.value)}
+   867→            placeholder="+880 1XXX-XXXXXX"
+   868→          />
+   869→        </Field>
+   870→        <Field label="Local ID number" icon={<FileText className="h-3.5 w-3.5" />}>
+   871→          <Input
+   872→            value={localIdNumber}
+   873→            onChange={(e) => setLocalIdNumber(e.target.value)}
+   874→            placeholder="Camp / clinic ID"
+   875→          />
+   876→        </Field>
+   877→        <Field label="Blood group" icon={<Droplet className="h-3.5 w-3.5" />}>
+   878→          <Select value={bloodGroup} onValueChange={setBloodGroup}>
+   879→            <SelectTrigger className="w-full">
+   880→              <SelectValue placeholder="Select blood group" />
+   881→            </SelectTrigger>
+   882→            <SelectContent>
+   883→              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'].map((bg) => (
+   884→                <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+   885→              ))}
+   886→            </SelectContent>
+   887→          </Select>
+   888→        </Field>
+   889→        <Field label="Height (cm)" icon={<Ruler className="h-3.5 w-3.5" />}>
+   890→          <Input
+   891→            type="number"
+   892→            min={0}
+   893→            value={heightCm}
+   894→            onChange={(e) => setHeightCm(e.target.value)}
+   895→            placeholder="e.g. 165"
+   896→          />
+   897→        </Field>
+   898→        <Field label="Weight (kg)" icon={<Weight className="h-3.5 w-3.5" />}>
+   899→          <Input
+   900→            type="number"
+   901→            min={0}
+   902→            value={weightKg}
+   903→            onChange={(e) => setWeightKg(e.target.value)}
+   904→            placeholder="e.g. 62"
+   905→          />
+   906→        </Field>
+   907→        <Field label="Profession" icon={<Briefcase className="h-3.5 w-3.5" />}>
+   908→          <Input
+   909→            value={profession}
+   910→            onChange={(e) => setProfession(e.target.value)}
+   911→            placeholder="e.g. Teacher"
+   912→          />
+   913→        </Field>
+   914→        <Field label="Education" icon={<GraduationCap className="h-3.5 w-3.5" />}>
+   915→          <Input
+   916→            value={education}
+   917→            onChange={(e) => setEducation(e.target.value)}
+   918→            placeholder="e.g. Secondary"
+   919→          />
+   920→        </Field>
+   921→        <Field label="Address" icon={<MapPin className="h-3.5 w-3.5" />} className="sm:col-span-2">
+   922→          <Textarea
+   923→            rows={2}
+   924→            value={address}
+   925→            onChange={(e) => setAddress(e.target.value)}
+   926→            placeholder="Village / ward / district"
+   927→          />
+   928→        </Field>
+   929→      </div>
+   930→
+   931→      {/* Consent */}
+   932→      <GlassPanel variant="subtle" className="p-3">
+   933→        <label className="flex cursor-pointer items-start gap-3">
+   934→          <Checkbox
+   935→            checked={consentGiven}
+   936→            onCheckedChange={(v) => setConsentGiven(v === true)}
+   937→            className="mt-0.5"
+   938→          />
+   939→          <div className="space-y-0.5">
+   940→            <p className="text-sm font-medium">
+   941→              Patient consent given <span className="text-red-500">*</span>
+   942→            </p>
+   943→            <p className="text-[11px] leading-snug text-muted-foreground">
+   944→              Patient (or guardian) has consented to local data collection and the de-identified
+   945→              summary being used for clinical decision support. Raw PHI never leaves this device.
+   946→            </p>
+   947→          </div>
+   948→        </label>
+   949→      </GlassPanel>
+   950→
+   951→      <StepFooter>
+   952→        <ContinueButton onClick={handleContinue} loading={saving} />
+   953→      </StepFooter>
+   954→    </div>
+   955→  )
+   956→}
+   957→
+   958→// ─────────────────────────────────────────────────────────────
+   959→// STEP 2 — Chief Complaint
+   960→// ─────────────────────────────────────────────────────────────
+   961→
+   962→function StepComplaint({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+   963→  const [complaint, setComplaint] = useState(patient?.chiefComplaint ?? '')
+   964→  const [notes, setNotes] = useState(() => {
+   965→    // If existing chiefComplaint has custom text after the structured label, restore it
+   966→    if (!patient?.chiefComplaint) return ''
+   967→    const parts = patient.chiefComplaint.split(' — ')
+   968→    return parts.length > 1 ? parts.slice(1).join(' — ') : ''
+   969→  })
+   970→  const [duration, setDuration] = useState('')
+   971→  const [saving, setSaving] = useState(false)
+   972→
+   973→  const MAX_NOTES = 300
+   974→
+   975→  const handleContinue = async () => {
+   976→    if (!complaint) {
+   977→      toast.error('Please select a chief complaint')
+   978→      return
+   979→    }
+   980→    setSaving(true)
+   981→    try {
+   982→      const combined = notes.trim()
+   983→        ? `${complaint} — ${notes.trim().slice(0, MAX_NOTES)}${duration ? ` (${duration})` : ''}`
+   984→        : complaint
+   985→      const res = await fetch(`/api/patients/${patient!.id}`, {
+   986→        method: 'PATCH',
+   987→        headers: { 'Content-Type': 'application/json' },
+   988→        body: JSON.stringify({ chiefComplaint: combined }),
+   989→      })
+   990→      if (!res.ok) throw new Error('Save failed')
+   991→      const data = await res.json()
+   992→      onPatientUpdated(data.patient)
+   993→      triggerSaved()
+   994→      toast.success('Chief complaint saved')
+   995→      onAdvance()
+   996→    } catch (e) {
+   997→      toast.error('Save failed', { description: (e as Error).message })
+   998→    } finally {
+   999→      setSaving(false)
+  1000→    }
+  1001→  }
+  1002→
+  1003→  return (
+  1004→    <div className="space-y-5">
+  1005→      <div className="grid gap-4 sm:grid-cols-2">
+  1006→        <Field label="Chief complaint" required>
+  1007→          <Select value={complaint.split(' — ')[0]} onValueChange={setComplaint}>
+  1008→            <SelectTrigger className="w-full">
+  1009→              <SelectValue placeholder="Select primary complaint" />
+  1010→            </SelectTrigger>
+  1011→            <SelectContent>
+  1012→              {CHIEF_COMPLAINTS.map((c) => (
+  1013→                <SelectItem key={c} value={c}>{c}</SelectItem>
+  1014→              ))}
+  1015→            </SelectContent>
+  1016→          </Select>
+  1017→        </Field>
+  1018→        <Field label="Duration (optional)">
+  1019→          <Input
+  1020→            value={duration}
+  1021→            onChange={(e) => setDuration(e.target.value)}
+  1022→            placeholder="e.g. 3 days"
+  1023→          />
+  1024→        </Field>
+  1025→      </div>
+  1026→
+  1027→      <Field
+  1028→        label="Additional notes (optional)"
+  1029→        hint={`${notes.length} / ${MAX_NOTES} chars`}
+  1030→      >
+  1031→        <Textarea
+  1032→          rows={3}
+  1033→          value={notes}
+  1034→          maxLength={MAX_NOTES}
+  1035→          onChange={(e) => setNotes(e.target.value)}
+  1036→          placeholder="Briefly describe onset, severity, associated symptoms…"
+  1037→        />
+  1038→      </Field>
+  1039→
+  1040→      <StepFooter>
+  1041→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1042→      </StepFooter>
+  1043→    </div>
+  1044→  )
+  1045→}
+  1046→
+  1047→// ─────────────────────────────────────────────────────────────
+  1048→// STEP 3 — Past History
+  1049→// ─────────────────────────────────────────────────────────────
+  1050→
+  1051→function StepHistory({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1052→  const [tags, setTags] = useState<string[]>(() => safeParse<string[]>(patient?.pastHistory, []))
+  1053→  const [notes, setNotes] = useState('')
+  1054→  const [saving, setSaving] = useState(false)
+  1055→  const MAX_NOTES = 400
+  1056→
+  1057→  const toggleTag = (t: string) => {
+  1058→    if (t === 'None') {
+  1059→      setTags(['None'])
+  1060→      return
+  1061→    }
+  1062→    setTags((prev) => {
+  1063→      const withoutNone = prev.filter((x) => x !== 'None')
+  1064→      return withoutNone.includes(t)
+  1065→        ? withoutNone.filter((x) => x !== t)
+  1066→        : [...withoutNone, t]
+  1067→    })
+  1068→  }
+  1069→
+  1070→  const handleContinue = async () => {
+  1071→    if (tags.length === 0) {
+  1072→      toast.error('Please select at least one tag (or "None")')
+  1073→      return
+  1074→    }
+  1075→    setSaving(true)
+  1076→    try {
+  1077→      const payload = JSON.stringify(tags)
+  1078→      const res = await fetch(`/api/patients/${patient!.id}`, {
+  1079→        method: 'PATCH',
+  1080→        headers: { 'Content-Type': 'application/json' },
+  1081→        body: JSON.stringify({ pastHistory: payload }),
+  1082→      })
+  1083→      if (!res.ok) throw new Error('Save failed')
+  1084→      const data = await res.json()
+  1085→      onPatientUpdated(data.patient)
+  1086→      triggerSaved()
+  1087→      toast.success('Past history saved')
+  1088→      onAdvance()
+  1089→    } catch (e) {
+  1090→      toast.error('Save failed', { description: (e as Error).message })
+  1091→    } finally {
+  1092→      setSaving(false)
+  1093→    }
+  1094→  }
+  1095→
+  1096→  return (
+  1097→    <div className="space-y-5">
+  1098→      <div>
+  1099→        <p className="mb-2 text-sm font-medium">Select relevant history tags</p>
+  1100→        <div className="flex flex-wrap gap-2">
+  1101→          {PAST_HISTORY_TAGS.map((t) => {
+  1102→            const active = tags.includes(t)
+  1103→            const isNone = t === 'None'
+  1104→            return (
+  1105→              <button
+  1106→                key={t}
+  1107→                type="button"
+  1108→                onClick={() => toggleTag(t)}
+  1109→                className={cn(
+  1110→                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+  1111→                  active && isNone && 'border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+  1112→                  active && !isNone && 'border-primary bg-primary text-primary-foreground',
+  1113→                  !active && 'border-border bg-muted/40 text-muted-foreground hover:bg-muted'
+  1114→                )}
+  1115→              >
+  1116→                {active && <Check className="h-3 w-3" />}
+  1117→                {t}
+  1118→              </button>
+  1119→            )
+  1120→          })}
+  1121→        </div>
+  1122→        {tags.length > 0 && !tags.includes('None') && (
+  1123→          <p className="mt-2 text-[11px] text-muted-foreground">
+  1124→            {tags.length} tag{tags.length > 1 ? 's' : ''} selected
+  1125→          </p>
+  1126→        )}
+  1127→      </div>
+  1128→
+  1129→      <Field
+  1130→        label="Additional history notes (optional)"
+  1131→        hint={`${notes.length} / ${MAX_NOTES} chars`}
+  1132→      >
+  1133→        <Textarea
+  1134→          rows={3}
+  1135→          maxLength={MAX_NOTES}
+  1136→          value={notes}
+  1137→          onChange={(e) => setNotes(e.target.value)}
+  1138→          placeholder="Family history, surgical details, ongoing treatment context…"
+  1139→        />
+  1140→      </Field>
+  1141→
+  1142→      <StepFooter>
+  1143→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1144→      </StepFooter>
+  1145→    </div>
+  1146→  )
+  1147→}
+  1148→
+  1149→// ─────────────────────────────────────────────────────────────
+  1150→// STEP 4 — Ongoing Medications
+  1151→// ─────────────────────────────────────────────────────────────
+  1152→
+  1153→function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1154→  const [meds, setMeds] = useState<MedicationEntry[]>(() =>
+  1155→    safeParse<MedicationEntry[]>(patient?.ongoingMedications, [])
+  1156→  )
+  1157→  const [saving, setSaving] = useState(false)
+  1158→
+  1159→  const addMed = () => {
+  1160→    setMeds((prev) => [...prev, { drug: '', dose: '', frequency: '' }])
+  1161→  }
+  1162→
+  1163→  const updateMed = (idx: number, patch: Partial<MedicationEntry>) => {
+  1164→    setMeds((prev) => prev.map((m, i) => (i === idx ? { ...m, ...patch } : m)))
+  1165→  }
+  1166→
+  1167→  const removeMed = (idx: number) => {
+  1168→    setMeds((prev) => prev.filter((_, i) => i !== idx))
+  1169→  }
+  1170→
+  1171→  const duplicateDrugs = useMemo(() => {
+  1172→    const seen = new Map<string, number>()
+  1173→    meds.forEach((m) => {
+  1174→      if (!m.drug) return
+  1175→      seen.set(m.drug.toLowerCase(), (seen.get(m.drug.toLowerCase()) ?? 0) + 1)
+  1176→    })
+  1177→    return new Set([...seen.entries()].filter(([, n]) => n > 1).map(([k]) => k))
+  1178→  }, [meds])
+  1179→
+  1180→  const handleContinue = async () => {
+  1181→    setSaving(true)
+  1182→    try {
+  1183→      // Filter out empty rows
+  1184→      const cleaned = meds.filter((m) => m.drug.trim())
+  1185→      const payload = JSON.stringify(cleaned)
+  1186→      const res = await fetch(`/api/patients/${patient!.id}`, {
+  1187→        method: 'PATCH',
+  1188→        headers: { 'Content-Type': 'application/json' },
+  1189→        body: JSON.stringify({ ongoingMedications: payload }),
+  1190→      })
+  1191→      if (!res.ok) throw new Error('Save failed')
+  1192→      const data = await res.json()
+  1193→      onPatientUpdated(data.patient)
+  1194→      triggerSaved()
+  1195→      toast.success(
+  1196→        cleaned.length > 0
+  1197→          ? `${cleaned.length} medication${cleaned.length > 1 ? 's' : ''} saved`
+  1198→          : 'Medications cleared (no ongoing meds)'
+  1199→      )
+  1200→      onAdvance()
+  1201→    } catch (e) {
+  1202→      toast.error('Save failed', { description: (e as Error).message })
+  1203→    } finally {
+  1204→      setSaving(false)
+  1205→    }
+  1206→  }
+  1207→
+  1208→  return (
+  1209→    <div className="space-y-4">
+  1210→      <div className="flex items-center justify-between">
+  1211→        <p className="text-sm text-muted-foreground">
+  1212→          Add each ongoing medication. Leave empty if patient is not on any medication.
+  1213→        </p>
+  1214→        <Button variant="outline" size="sm" onClick={addMed} className="gap-1.5">
+  1215→          <Plus className="h-3.5 w-3.5" />
+  1216→          Add medication
+  1217→        </Button>
+  1218→      </div>
+  1219→
+  1220→      {meds.length === 0 ? (
+  1221→        <GlassPanel variant="subtle" className="p-6 text-center">
+  1222→          <Pill className="mx-auto h-8 w-8 text-muted-foreground/50" />
+  1223→          <p className="mt-2 text-sm font-medium">No medications added</p>
+  1224→          <p className="mt-1 text-xs text-muted-foreground">
+  1225→            Patient is not on any ongoing medication. Continue to proceed.
+  1226→          </p>
+  1227→        </GlassPanel>
+  1228→      ) : (
+  1229→        <div className="space-y-2.5">
+  1230→          {meds.map((m, idx) => {
+  1231→            const isDuplicate = m.drug && duplicateDrugs.has(m.drug.toLowerCase())
+  1232→            return (
+  1233→              <GlassPanel key={idx} variant="subtle" className="p-3">
+  1234→                <div className="grid gap-2.5 sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-end">
+  1235→                  <Field label={idx === 0 ? 'Drug' : undefined}>
+  1236→                    <Select
+  1237→                      value={m.drug}
+  1238→                      onValueChange={(v) => updateMed(idx, { drug: v, custom: v === '__custom' })}
+  1239→                    >
+  1240→                      <SelectTrigger className="w-full">
+  1241→                        <SelectValue placeholder="Select or type below" />
+  1242→                      </SelectTrigger>
+  1243→                      <SelectContent>
+  1244→                        {COMMON_MEDICATIONS.map((d) => (
+  1245→                          <SelectItem key={d} value={d}>{d}</SelectItem>
+  1246→                        ))}
+  1247→                        <SelectItem value="__custom">Custom drug…</SelectItem>
+  1248→                      </SelectContent>
+  1249→                    </Select>
+  1250→                    {m.drug === '__custom' && (
+  1251→                      <Input
+  1252→                        className="mt-1.5"
+  1253→                        placeholder="Type drug name"
+  1254→                        value={m.custom ? '' : m.drug === '__custom' ? '' : m.drug}
+  1255→                        onChange={(e) => updateMed(idx, { drug: e.target.value, custom: true })}
+  1256→                      />
+  1257→                    )}
+  1258→                  </Field>
+  1259→                  <Field label={idx === 0 ? 'Dose' : undefined}>
+  1260→                    <Input
+  1261→                      placeholder="e.g. 500mg"
+  1262→                      value={m.dose}
+  1263→                      onChange={(e) => updateMed(idx, { dose: e.target.value })}
+  1264→                    />
+  1265→                  </Field>
+  1266→                  <Field label={idx === 0 ? 'Frequency' : undefined}>
+  1267→                    <Select
+  1268→                      value={m.frequency}
+  1269→                      onValueChange={(v) => updateMed(idx, { frequency: v })}
+  1270→                    >
+  1271→                      <SelectTrigger className="w-full">
+  1272→                        <SelectValue placeholder="Select" />
+  1273→                      </SelectTrigger>
+  1274→                      <SelectContent>
+  1275→                        {['Once daily', 'Twice daily', 'Three times daily', 'As needed', 'Weekly', 'Monthly'].map((f) => (
+  1276→                          <SelectItem key={f} value={f}>{f}</SelectItem>
+  1277→                        ))}
+  1278→                      </SelectContent>
+  1279→                    </Select>
+  1280→                  </Field>
+  1281→                  <Button
+  1282→                    variant="ghost"
+  1283→                    size="icon"
+  1284→                    className="h-9 w-9 text-muted-foreground hover:text-red-500"
+  1285→                    onClick={() => removeMed(idx)}
+  1286→                    aria-label="Remove medication"
+  1287→                  >
+  1288→                    <Trash2 className="h-4 w-4" />
+  1289→                  </Button>
+  1290→                </div>
+  1291→                {isDuplicate && (
+  1292→                  <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+  1293→                    <AlertTriangle className="h-3 w-3" />
+  1294→                    Duplicate drug — patient may already be on this medication
+  1295→                  </div>
+  1296→                )}
+  1297→              </GlassPanel>
+  1298→            )
+  1299→          })}
+  1300→        </div>
+  1301→      )}
+  1302→
+  1303→      <StepFooter>
+  1304→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1305→      </StepFooter>
+  1306→    </div>
+  1307→  )
+  1308→}
+  1309→
+  1310→// ─────────────────────────────────────────────────────────────
+  1311→// STEP 5 — Vitals
+  1312→// ─────────────────────────────────────────────────────────────
+  1313→
+  1314→function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance, triggerSaved }: StepProps & {
+  1315→  existingVitals: VitalsRecord | null
+  1316→}) {
+  1317→  const [temperature, setTemperature] = useState(existingVitals?.temperature?.toString() ?? '')
+  1318→  const [bpSystolic, setBpSystolic] = useState(existingVitals?.bpSystolic?.toString() ?? '')
+  1319→  const [bpDiastolic, setBpDiastolic] = useState(existingVitals?.bpDiastolic?.toString() ?? '')
+  1320→  const [heartRate, setHeartRate] = useState(existingVitals?.heartRate?.toString() ?? '')
+  1321→  const [spo2, setSpo2] = useState(existingVitals?.spo2?.toString() ?? '')
+  1322→  const [weightKg, setWeightKg] = useState(existingVitals?.weightKg?.toString() ?? patient?.weightKg?.toString() ?? '')
+  1323→  const [heightCm, setHeightCm] = useState(existingVitals?.heightCm?.toString() ?? patient?.heightCm?.toString() ?? '')
+  1324→  const [saving, setSaving] = useState(false)
+  1325→
+  1326→  const triagePreview: TriageLevel = useMemo(
+  1327→    () =>
+  1328→      computeTriageLevel({
+  1329→        temperature: temperature ? Number(temperature) : null,
+  1330→        bpSystolic: bpSystolic ? Number(bpSystolic) : null,
+  1331→        bpDiastolic: bpDiastolic ? Number(bpDiastolic) : null,
+  1332→        heartRate: heartRate ? Number(heartRate) : null,
+  1333→        spo2: spo2 ? Number(spo2) : null,
+  1334→      }),
+  1335→    [temperature, bpSystolic, bpDiastolic, heartRate, spo2]
+  1336→  )
+  1337→
+  1338→  const abnormalFlags = useMemo(() => {
+  1339→    const flags: { field: string; msg: string }[] = []
+  1340→    const t = temperature ? Number(temperature) : null
+  1341→    const s = bpSystolic ? Number(bpSystolic) : null
+  1342→    const d = bpDiastolic ? Number(bpDiastolic) : null
+  1343→    const hr = heartRate ? Number(heartRate) : null
+  1344→    const sp = spo2 ? Number(spo2) : null
+  1345→    if (t != null && (t >= 39.5 || t <= 35)) flags.push({ field: 'Temperature', msg: `${t}°C — critical range` })
+  1346→    else if (t != null && (t >= 38.5 || t < 36)) flags.push({ field: 'Temperature', msg: `${t}°C — abnormal` })
+  1347→    if (s != null && s >= 180) flags.push({ field: 'BP Systolic', msg: `${s} mmHg — hypertensive crisis` })
+  1348→    if (d != null && d >= 120) flags.push({ field: 'BP Diastolic', msg: `${d} mmHg — hypertensive crisis` })
+  1349→    if (hr != null && (hr >= 120 || hr <= 50)) flags.push({ field: 'Heart rate', msg: `${hr} BPM — critical` })
+  1350→    if (sp != null && sp <= 90) flags.push({ field: 'SpO₂', msg: `${sp}% — hypoxemia` })
+  1351→    else if (sp != null && sp <= 94) flags.push({ field: 'SpO₂', msg: `${sp}% — below normal` })
+  1352→    return flags
+  1353→  }, [temperature, bpSystolic, bpDiastolic, heartRate, spo2])
+  1354→
+  1355→  const handleContinue = async () => {
+  1356→    if (!temperature && !bpSystolic && !heartRate && !spo2) {
+  1357→      toast.error('Please record at least one vital sign')
+  1358→      return
+  1359→    }
+  1360→    setSaving(true)
+  1361→    try {
+  1362→      const res = await fetch('/api/vitals', {
+  1363→        method: 'POST',
+  1364→        headers: { 'Content-Type': 'application/json' },
+  1365→        body: JSON.stringify({
+  1366→          patientId: patient!.id,
+  1367→          recordedBy: user.id,
+  1368→          temperature: temperature ? Number(temperature) : null,
+  1369→          bpSystolic: bpSystolic ? Number(bpSystolic) : null,
+  1370→          bpDiastolic: bpDiastolic ? Number(bpDiastolic) : null,
+  1371→          heartRate: heartRate ? Number(heartRate) : null,
+  1372→          spo2: spo2 ? Number(spo2) : null,
+  1373→          weightKg: weightKg ? Number(weightKg) : null,
+  1374→          heightCm: heightCm ? Number(heightCm) : null,
+  1375→        }),
+  1376→      })
+  1377→      if (!res.ok) throw new Error('Failed to record vitals')
+  1378→      const data = await res.json()
+  1379→      onVitalsRecorded(data.vitals)
+  1380→      triggerSaved()
+  1381→      toast.success(`Vitals recorded · Triage ${data.triageLevel}`, {
+  1382→        description: data.triageLevel === 'RED'
+  1383→          ? 'Critical — prioritize this patient'
+  1384→          : data.triageLevel === 'YELLOW'
+  1385→            ? 'Abnormal — clinical review advised'
+  1386→            : 'Within normal limits',
+  1387→      })
+  1388→      onAdvance()
+  1389→    } catch (e) {
+  1390→      toast.error('Save failed', { description: (e as Error).message })
+  1391→    } finally {
+  1392→      setSaving(false)
+  1393→    }
+  1394→  }
+  1395→
+  1396→  return (
+  1397→    <div className="space-y-4">
+  1398→      {/* Triage preview */}
+  1399→      <GlassPanel variant="subtle" className="flex items-center justify-between p-3">
+  1400→        <div className="flex items-center gap-2">
+  1401→          <Activity className="h-4 w-4 text-primary" />
+  1402→          <span className="text-sm font-medium">Local triage level (computed, no AI)</span>
+  1403→        </div>
+  1404→        <TriageBadge level={triagePreview} />
+  1405→      </GlassPanel>
+  1406→
+  1407→      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  1408→        <Field label="Temperature (°C)" icon={<Thermometer className="h-3.5 w-3.5" />}>
+  1409→          <Input
+  1410→            type="number"
+  1411→            step="0.1"
+  1412→            value={temperature}
+  1413→            onChange={(e) => setTemperature(e.target.value)}
+  1414→            placeholder="36.5"
+  1415→          />
+  1416→        </Field>
+  1417→        <Field label="BP systolic (mmHg)" icon={<HeartPulse className="h-3.5 w-3.5" />}>
+  1418→          <Input
+  1419→            type="number"
+  1420→            value={bpSystolic}
+  1421→            onChange={(e) => setBpSystolic(e.target.value)}
+  1422→            placeholder="120"
+  1423→          />
+  1424→        </Field>
+  1425→        <Field label="BP diastolic (mmHg)">
+  1426→          <Input
+  1427→            type="number"
+  1428→            value={bpDiastolic}
+  1429→            onChange={(e) => setBpDiastolic(e.target.value)}
+  1430→            placeholder="80"
+  1431→          />
+  1432→        </Field>
+  1433→        <Field label="Heart rate (BPM)" icon={<HeartPulse className="h-3.5 w-3.5" />}>
+  1434→          <Input
+  1435→            type="number"
+  1436→            value={heartRate}
+  1437→            onChange={(e) => setHeartRate(e.target.value)}
+  1438→            placeholder="72"
+  1439→          />
+  1440→        </Field>
+  1441→        <Field label="SpO₂ (%)" icon={<Wind className="h-3.5 w-3.5" />}>
+  1442→          <Input
+  1443→            type="number"
+  1444→            min={0}
+  1445→            max={100}
+  1446→            value={spo2}
+  1447→            onChange={(e) => setSpo2(e.target.value)}
+  1448→            placeholder="98"
+  1449→          />
+  1450→        </Field>
+  1451→        <Field label="Weight (kg)" icon={<Weight className="h-3.5 w-3.5" />}>
+  1452→          <Input
+  1453→            type="number"
+  1454→            value={weightKg}
+  1455→            onChange={(e) => setWeightKg(e.target.value)}
+  1456→            placeholder="62"
+  1457→          />
+  1458→        </Field>
+  1459→        <Field label="Height (cm)" icon={<Ruler className="h-3.5 w-3.5" />}>
+  1460→          <Input
+  1461→            type="number"
+  1462→            value={heightCm}
+  1463→            onChange={(e) => setHeightCm(e.target.value)}
+  1464→            placeholder="165"
+  1465→          />
+  1466→        </Field>
+  1467→      </div>
+  1468→
+  1469→      {abnormalFlags.length > 0 && (
+  1470→        <GlassPanel variant="subtle" className="space-y-1.5 p-3">
+  1471→          <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+  1472→            <AlertTriangle className="h-3.5 w-3.5" />
+  1473→            {abnormalFlags.length} abnormal value{abnormalFlags.length > 1 ? 's' : ''} detected
+  1474→          </div>
+  1475→          {abnormalFlags.map((f, i) => (
+  1476→            <p key={i} className="text-[11px] text-muted-foreground">
+  1477→              · <span className="font-medium text-foreground">{f.field}:</span> {f.msg}
+  1478→            </p>
+  1479→          ))}
+  1480→        </GlassPanel>
+  1481→      )}
+  1482→
+  1483→      <StepFooter>
+  1484→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1485→      </StepFooter>
+  1486→    </div>
+  1487→  )
+  1488→}
+  1489→
+  1490→// ─────────────────────────────────────────────────────────────
+  1491→// STEP 6 — Hypersensitivity (Allergies)
+  1492→// ─────────────────────────────────────────────────────────────
+  1493→
+  1494→function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1495→  const [allergies, setAllergies] = useState<AllergyEntry[]>(() => {
+  1496→    const parsed = safeParse<AllergyEntry[]>(patient?.allergies, [])
+  1497→    // If patient has no allergies field yet, default to "None"
+  1498→    if (!patient?.allergies && parsed.length === 0) return [{ allergen: 'None', severity: 'Mild' }]
+  1499→    return parsed
+  1500→  })
+  1501→  const [saving, setSaving] = useState(false)
+  1502→
+  1503→  const hasNone = allergies.some((a) => a.allergen.toLowerCase() === 'none')
+  1504→
+  1505→  const addAllergy = () => {
+  1506→    if (hasNone) {
+  1507→      // Remove None when adding a real allergy
+  1508→      setAllergies([{ allergen: '', severity: 'Mild' }])
+  1509→      return
+  1510→    }
+  1511→    setAllergies((prev) => [...prev, { allergen: '', severity: 'Mild' }])
+  1512→  }
+  1513→
+  1514→  const updateAllergy = (idx: number, patch: Partial<AllergyEntry>) => {
+  1515→    setAllergies((prev) => prev.map((a, i) => (i === idx ? { ...a, ...patch } : a)))
+  1516→  }
+  1517→
+  1518→  const removeAllergy = (idx: number) => {
+  1519→    setAllergies((prev) => {
+  1520→      const next = prev.filter((_, i) => i !== idx)
+  1521→      return next.length === 0 ? [{ allergen: 'None', severity: 'Mild' }] : next
+  1522→    })
+  1523→  }
+  1524→
+  1525→  const markNone = () => {
+  1526→    setAllergies([{ allergen: 'None', severity: 'Mild' }])
+  1527→  }
+  1528→
+  1529→  const handleContinue = async () => {
+  1530→    if (allergies.length === 0) {
+  1531→      toast.error('Please mark "No known allergies" or add at least one entry')
+  1532→      return
+  1533→    }
+  1534→    setSaving(true)
+  1535→    try {
+  1536→      const cleaned = allergies.filter((a) => a.allergen.trim())
+  1537→      if (cleaned.length === 0) {
+  1538→        toast.error('Allergy entries cannot be empty')
+  1539→        setSaving(false)
+  1540→        return
+  1541→      }
+  1542→      const payload = JSON.stringify(cleaned)
+  1543→      const res = await fetch(`/api/patients/${patient!.id}`, {
+  1544→        method: 'PATCH',
+  1545→        headers: { 'Content-Type': 'application/json' },
+  1546→        body: JSON.stringify({ allergies: payload }),
+  1547→      })
+  1548→      if (!res.ok) throw new Error('Save failed')
+  1549→      const data = await res.json()
+  1550→      onPatientUpdated(data.patient)
+  1551→      triggerSaved()
+  1552→      toast.success(
+  1553→        hasNone ? 'No known allergies recorded' : `${cleaned.length} allerg${cleaned.length > 1 ? 'ies' : 'y'} saved`
+  1554→      )
+  1555→      onAdvance()
+  1556→    } catch (e) {
+  1557→      toast.error('Save failed', { description: (e as Error).message })
+  1558→    } finally {
+  1559→      setSaving(false)
+  1560→    }
+  1561→  }
+  1562→
+  1563→  return (
+  1564→    <div className="space-y-4">
+  1565→      <div className="flex flex-wrap items-center justify-between gap-2">
+  1566→        <p className="text-sm text-muted-foreground">
+  1567→          Record known hypersensitivities. At least one entry (or "None") is required.
+  1568→        </p>
+  1569→        <div className="flex gap-2">
+  1570→          <Button variant="outline" size="sm" onClick={markNone} disabled={hasNone} className="gap-1.5">
+  1571→            <Check className="h-3.5 w-3.5" />
+  1572→            No known allergies
+  1573→          </Button>
+  1574→          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="gap-1.5">
+  1575→            <Plus className="h-3.5 w-3.5" />
+  1576→            Add allergy
+  1577→          </Button>
+  1578→        </div>
+  1579→      </div>
+  1580→
+  1581→      {hasNone ? (
+  1582→        <GlassPanel variant="subtle" className="flex items-center gap-3 p-4">
+  1583→          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+  1584→            <Check className="h-4 w-4" />
+  1585→          </div>
+  1586→          <div>
+  1587→            <p className="text-sm font-medium">No known allergies (NKA)</p>
+  1588→            <p className="text-xs text-muted-foreground">Patient has no documented hypersensitivities.</p>
+  1589→          </div>
+  1590→        </GlassPanel>
+  1591→      ) : (
+  1592→        <div className="space-y-2.5">
+  1593→          {allergies.map((a, idx) => (
+  1594→            <GlassPanel key={idx} variant="subtle" className="p-3">
+  1595→              <div className="grid gap-2.5 sm:grid-cols-[1.5fr_1fr_auto] sm:items-end">
+  1596→                <Field label={idx === 0 ? 'Allergen' : undefined}>
+  1597→                  <Input
+  1598→                    placeholder="e.g. Penicillin, Peanuts, Latex"
+  1599→                    value={a.allergen}
+  1600→                    onChange={(e) => updateAllergy(idx, { allergen: e.target.value })}
+  1601→                  />
+  1602→                </Field>
+  1603→                <Field label={idx === 0 ? 'Severity' : undefined}>
+  1604→                  <Select
+  1605→                    value={a.severity}
+  1606→                    onValueChange={(v) => updateAllergy(idx, { severity: v })}
+  1607→                  >
+  1608→                    <SelectTrigger className="w-full">
+  1609→                      <SelectValue placeholder="Select severity" />
+  1610→                    </SelectTrigger>
+  1611→                    <SelectContent>
+  1612→                      {ALLERGY_SEVERITIES.map((s) => (
+  1613→                        <SelectItem key={s} value={s}>{s}</SelectItem>
+  1614→                      ))}
+  1615→                    </SelectContent>
+  1616→                  </Select>
+  1617→                </Field>
+  1618→                <Button
+  1619→                  variant="ghost"
+  1620→                  size="icon"
+  1621→                  className="h-9 w-9 text-muted-foreground hover:text-red-500"
+  1622→                  onClick={() => removeAllergy(idx)}
+  1623→                  aria-label="Remove allergy"
+  1624→                >
+  1625→                  <Trash2 className="h-4 w-4" />
+  1626→                </Button>
+  1627→              </div>
+  1628→            </GlassPanel>
+  1629→          ))}
+  1630→        </div>
+  1631→      )}
+  1632→
+  1633→      <StepFooter>
+  1634→        <ContinueButton onClick={handleContinue} loading={saving} />
+  1635→      </StepFooter>
+  1636→    </div>
+  1637→  )
+  1638→}
+  1639→
+  1640→// ─────────────────────────────────────────────────────────────
+  1641→// STEP 7 — Assign Doctor
+  1642→// ─────────────────────────────────────────────────────────────
+  1643→
+  1644→const TIME_SLOTS = [
+  1645→  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+  1646→  '12:00', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+  1647→]
+  1648→
+  1649→function StepDoctor({ patient, onAdvance, triggerSaved }: StepProps) {
+  1650→  const [doctors, setDoctors] = useState<Doctor[]>([])
+  1651→  const [loading, setLoading] = useState(true)
+  1652→  const [doctorId, setDoctorId] = useState('')
+  1653→  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
+  1654→  const [slot, setSlot] = useState('')
+  1655→  const [reason, setReason] = useState('')
+  1656→  const [saving, setSaving] = useState(false)
+  1657→
+  1658→  useEffect(() => {
+  1659→    fetch('/api/staff?role=DOCTOR')
+  1660→      .then((r) => r.json())
+  1661→      .then((data) => setDoctors(data.staff ?? []))
+  1662→      .catch(() => toast.error('Failed to load doctors'))
+  1663→      .finally(() => setLoading(false))
+  1664→  }, [])
+  1665→
+  1666→  const handleContinue = async () => {
+  1667→    if (!doctorId) {
+  1668→      toast.error('Please select a doctor')
+  1669→      return
+  1670→    }
+  1671→    if (!date || !slot) {
+  1672→      toast.error('Please pick a date and time slot')
+  1673→      return
+  1674→    }
+  1675→    setSaving(true)
+  1676→    try {
+  1677→      const scheduledAt = new Date(`${date}T${slot}:00`).toISOString()
+  1678→      const res = await fetch('/api/appointments', {
+  1679→        method: 'POST',
+  1680→        headers: { 'Content-Type': 'application/json' },
+  1681→        body: JSON.stringify({
+  1682→          patientId: patient!.id,
+  1683→          doctorId,
+  1684→          scheduledAt,
+  1685→          reason: reason || patient!.chiefComplaint || 'Consultation',
+  1686→          status: 'SCHEDULED',
+  1687→        }),
+  1688→      })
+  1689→      if (!res.ok) throw new Error('Failed to schedule appointment')
+  1690→      triggerSaved()
+  1691→      const doc = doctors.find((d) => d.id === doctorId)
+  1692→      toast.success(`Appointment scheduled with ${doc?.name ?? 'doctor'}`)
+  1693→      onAdvance()
+  1694→    } catch (e) {
+  1695→      toast.error('Scheduling failed', { description: (e as Error).message })
+  1696→    } finally {
+  1697→      setSaving(false)
+  1698→    }
+  1699→  }
+  1700→
+  1701→  if (loading) {
+  1702→    return (
+  1703→      <div className="flex items-center justify-center py-10">
+  1704→        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+  1705→      </div>
+  1706→    )
+  1707→  }
+  1708→
+  1709→  return (
+  1710→    <div className="space-y-4">
+  1711→      {doctors.length === 0 ? (
+  1712→        <GlassPanel variant="subtle" className="p-4 text-center text-sm text-muted-foreground">
+  1713→          <Stethoscope className="mx-auto h-8 w-8 opacity-50" />
+  1714→          <p className="mt-2 font-medium text-foreground">No doctors available</p>
+  1715→          <p className="mt-1 text-xs">Ask an administrator to add doctors in Staff management.</p>
+  1716→        </GlassPanel>
+  1717→      ) : (
+  1718→        <>
+  1719→          <Field label="Assign doctor" required>
+  1720→            <Select value={doctorId} onValueChange={setDoctorId}>
+  1721→              <SelectTrigger className="w-full">
+  1722→                <SelectValue placeholder="Select a doctor" />
+  1723→              </SelectTrigger>
+  1724→              <SelectContent>
+  1725→                {doctors.map((d) => (
+  1726→                  <SelectItem key={d.id} value={d.id}>
+  1727→                    {d.name}
+  1728→                  </SelectItem>
+  1729→                ))}
+  1730→              </SelectContent>
+  1731→            </Select>
+  1732→          </Field>
+  1733→
+  1734→          <div className="grid gap-4 sm:grid-cols-2">
+  1735→            <Field label="Appointment date" icon={<Calendar className="h-3.5 w-3.5" />} required>
+  1736→              <Input
+  1737→                type="date"
+  1738→                value={date}
+  1739→                min={new Date().toISOString().slice(0, 10)}
+  1740→                onChange={(e) => setDate(e.target.value)}
+  1741→              />
+  1742→            </Field>
+  1743→            <Field label="Time slot" required>
+  1744→              <Select value={slot} onValueChange={setSlot}>
+  1745→                <SelectTrigger className="w-full">
+  1746→                  <SelectValue placeholder="Select a time slot" />
+  1747→                </SelectTrigger>
+  1748→                <SelectContent>
+  1749→                  {TIME_SLOTS.map((s) => (
+  1750→                    <SelectItem key={s} value={s}>{s}</SelectItem>
+  1751→                  ))}
+  1752→                </SelectContent>
+  1753→              </Select>
+  1754→            </Field>
+  1755→          </div>
+  1756→
+  1757→          <Field label="Reason for visit (optional)">
+  1758→            <Textarea
+  1759→              rows={2}
+  1760→              value={reason}
+  1761→              onChange={(e) => setReason(e.target.value)}
+  1762→              placeholder="Defaults to chief complaint"
+  1763→            />
+  1764→          </Field>
+  1765→
+  1766→          {doctorId && date && slot && (
+  1767→            <GlassPanel variant="subtle" className="flex items-center gap-3 p-3">
+  1768→              <Calendar className="h-4 w-4 text-primary" />
+  1769→              <p className="text-sm">
+  1770→                <span className="font-medium">
+  1771→                  {doctors.find((d) => d.id === doctorId)?.name}
+  1772→                </span>
+  1773→                <span className="text-muted-foreground">
+  1774→                  {' · '}{new Date(`${date}T${slot}:00`).toLocaleString(undefined, {
+  1775→                    weekday: 'short',
+  1776→                    month: 'short',
+  1777→                    day: 'numeric',
+  1778→                    hour: '2-digit',
+  1779→                    minute: '2-digit',
+  1780→                  })}
+  1781→                </span>
+  1782→              </p>
+  1783→            </GlassPanel>
+  1784→          )}
+  1785→        </>
+  1786→      )}
+  1787→
+  1788→      <StepFooter>
+  1789→        <ContinueButton
+  1790→          onClick={handleContinue}
+  1791→          loading={saving}
+  1792→          disabled={doctors.length === 0}
+  1793→          label="Schedule & Continue"
+  1794→        />
+  1795→      </StepFooter>
+  1796→    </div>
+  1797→  )
+  1798→}
+  1799→
+  1800→// ─────────────────────────────────────────────────────────────
+  1801→// STEP 8 — Local Summary (PRIVACY FIREWALL — NO AI, NO NETWORK)
+  1802→// ─────────────────────────────────────────────────────────────
+  1803→
+  1804→function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1805→  const [summary, setSummary] = useState<string | null>(patient?.localSummary ?? null)
+  1806→  const [compressionRatio, setCompressionRatio] = useState<number | null>(null)
+  1807→  const [summaryId, setSummaryId] = useState<string | null>(null)
+  1808→  const [generating, setGenerating] = useState(false)
+  1809→  const [error, setError] = useState<string | null>(null)
+  1810→  const hasGenerated = !!summary
+  1811→
+  1812→  const generate = useCallback(async () => {
+  1813→    if (!patient) return
+  1814→    setGenerating(true)
+  1815→    setError(null)
+  1816→    try {
+  1817→      const res = await fetch('/api/summary', {
+  1818→        method: 'POST',
+  1819→        headers: { 'Content-Type': 'application/json' },
+  1820→        body: JSON.stringify({ patientId: patient.id }),
+  1821→      })
+  1822→      if (!res.ok) {
+  1823→        const data = await res.json().catch(() => ({}))
+  1824→        throw new Error(data.error ?? 'Failed to generate summary')
+  1825→      }
+  1826→      const data: SummaryResponse = await res.json()
+  1827→      setSummary(data.summary)
+  1828→      setCompressionRatio(data.compressionRatio)
+  1829→      setSummaryId(data.summaryId)
+  1830→      onPatientUpdated({ localSummary: data.summary })
+  1831→      triggerSaved()
+  1832→      toast.success('patient_summary_v1 generated locally', {
+  1833→        description: `Compression: ${Math.round(data.compressionRatio * 100)}% · Privacy firewall active`,
+  1834→      })
+  1835→    } catch (e) {
+  1836→      setError((e as Error).message)
+  1837→      toast.error('Summary generation failed', { description: (e as Error).message })
+  1838→    } finally {
+  1839→      setGenerating(false)
+  1840→    }
+  1841→  }, [patient, onPatientUpdated, triggerSaved])
+  1842→
+  1843→  // Auto-generate on first entry if no summary yet
+  1844→  useEffect(() => {
+  1845→    if (!patient) return
+  1846→    if (!patient.localSummary && !generating && !error) {
+  1847→      generate()
+  1848→    }
+  1849→  }, [patient, generating, error, generate])
+  1850→
+  1851→  const handleContinue = () => {
+  1852→    if (!summary) {
+  1853→      toast.error('Please generate the local summary first')
+  1854→      return
+  1855→    }
+  1856→    onAdvance()
+  1857→  }
+  1858→
+  1859→  return (
+  1860→    <div className="space-y-4">
+  1861→      {/* Firewall banner */}
+  1862→      <GlassPanel variant="subtle" className="border-emerald-500/30 bg-emerald-500/5 p-4">
+  1863→        <div className="flex items-start gap-3">
+  1864→          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+  1865→            <ShieldCheck className="h-5 w-5" />
+  1866→          </div>
+  1867→          <div className="min-w-0 flex-1">
+  1868→            <div className="flex flex-wrap items-center gap-2">
+  1869→              <p className="text-sm font-semibold">Privacy Firewall</p>
+  1870→              {hasGenerated && (
+  1871→                <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
+  1872→                  <Check className="h-3 w-3" /> Complete
+  1873→                </Badge>
+  1874→              )}
+  1875→            </div>
+  1876→            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+  1877→              This step is <strong>strictly local</strong>. No AI, no network. A de-identified
+  1878→              summary (<code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>) is
+  1879→              generated from the structured data captured so far. All downstream AI calls
+  1880→              receive <em>only</em> this summary — raw PHI never leaves the device.
+  1881→            </p>
+  1882→          </div>
+  1883→        </div>
+  1884→      </GlassPanel>
+  1885→
+  1886→      {error && (
+  1887→        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300">
+  1888→          <AlertTriangle className="h-3.5 w-3.5" />
+  1889→          {error}
+  1890→          <Button variant="ghost" size="sm" onClick={generate} className="ml-auto h-6 px-2 text-[11px]">
+  1891→            Retry
+  1892→          </Button>
+  1893→        </div>
+  1894→      )}
+  1895→
+  1896→      {generating && !hasGenerated && (
+  1897→        <GlassPanel variant="subtle" className="flex items-center gap-3 p-6">
+  1898→          <Loader2 className="h-5 w-5 animate-spin text-emerald-600 dark:text-emerald-400" />
+  1899→          <div>
+  1900→            <p className="text-sm font-medium">Generating patient_summary_v1…</p>
+  1901→            <p className="text-xs text-muted-foreground">Compressing structured data, stripping PHI…</p>
+  1902→          </div>
+  1903→        </GlassPanel>
+  1904→      )}
+  1905→
+  1906→      {summary && (
+  1907→        <>
+  1908→          {/* Summary output — monospace box */}
+  1909→          <div>
+  1910→            <div className="mb-2 flex items-center justify-between">
+  1911→              <p className="text-sm font-medium">patient_summary_v1 (de-identified)</p>
+  1912→              <Button
+  1913→                variant="ghost"
+  1914→                size="sm"
+  1915→                onClick={generate}
+  1916→                disabled={generating}
+  1917→                className="h-7 gap-1.5 text-[11px] text-muted-foreground"
+  1918→              >
+  1919→                <RotateCcw className="h-3 w-3" />
+  1920→                Regenerate
+  1921→              </Button>
+  1922→            </div>
+  1923→            <pre className="max-h-72 overflow-auto rounded-xl border border-border/60 bg-muted/40 p-4 font-mono text-[12px] leading-relaxed text-foreground/90 orio-scroll">
+  1924→{summary}
+  1925→            </pre>
+  1926→            {summaryId && (
+  1927→              <p className="mt-1.5 text-[10px] text-muted-foreground">
+  1928→                Summary ID: <span className="font-mono">{summaryId}</span>
+  1929→              </p>
+  1930→            )}
+  1931→          </div>
+  1932→
+  1933→          {/* Compression ratio */}
+  1934→          {compressionRatio != null && (
+  1935→            <GlassPanel variant="subtle" className="p-4">
+  1936→              <div className="mb-2 flex items-center justify-between">
+  1937→                <div>
+  1938→                  <p className="text-sm font-medium">Compression ratio</p>
+  1939→                  <p className="text-[11px] text-muted-foreground">
+  1940→                    Target ≥ 70% (raw JSON vs. de-identified summary)
+  1941→                  </p>
+  1942→                </div>
+  1943→                <span
+  1944→                  className={cn(
+  1945→                    'text-2xl font-bold tabular-nums',
+  1946→                    compressionRatio >= 0.7 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+  1947→                  )}
+  1948→                >
+  1949→                  {Math.round(compressionRatio * 100)}%
+  1950→                </span>
+  1951→              </div>
+  1952→              <Progress
+  1953→                value={compressionRatio * 100}
+  1954→                className={cn(
+  1955→                  'h-2',
+  1956→                  compressionRatio >= 0.7 ? '[&>[data-slot=progress-indicator]]:bg-emerald-500' : '[&>[data-slot=progress-indicator]]:bg-amber-500'
+  1957→                )}
+  1958→              />
+  1959→              <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+  1960→                <span>0%</span>
+  1961→                <span className={compressionRatio >= 0.7 ? 'text-emerald-600 dark:text-emerald-400' : ''}>70% target</span>
+  1962→                <span>100%</span>
+  1963→              </div>
+  1964→            </GlassPanel>
+  1965→          )}
+  1966→
+  1967→          {/* What the AI sees */}
+  1968→          <GlassPanel variant="subtle" className="p-3">
+  1969→            <div className="flex items-start gap-2 text-xs">
+  1970→              <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+  1971→              <p className="text-muted-foreground">
+  1972→                The next step (Notify Doctor) will call the Orio AI service. The AI will receive{' '}
+  1973→                <strong>only the summary above</strong> — no name, no contact, no address, no local ID.
+  1974→                This is the privacy firewall in action.
+  1975→              </p>
+  1976→            </div>
+  1977→          </GlassPanel>
+  1978→        </>
+  1979→      )}
+  1980→
+  1981→      <StepFooter>
+  1982→        <ContinueButton onClick={handleContinue} loading={generating} disabled={!summary} />
+  1983→      </StepFooter>
+  1984→    </div>
+  1985→  )
+  1986→}
+  1987→
+  1988→// ─────────────────────────────────────────────────────────────
+  1989→// STEP 9 — Notify Doctor (AI-assisted, receives only summary_v1)
+  1990→// ─────────────────────────────────────────────────────────────
+  1991→
+  1992→function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved }: StepProps) {
+  1993→  const [aiOutput, setAiOutput] = useState<AiNotifyResponse['output'] | null>(null)
+  1994→  const [tierUsed, setTierUsed] = useState<number | null>(null)
+  1995→  const [modelUsed, setModelUsed] = useState<string | null>(null)
+  1996→  const [disclaimer, setDisclaimer] = useState<string>(MANDATORY_DISCLAIMER)
+  1997→  const [loading, setLoading] = useState(false)
+  1998→  const [error, setError] = useState<string | null>(null)
+  1999→  const [blocked, setBlocked] = useState(false)
+  2000→  const [queued, setQueued] = useState(false)
+
+[showing lines 1-2000 of 2530; use offset=2001 with limit to continue reading]

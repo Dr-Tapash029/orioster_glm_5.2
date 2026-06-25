@@ -6,8 +6,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -37,80 +35,74 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MUSLIM HANDS AI-POWERED HMS — Design Language v1.0
+   Dark navy humanitarian command center + cyan glow glassmorphism
+   ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  --radius: 0.875rem;
-  /* ORIOSTER medical theme — teal/emerald clinical palette */
-  --background: oklch(0.98 0.012 165);
-  --foreground: oklch(0.18 0.02 180);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 180);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 180);
-  --primary: oklch(0.52 0.12 175);
-  --primary-foreground: oklch(0.99 0.005 165);
-  --secondary: oklch(0.95 0.018 170);
-  --secondary-foreground: oklch(0.28 0.03 175);
-  --muted: oklch(0.95 0.012 165);
-  --muted-foreground: oklch(0.5 0.02 175);
-  --accent: oklch(0.6 0.13 145);
-  --accent-foreground: oklch(0.99 0.005 145);
-  --destructive: oklch(0.58 0.22 25);
-  --border: oklch(0.9 0.015 170);
-  --input: oklch(0.92 0.015 170);
-  --ring: oklch(0.52 0.12 175);
-  --chart-1: oklch(0.6 0.13 175);
-  --chart-2: oklch(0.65 0.15 145);
-  --chart-3: oklch(0.7 0.18 80);
-  --chart-4: oklch(0.62 0.2 25);
-  --chart-5: oklch(0.55 0.16 300);
-  --sidebar: oklch(0.97 0.014 170);
-  --sidebar-foreground: oklch(0.2 0.02 180);
-  --sidebar-primary: oklch(0.52 0.12 175);
-  --sidebar-primary-foreground: oklch(0.99 0.005 165);
-  --sidebar-accent: oklch(0.93 0.02 170);
-  --sidebar-accent-foreground: oklch(0.24 0.03 175);
-  --sidebar-border: oklch(0.9 0.015 170);
-  --sidebar-ring: oklch(0.52 0.12 175);
-}
+  /* Brand radius — tight, modern */
+  --radius: 0.625rem;
 
-.dark {
-  --background: oklch(0.16 0.015 185);
-  --foreground: oklch(0.96 0.008 165);
-  --card: oklch(0.21 0.018 185);
-  --card-foreground: oklch(0.96 0.008 165);
-  --popover: oklch(0.21 0.018 185);
-  --popover-foreground: oklch(0.96 0.008 165);
-  --primary: oklch(0.7 0.13 175);
-  --primary-foreground: oklch(0.16 0.015 185);
-  --secondary: oklch(0.27 0.02 180);
-  --secondary-foreground: oklch(0.96 0.008 165);
-  --muted: oklch(0.25 0.018 180);
-  --muted-foreground: oklch(0.7 0.015 170);
-  --accent: oklch(0.68 0.14 150);
-  --accent-foreground: oklch(0.16 0.015 185);
-  --destructive: oklch(0.7 0.19 22);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.7 0.13 175);
-  --chart-1: oklch(0.65 0.14 175);
-  --chart-2: oklch(0.7 0.16 145);
-  --chart-3: oklch(0.75 0.18 80);
-  --chart-4: oklch(0.68 0.21 25);
-  --chart-5: oklch(0.62 0.17 300);
-  --sidebar: oklch(0.19 0.017 185);
-  --sidebar-foreground: oklch(0.96 0.008 165);
-  --sidebar-primary: oklch(0.7 0.13 175);
-  --sidebar-primary-foreground: oklch(0.16 0.015 185);
-  --sidebar-accent: oklch(0.26 0.02 180);
-  --sidebar-accent-foreground: oklch(0.96 0.008 165);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.7 0.13 175);
+  /* ── Layer 1: Deep Navy Background ────────────────────── */
+  --background: #061425;
+  --foreground: #e8f4f8;
+
+  /* ── Midnight Surface ─────────────────────────────────── */
+  --card: #0A1B31;
+  --card-foreground: #e8f4f8;
+  --popover: #0A1B31;
+  --popover-foreground: #e8f4f8;
+
+  /* ── Muslim Hands Cyan Brand ──────────────────────────── */
+  --primary: #36B8D8;
+  --primary-foreground: #061425;
+  --deep-cyan: #1E9FC0;
+  --light-cyan: #6ED4EC;
+  --glow-cyan: #73E8FF;
+
+  /* ── Supporting Surfaces ──────────────────────────────── */
+  --secondary: rgba(255, 255, 255, 0.06);
+  --secondary-foreground: #e8f4f8;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #8ba8b8;
+  --accent: #36B8D8;
+  --accent-foreground: #061425;
+
+  /* ── Status Colors ────────────────────────────────────── */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --destructive: #EF4444;
+  --info: #36B8D8;
+  --amber-glow: #FFD166;
+
+  /* ── Glass Borders ────────────────────────────────────── */
+  --border: rgba(255, 255, 255, 0.10);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #36B8D8;
+
+  /* ── Chart Colors ─────────────────────────────────────── */
+  --chart-1: #36B8D8;
+  --chart-2: #F59E0B;
+  --chart-3: #22C55E;
+  --chart-4: #EF4444;
+  --chart-5: #6ED4EC;
+
+  /* ── Sidebar (kept for compat but restyled) ───────────── */
+  --sidebar: #061425;
+  --sidebar-foreground: #e8f4f8;
+  --sidebar-primary: #36B8D8;
+  --sidebar-primary-foreground: #061425;
+  --sidebar-accent: rgba(54, 184, 216, 0.12);
+  --sidebar-accent-foreground: #e8f4f8;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #36B8D8;
 }
 
 @layer base {
@@ -119,109 +111,311 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-/* ── ORIOSTER Glassmorphism Design System ─────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   5-LAYER BACKGROUND SHADER SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Medical gradient backdrop */
-.orio-bg {
-  background:
-    radial-gradient(1200px 600px at 10% -10%, oklch(0.85 0.08 170 / 0.5), transparent 60%),
-    radial-gradient(1000px 500px at 100% 0%, oklch(0.85 0.08 150 / 0.4), transparent 55%),
-    radial-gradient(900px 700px at 50% 120%, oklch(0.82 0.07 185 / 0.35), transparent 60%);
+.mh-bg {
+  position: relative;
+  background: var(--background);
+  isolation: isolate;
 }
-.dark .orio-bg {
+/* Layer 2: Slow-moving mesh gradient */
+.mh-bg::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
   background:
-    radial-gradient(1200px 600px at 10% -10%, oklch(0.3 0.06 180 / 0.5), transparent 60%),
-    radial-gradient(1000px 500px at 100% 0%, oklch(0.28 0.06 155 / 0.45), transparent 55%),
-    radial-gradient(900px 700px at 50% 120%, oklch(0.26 0.05 195 / 0.4), transparent 60%);
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(54, 184, 216, 0.18), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(30, 159, 192, 0.15), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 85%, rgba(110, 212, 236, 0.10), transparent 60%),
+    radial-gradient(ellipse 40% 40% at 90% 70%, rgba(54, 184, 216, 0.12), transparent 50%);
+  animation: mh-mesh 40s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+/* Layer 3: Blurred geometric Islamic pattern (subtle) */
+.mh-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.035;
+  background-image:
+    repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(115, 232, 255, 0.4) 30deg, transparent 60deg),
+    repeating-conic-gradient(from 15deg at 50% 50%, transparent 0deg, rgba(54, 184, 216, 0.3) 45deg, transparent 90deg);
+  background-size: 280px 280px, 280px 280px;
+  pointer-events: none;
 }
 
-/* Frosted glass panel — the core glassmorphism primitive */
+@keyframes mh-mesh {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  33% { transform: translate(2%, -1.5%) scale(1.05); opacity: 0.85; }
+  66% { transform: translate(-1.5%, 2%) scale(0.98); opacity: 0.9; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLASSMORPHISM — Frosted glass surfaces (VisionOS-like)
+   ═══════════════════════════════════════════════════════════════ */
+
 .glass {
-  background: oklch(1 0 0 / 0.55);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid oklch(1 0 0 / 0.6);
+  background: rgba(10, 27, 49, 0.55);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(115, 232, 255, 0.12);
   box-shadow:
-    0 8px 32px oklch(0.2 0.02 180 / 0.1),
-    inset 0 1px 0 oklch(1 0 0 / 0.7);
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(54, 184, 216, 0.06);
 }
-.dark .glass {
-  background: oklch(0.24 0.02 185 / 0.55);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid oklch(1 0 0 / 0.08);
-  box-shadow:
-    0 8px 32px oklch(0 0 0 / 0.4),
-    inset 0 1px 0 oklch(1 0 0 / 0.06);
-}
-
 .glass-strong {
-  background: oklch(1 0 0 / 0.75);
+  background: rgba(10, 27, 49, 0.70);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid oklch(1 0 0 / 0.7);
+  border: 1px solid rgba(115, 232, 255, 0.18);
   box-shadow:
-    0 12px 40px oklch(0.2 0.02 180 / 0.14),
-    inset 0 1px 0 oklch(1 0 0 / 0.8);
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 50px rgba(54, 184, 216, 0.08);
 }
-.dark .glass-strong {
-  background: oklch(0.26 0.02 185 / 0.7);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid oklch(1 0 0 / 0.1);
-  box-shadow:
-    0 12px 40px oklch(0 0 0 / 0.5),
-    inset 0 1px 0 oklch(1 0 0 / 0.08);
-}
-
 .glass-subtle {
-  background: oklch(1 0 0 / 0.4);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 1px solid oklch(1 0 0 / 0.45);
+  background: rgba(10, 27, 49, 0.40);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.dark .glass-subtle {
-  background: oklch(0.24 0.02 185 / 0.4);
-  backdrop-filter: blur(12px) saturate(130%);
-  -webkit-backdrop-filter: blur(12px) saturate(130%);
-  border: 1px solid oklch(1 0 0 / 0.06);
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+.glass-input:focus-within {
+  border-color: rgba(115, 232, 255, 0.40);
+  box-shadow: 0 0 0 3px rgba(54, 184, 216, 0.12);
 }
 
-/* Triage / clinical status colors */
-.triage-green { background: oklch(0.85 0.15 145 / 0.18); color: oklch(0.4 0.16 145); border-color: oklch(0.6 0.16 145 / 0.4); }
-.triage-yellow { background: oklch(0.88 0.16 85 / 0.18); color: oklch(0.45 0.16 75); border-color: oklch(0.7 0.16 80 / 0.4); }
-.triage-red { background: oklch(0.82 0.2 25 / 0.18); color: oklch(0.5 0.22 25); border-color: oklch(0.62 0.22 25 / 0.45); }
-.dark .triage-green { background: oklch(0.5 0.16 145 / 0.22); color: oklch(0.8 0.15 145); border-color: oklch(0.6 0.16 145 / 0.5); }
-.dark .triage-yellow { background: oklch(0.55 0.16 80 / 0.22); color: oklch(0.85 0.15 80); border-color: oklch(0.7 0.16 80 / 0.5); }
-.dark .triage-red { background: oklch(0.5 0.2 25 / 0.22); color: oklch(0.82 0.18 25); border-color: oklch(0.62 0.22 25 / 0.5); }
+/* ═══════════════════════════════════════════════════════════════
+   GLOW EFFECTS — Cyan brand glow shadows
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Custom scrollbar for long lists */
-.orio-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-.orio-scroll::-webkit-scrollbar-track { background: transparent; }
-.orio-scroll::-webkit-scrollbar-thumb {
-  background: oklch(0.5 0.04 175 / 0.3);
+.glow-cyan { box-shadow: 0 0 40px rgba(54, 184, 216, 0.20); }
+.glow-cyan-strong { box-shadow: 0 0 30px rgba(54, 184, 216, 0.35), 0 0 60px rgba(54, 184, 216, 0.15); }
+.glow-amber { box-shadow: 0 0 40px rgba(245, 158, 11, 0.20); }
+.glow-success { box-shadow: 0 0 40px rgba(34, 197, 94, 0.18); }
+.glow-critical { box-shadow: 0 0 40px rgba(239, 68, 68, 0.20); }
+
+/* ═══════════════════════════════════════════════════════════════
+   KPI CARD GRADIENTS — Breathing gradient fills
+   ═══════════════════════════════════════════════════════════════ */
+
+.kpi-cyan {
+  background: linear-gradient(135deg, rgba(54, 184, 216, 0.20) 0%, rgba(115, 232, 255, 0.12) 100%);
+  border: 1px solid rgba(115, 232, 255, 0.25);
+  box-shadow: 0 0 40px rgba(54, 184, 216, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.kpi-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.20) 0%, rgba(255, 209, 102, 0.12) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.kpi-turquoise {
+  background: linear-gradient(135deg, rgba(54, 184, 216, 0.18) 0%, rgba(34, 197, 94, 0.15) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.kpi-critical {
+  background: linear-gradient(135deg, rgba(54, 184, 216, 0.15) 0%, rgba(239, 68, 68, 0.18) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Breathing animation for KPI cards */
+@keyframes mh-breathe {
+  0%, 100% { box-shadow: 0 0 40px rgba(54, 184, 216, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+  50% { box-shadow: 0 0 55px rgba(54, 184, 216, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+}
+.kpi-cyan, .kpi-amber, .kpi-turquoise, .kpi-critical {
+  animation: mh-breathe 4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGO BREATHING GLOW — Cyan breathing every 5s
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes mh-logo-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(54, 184, 216, 0.30), 0 0 40px rgba(54, 184, 216, 0.15); }
+  50% { box-shadow: 0 0 30px rgba(54, 184, 216, 0.50), 0 0 60px rgba(54, 184, 216, 0.25); }
+}
+.mh-logo-glow { animation: mh-logo-glow 5s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════════════
+   STATUS / TRIAGE BADGES
+   ═══════════════════════════════════════════════════════════════ */
+
+.triage-green {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+.triage-yellow {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+.triage-red {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.40);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AI CONFIDENCE METER
+   ═══════════════════════════════════════════════════════════════ */
+
+.confidence-meter {
+  background: linear-gradient(90deg, #EF4444 0%, #F59E0B 50%, #22C55E 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR
+   ═══════════════════════════════════════════════════════════════ */
+
+.mh-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.mh-scroll::-webkit-scrollbar-track { background: transparent; }
+.mh-scroll::-webkit-scrollbar-thumb {
+  background: rgba(54, 184, 216, 0.25);
   border-radius: 9999px;
 }
-.orio-scroll::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0.08 175 / 0.5);
+.mh-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(54, 184, 216, 0.45);
 }
 
-/* AI confidence meter gradient */
-.confidence-meter {
-  background: linear-gradient(90deg, oklch(0.62 0.2 25) 0%, oklch(0.7 0.18 80) 50%, oklch(0.65 0.15 145) 100%);
-}
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS — 60 FPS target
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Subtle pulse for live/AI indicators */
-@keyframes orio-pulse {
+/* Staggered dashboard load */
+@keyframes mh-stagger {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mh-stagger-1 { animation: mh-stagger 0.4s ease-out 0.05s both; }
+.mh-stagger-2 { animation: mh-stagger 0.4s ease-out 0.12s both; }
+.mh-stagger-3 { animation: mh-stagger 0.4s ease-out 0.19s both; }
+.mh-stagger-4 { animation: mh-stagger 0.4s ease-out 0.26s both; }
+.mh-stagger-5 { animation: mh-stagger 0.4s ease-out 0.33s both; }
+
+/* Pulse for live indicators */
+@keyframes mh-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.4; }
 }
-.orio-pulse { animation: orio-pulse 2s ease-in-out infinite; }
+.mh-pulse { animation: mh-pulse 2s ease-in-out infinite; }
 
-/* Stepper connector */
-.step-connector {
-  background: linear-gradient(90deg, var(--primary), oklch(0.7 0.13 175 / 0.3));
+/* AI orb pulse wave */
+@keyframes mh-orb-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.2; }
+}
+.mh-orb-ring {
+  animation: mh-orb-pulse 3s ease-in-out infinite;
+}
+
+/* Moving cyan light rays (login screen) */
+@keyframes mh-ray {
+  0% { transform: translateX(-100%) rotate(15deg); opacity: 0; }
+  50% { opacity: 0.3; }
+  100% { transform: translateX(200%) rotate(15deg); opacity: 0; }
+}
+.mh-light-ray { animation: mh-ray 8s ease-in-out infinite; }
+
+/* Chart draw animation */
+@keyframes mh-chart-draw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHADCN OVERRIDES — Adapt components to dark glass theme
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Buttons get the cyan treatment */
+.btn-cyan {
+  background: linear-gradient(135deg, #36B8D8 0%, #1E9FC0 100%);
+  color: #061425;
+  border: none;
+  box-shadow: 0 0 20px rgba(54, 184, 216, 0.30);
+  transition: all 0.2s ease;
+}
+.btn-cyan:hover {
+  box-shadow: 0 0 30px rgba(54, 184, 216, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Text gradient for headings */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #6ED4EC 0%, #36B8D8 50%, #1E9FC0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shadcn input dark glass override */
+input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="datetime-local"], input[type="search"],
+textarea, select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  color: #e8f4f8 !important;
+}
+input::placeholder, textarea::placeholder {
+  color: #5a7a8a !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(115, 232, 255, 0.40) !important;
+  box-shadow: 0 0 0 3px rgba(54, 184, 216, 0.12) !important;
+  outline: none !important;
+}
+
+/* Select dropdown content */
+[data-radix-popper-content-wrapper] * {
+  background: #0A1B31 !important;
+  border-color: rgba(115, 232, 255, 0.15) !important;
+}
+
+/* Dialog/Modal overlay */
+[data-radix-overlay] {
+  background: rgba(6, 20, 37, 0.80) !important;
+  backdrop-filter: blur(8px);
+}
+[data-radix-dialog-content] {
+  background: #0A1B31 !important;
+  border: 1px solid rgba(115, 232, 255, 0.15) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 60px rgba(54, 184, 216, 0.10) !important;
+}
+
+/* Tabs */
+[data-radix-tabs-trigger][data-state="active"] {
+  color: #36B8D8 !important;
+  box-shadow: inset 0 -2px 0 #36B8D8 !important;
+}
+
+/* Tooltip */
+[data-radix-tooltip-content] {
+  background: #0A1B31 !important;
+  border: 1px solid rgba(115, 232, 255, 0.15) !important;
+  color: #e8f4f8 !important;
+}
+
+/* Toast / Sonner */
+[data-sonner-toast] {
+  background: #0A1B31 !important;
+  border: 1px solid rgba(115, 232, 255, 0.15) !important;
+  color: #e8f4f8 !important;
 }
