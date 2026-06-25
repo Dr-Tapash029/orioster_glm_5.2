@@ -250,7 +250,7 @@ function NotificationButton() {
       </button>
 
       {open && (
-        <div className="anim-fade-in-up absolute right-0 top-10 z-50 w-80 max-w-[calc(100vw-1.5rem)] glass-strong rounded-xl p-3 shadow-2xl">
+        <div className="anim-fade-in-up absolute right-0 top-10 z-50 w-80 max-w-[calc(100vw-1.5rem)] glass-panel-solid rounded-xl p-3 shadow-2xl">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-white">Notifications</p>
             {unreadCount > 0 && (
@@ -349,7 +349,7 @@ function ProfileButton({
       </button>
 
       {open && (
-        <div className="anim-fade-in-up absolute right-0 top-11 z-50 w-64 glass-strong rounded-xl p-2 shadow-2xl">
+        <div className="anim-fade-in-up absolute right-0 top-11 z-50 w-64 glass-panel-solid rounded-xl p-2 shadow-2xl">
           {/* User info header */}
           <div className="flex items-center gap-2.5 rounded-lg p-2">
             <Avatar className="h-10 w-10 border border-violet-500/30">

@@ -312,6 +312,26 @@ html.light [data-sonner-toast] {
     0 12px 40px rgba(0, 0, 0, 0.5),
     0 0 50px rgba(113, 61, 255, 0.06);
 }
+
+/* ── Solid glass panel for dropdowns (opaque, no bleed-through) ── */
+.glass-panel-solid {
+  background: rgba(16, 8, 30, 0.96);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(186, 179, 255, 0.15);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(113, 61, 255, 0.10);
+}
+/* Light mode override for solid dropdown panels */
+html.light .glass-panel-solid {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(113, 61, 255, 0.15) !important;
+  box-shadow:
+    0 16px 48px rgba(113, 61, 255, 0.15),
+    0 0 60px rgba(113, 61, 255, 0.08) !important;
+}
 .glass-subtle {
   background: rgba(20, 11, 37, 0.40);
   backdrop-filter: blur(16px) saturate(130%);
