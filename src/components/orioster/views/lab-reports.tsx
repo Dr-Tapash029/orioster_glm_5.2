@@ -183,7 +183,7 @@ export function LabReportsView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="fx-btn-border-trace gap-2">
+              <Button className="fx-btn-border-trace btn-press ripple gap-2">
                 <Plus className="h-4 w-4" />
                 New Report
               </Button>
@@ -254,7 +254,7 @@ export function LabReportsView() {
                   AI will analyze the parameters and provide advisory feedback after saving.
                 </div>
 
-                <Button onClick={createAndAnalyze} disabled={analyzing} className="fx-btn-border-trace w-full gap-2">
+                <Button onClick={createAndAnalyze} disabled={analyzing} className="fx-btn-border-trace btn-press ripple w-full gap-2">
                   {analyzing ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Generating & Analyzing...</>
                   ) : (
@@ -291,7 +291,7 @@ export function LabReportsView() {
               try { aiFeedback = JSON.parse(r.aiFeedback) } catch { /* */ }
             }
             return (
-              <GlassPanel key={r.id} className="p-4">
+              <GlassPanel key={r.id} className="card-lift p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

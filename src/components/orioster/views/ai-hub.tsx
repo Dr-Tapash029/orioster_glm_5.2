@@ -230,7 +230,7 @@ export function AiHubView() {
                 </span>
               </div>
               <Button
-                className="fx-btn-border-trace mt-4 w-full gap-1.5"
+                className="fx-btn-border-trace btn-press ripple mt-4 w-full gap-1.5"
                 onClick={() => setActiveDoc(card.type)}
                 disabled={loadingPatients}
               >
@@ -468,7 +468,7 @@ function DocWorkflow({
           {/* Generate button */}
           {firewallOk && (
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={runAi} disabled={loading} className="fx-btn-border-trace gap-1.5">
+              <Button onClick={runAi} disabled={loading} className="fx-btn-border-trace btn-press ripple gap-1.5">
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {result ? 'Regenerate' : 'Generate with AI'}
               </Button>
@@ -522,7 +522,7 @@ function DocWorkflow({
                       size="sm"
                       onClick={docType === 'INVOICE' ? saveInvoice : saveLabReport}
                       disabled={saving || saved}
-                      className="fx-btn-border-trace gap-1.5"
+                      className="fx-btn-border-trace btn-press ripple gap-1.5"
                     >
                       {saved ? <CheckCircle2 className="h-3.5 w-3.5" /> : saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                       {saved ? 'Saved' : saving ? 'Saving…' : 'Save'}

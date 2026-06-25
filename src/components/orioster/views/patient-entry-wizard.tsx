@@ -2415,7 +2415,7 @@ function StepReview({
         <Button
           onClick={onSubmit}
           disabled={!allChecked || submitting}
-          className="fx-btn-border-trace gap-2 sm:w-auto"
+          className="fx-btn-border-trace btn-press ripple gap-2 sm:w-auto"
           size="lg"
         >
           {submitting ? (
@@ -2484,7 +2484,7 @@ function ContinueButton({
   label?: string
 }) {
   return (
-    <Button onClick={onClick} disabled={loading || disabled} className="fx-btn-border-trace gap-1.5">
+    <Button onClick={onClick} disabled={loading || disabled} className="fx-btn-border-trace btn-press ripple gap-1.5">
       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
       {label}
       {!loading && <ChevronRight className="h-4 w-4" />}

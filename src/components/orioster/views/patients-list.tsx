@@ -66,7 +66,7 @@ export function PatientsListView() {
         subtitle={`${patients.length} ${patients.length === 1 ? 'record' : 'records'} · Local SQLite is runtime authority`}
         action={
           canAddPatient && (
-            <Button onClick={() => setView('patient-entry')} className="fx-btn-border-trace gap-2">
+            <Button onClick={() => setView('patient-entry')} className="fx-btn-border-trace btn-press ripple gap-2">
               <UserPlus className="h-4 w-4" />
               Add Patient
             </Button>

@@ -110,12 +110,13 @@ export function LoginScreen() {
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {staff.map((s) => (
+            {staff.map((s, i) => (
               <button
                 key={s.id}
                 onClick={() => handleLogin(s)}
                 disabled={signingIn !== null}
-                className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-all hover:border-cyan-500/30 hover:bg-cyan-500/5 hover:shadow-[0_0_30px_rgba(54,184,216,0.12)] disabled:opacity-50"
+                className="anim-fade-in-up card-lift btn-press group flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-left hover:border-cyan-500/30 hover:bg-cyan-500/5 hover:shadow-[0_0_30px_rgba(54,184,216,0.12)] disabled:opacity-50"
+                style={{ animationDelay: `${i * 0.06}s` }}
               >
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300">
                   {ROLE_ICONS[s.role] ?? <Users className="h-5 w-5" />}

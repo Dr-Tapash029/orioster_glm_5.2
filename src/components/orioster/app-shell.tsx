@@ -272,13 +272,13 @@ function NavTab({
     <button
       onClick={onClick}
       className={cn(
-        'flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-all',
+        'nav-tab-indicator btn-press ripple flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-all',
         active
-          ? 'border-cyan-400 text-cyan-300'
+          ? 'active border-cyan-400 text-cyan-300'
           : 'border-transparent text-slate-400 hover:text-slate-200'
       )}
     >
-      {item.icon}
+      <span className="transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
       {item.label}
     </button>
   )

@@ -169,7 +169,7 @@ export function InvoicesView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="fx-btn-border-trace gap-2">
+              <Button className="fx-btn-border-trace btn-press ripple gap-2">
                 <Plus className="h-4 w-4" />
                 New Invoice
               </Button>
@@ -266,7 +266,7 @@ export function InvoicesView() {
                   <span>Use AI to suggest line items (advisory — requires Step 8 summary)</span>
                 </label>
 
-                <Button onClick={generateInvoice} disabled={generating} className="fx-btn-border-trace w-full gap-2">
+                <Button onClick={generateInvoice} disabled={generating} className="fx-btn-border-trace btn-press ripple w-full gap-2">
                   {generating ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
                   ) : (
@@ -299,7 +299,7 @@ export function InvoicesView() {
             let items: Array<{ description: string; quantity: number; unit_price: number }> = []
             try { items = JSON.parse(inv.items) } catch { /* */ }
             return (
-              <GlassPanel key={inv.id} className="p-4">
+              <GlassPanel key={inv.id} className="card-lift p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

@@ -530,4 +530,247 @@ input:focus, textarea:focus, select:focus {
   background: #0A1B31 !important;
   border: 1px solid rgba(115, 232, 255, 0.15) !important;
   color: #e8f4f8 !important;
+  animation: mh-toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ALIVE ANIMATION SYSTEM — Micro-interactions & motion
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────────────────────────── */
+
+@keyframes mh-fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mh-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes mh-scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes mh-slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes mh-slide-in-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes mh-toast-in {
+  from { opacity: 0; transform: translateX(40px) scale(0.9); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes mh-shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+@keyframes mh-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes mh-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(54, 184, 216, 0.20); }
+  50% { box-shadow: 0 0 35px rgba(54, 184, 216, 0.45); }
+}
+@keyframes mh-ripple {
+  to { transform: scale(2.5); opacity: 0; }
+}
+@keyframes mh-spin-glow {
+  from { transform: rotate(0deg); box-shadow: 0 0 15px rgba(54, 184, 216, 0.3); }
+  to { transform: rotate(360deg); box-shadow: 0 0 25px rgba(54, 184, 216, 0.5); }
+}
+@keyframes mh-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes mh-bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes mh-count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Entrance animations (utility classes) ─────────────────── */
+
+.anim-fade-in-up { animation: mh-fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade-in { animation: mh-fade-in 0.4s ease-out both; }
+.anim-scale-in { animation: mh-scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-slide-right { animation: mh-slide-in-right 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-slide-left { animation: mh-slide-in-left 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Staggered delays */
+.anim-d-1 { animation-delay: 0.05s; }
+.anim-d-2 { animation-delay: 0.1s; }
+.anim-d-3 { animation-delay: 0.15s; }
+.anim-d-4 { animation-delay: 0.2s; }
+.anim-d-5 { animation-delay: 0.25s; }
+.anim-d-6 { animation-delay: 0.3s; }
+.anim-d-7 { animation-delay: 0.35s; }
+.anim-d-8 { animation-delay: 0.4s; }
+
+/* ── Continuous animations ─────────────────────────────────── */
+
+.anim-float { animation: mh-float 3s ease-in-out infinite; }
+.anim-glow-pulse { animation: mh-glow-pulse 3s ease-in-out infinite; }
+.anim-spin-glow { animation: mh-spin-glow 1.2s linear infinite; }
+
+/* ── Shimmer loading skeleton ──────────────────────────────── */
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(54, 184, 216, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 1000px 100%;
+  animation: mh-shimmer 1.8s infinite linear;
+}
+
+/* ── Card hover lift effect ────────────────────────────────── */
+
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+  will-change: transform;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  border-color: rgba(115, 232, 255, 0.25) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(54, 184, 216, 0.12) !important;
+}
+
+/* ── Click ripple effect ───────────────────────────────────── */
+
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(115, 232, 255, 0.5);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.ripple:active::after {
+  animation: mh-ripple 0.5s ease-out;
+  opacity: 1;
+}
+
+/* ── Button press micro-interaction ────────────────────────── */
+
+.btn-press {
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* ── Nav tab indicator slide ───────────────────────────────── */
+
+.nav-tab-indicator {
+  position: relative;
+}
+.nav-tab-indicator::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #36B8D8;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 8px rgba(54, 184, 216, 0.5);
+}
+.nav-tab-indicator:hover::after { width: 40%; }
+.nav-tab-indicator.active::after { width: 100%; }
+
+/* ── Animated gradient text ────────────────────────────────── */
+
+.text-animated-gradient {
+  background: linear-gradient(90deg, #6ED4EC, #36B8D8, #73E8FF, #36B8D8, #6ED4EC);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: mh-gradient-shift 4s ease-in-out infinite;
+}
+
+/* ── Row hover slide ───────────────────────────────────────── */
+
+.row-slide {
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.row-slide:hover {
+  background: rgba(54, 184, 216, 0.05) !important;
+  transform: translateX(2px);
+}
+
+/* ── Icon spin on hover ────────────────────────────────────── */
+
+.icon-spin-hover {
+  transition: transform 0.4s ease;
+}
+.icon-spin-hover:hover {
+  transform: rotate(180deg);
+}
+
+/* ── Tab content transition ────────────────────────────────── */
+
+.tab-content-enter {
+  animation: mh-fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Number count-up ───────────────────────────────────────── */
+
+.count-up {
+  animation: mh-count-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Chart bar grow ────────────────────────────────────────── */
+
+.chart-bar-grow {
+  transform-origin: bottom;
+  animation: mh-bar-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Pulse dot (live indicator) ────────────────────────────── */
+
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: inherit;
+  animation: mh-ripple 1.8s ease-out infinite;
+  opacity: 0.5;
+}
+
+/* ── Respect reduced motion ────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

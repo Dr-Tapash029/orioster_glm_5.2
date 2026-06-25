@@ -15,6 +15,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import type { SyncStatus, TriageLevel, RiskLevel } from '@/lib/types'
+import { AnimatedCounter } from '@/components/orioster/anim-helpers'
 
 // ── Glass Panel ───────────────────────────────────────────────
 export function GlassPanel({
@@ -237,15 +238,23 @@ export function StatCard({
     },
   }
   const a = accents[accent] ?? accents.cyan
+  const numValue = typeof value === 'number' ? value : parseInt(String(value).replace(/[^0-9]/g, '')) || 0
+  const hasNumeric = typeof value === 'number' || /^\d+$/.test(String(value).replace(/[^0-9]/g, ''))
   return (
-    <div className={cn('rounded-xl p-4 sm:p-5', a.card, className)}>
+    <div className={cn('card-lift rounded-xl p-4 sm:p-5', a.card, className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-xs font-medium text-slate-400">{label}</p>
-          <p className={cn('mt-1 text-2xl font-bold tracking-tight tabular-nums sm:text-3xl', a.valueColor)}>{value}</p>
+          <p className={cn('mt-1 text-2xl font-bold tracking-tight tabular-nums sm:text-3xl', a.valueColor)}>
+            {hasNumeric && numValue > 0 ? (
+              <AnimatedCounter value={numValue} format={(n) => Math.round(n).toString()} />
+            ) : (
+              value
+            )}
+          </p>
           {trend && <p className="mt-0.5 text-[11px] text-slate-500">{trend}</p>}
         </div>
-        <div className={cn('flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl', a.iconBg, a.iconColor)}>
+        <div className={cn('flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-110', a.iconBg, a.iconColor)}>
           {icon}
         </div>
       </div>

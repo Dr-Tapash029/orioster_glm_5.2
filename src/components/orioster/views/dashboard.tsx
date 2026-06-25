@@ -121,7 +121,7 @@ export function DashboardView() {
             <Button
               size="lg"
               onClick={() => setView('patient-entry')}
-              className="fx-btn-border-trace gap-2"
+              className="fx-btn-border-trace btn-press ripple gap-2"
             >
               <UserPlus className="h-4.5 w-4.5" />
               Add Patient
@@ -248,7 +248,7 @@ export function DashboardView() {
               {data.recentPatients.map((p) => (
                 <tr
                   key={p.id}
-                  className="cursor-pointer border-b border-white/5 transition-colors hover:bg-cyan-500/5"
+                  className="row-slide cursor-pointer border-b border-white/5"
                   onClick={() => {
                     setActivePatient(p.id)
                     setView('patient-detail')
