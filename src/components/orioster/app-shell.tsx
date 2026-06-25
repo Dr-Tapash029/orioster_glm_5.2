@@ -1,13 +1,8 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { useAppStore, type ViewKey } from '@/lib/store'
-import {
-  OnlineIndicator,
-  OfflineBanner,
-  RoleBadge,
-} from '@/components/orioster/ui-primitives'
-import { Button } from '@/components/ui/button'
+import { OnlineIndicator, OfflineBanner, RoleBadge } from '@/components/orioster/ui-primitives'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   HeartPulse,
@@ -30,10 +25,20 @@ import {
   WifiOff,
   ShieldCheck,
   Command,
+  Home,
+  Calendar,
+  User,
+  Building2,
+  CheckSquare,
+  FileText,
+  ChevronRight,
+  Settings,
+  type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AppRole } from '@/lib/types'
 
+// ── Navigation items ──────────────────────────────────────────
 interface NavItem {
   key: ViewKey
   label: string
@@ -41,29 +46,57 @@ interface NavItem {
   roles?: AppRole[]
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
-  { key: 'patients', label: 'Patients', icon: <Users className="h-4 w-4" /> },
-  { key: 'patient-entry', label: 'New Patient', icon: <UserPlus className="h-4 w-4" />, roles: ['NURSE', 'ADMIN', 'DOCTOR'] },
-  { key: 'orio-ai', label: 'Orio AI', icon: <Sparkles className="h-4 w-4" />, roles: ['DOCTOR', 'ADMIN'] },
-  { key: 'ai-hub', label: 'AI Hub', icon: <LayoutGrid className="h-4 w-4" />, roles: ['ADMIN', 'DOCTOR'] },
-  { key: 'appointments', label: 'Appointments', icon: <CalendarClock className="h-4 w-4" /> },
-  { key: 'lab-reports', label: 'Lab Reports', icon: <FlaskConical className="h-4 w-4" />, roles: ['LAB_TECH', 'DOCTOR', 'ADMIN'] },
-  { key: 'invoices', label: 'Invoices', icon: <Receipt className="h-4 w-4" />, roles: ['ADMIN'] },
+const ALL_NAV: NavItem[] = [
+  { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+  { key: 'patients', label: 'Patients', icon: <Users className="h-5 w-5" /> },
+  { key: 'patient-entry', label: 'New Patient', icon: <UserPlus className="h-5 w-5" />, roles: ['NURSE', 'ADMIN', 'DOCTOR'] },
+  { key: 'orio-ai', label: 'Orio AI', icon: <Sparkles className="h-5 w-5" />, roles: ['DOCTOR', 'ADMIN'] },
+  { key: 'ai-hub', label: 'AI Hub', icon: <LayoutGrid className="h-5 w-5" />, roles: ['ADMIN', 'DOCTOR'] },
+  { key: 'appointments', label: 'Appointments', icon: <CalendarClock className="h-5 w-5" /> },
+  { key: 'lab-reports', label: 'Lab Reports', icon: <FlaskConical className="h-5 w-5" />, roles: ['LAB_TECH', 'DOCTOR', 'ADMIN'] },
+  { key: 'invoices', label: 'Invoices', icon: <Receipt className="h-5 w-5" />, roles: ['ADMIN'] },
+]
+
+// Bottom nav items (5 slots, middle is menu)
+const BOTTOM_NAV: Array<{ key: ViewKey; label: string; icon: ReactNode; roles?: AppRole[] }> = [
+  { key: 'dashboard', label: 'Home', icon: <Home className="h-5 w-5" /> },
+  { key: 'patients', label: 'Patients', icon: <Users className="h-5 w-5" /> },
+  { key: 'menu' as ViewKey, label: 'Menu', icon: <Menu className="h-6 w-6" /> },
+  { key: 'appointments', label: 'Schedule', icon: <Calendar className="h-5 w-5" /> },
+  { key: 'orio-ai', label: 'AI', icon: <Sparkles className="h-5 w-5" />, roles: ['DOCTOR', 'ADMIN'] },
+]
+
+// Profile dropdown items
+const PROFILE_MENU: Array<{ key: ViewKey; label: string; icon: ReactNode }> = [
+  { key: 'my-profile', label: 'My Profile', icon: <User className="h-4 w-4" /> },
+  { key: 'my-company', label: 'My Company', icon: <Building2 className="h-4 w-4" /> },
+  { key: 'my-tasks', label: 'My Tasks', icon: <CheckSquare className="h-4 w-4" /> },
+  { key: 'my-documents', label: 'My Documents', icon: <FileText className="h-4 w-4" /> },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, logout, view, setView, online, setOnline } = useAppStore()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, logout, view, setView, online, setOnline, theme, toggleTheme, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
 
   if (!user) return null
 
   const role = user.role as AppRole
-  const visibleNav = NAV_ITEMS.filter((n) => !n.roles || n.roles.includes(role))
+  const visibleNav = ALL_NAV.filter((n) => !n.roles || n.roles.includes(role))
+  const visibleBottom = BOTTOM_NAV.filter((n) => !n.roles || n.roles.includes(role))
+
+  // If bottom nav has only 4 items (AI filtered out), add invoices or labs as 5th
+  const bottomNav = visibleBottom.length >= 5 ? visibleBottom : [
+    ...visibleBottom.slice(0, 2),
+    { key: 'menu' as ViewKey, label: 'Menu', icon: <Menu className="h-6 w-6" /> },
+    ...visibleBottom.slice(2),
+    { key: 'lab-reports' as ViewKey, label: 'Labs', icon: <FlaskConical className="h-5 w-5" /> },
+  ].slice(0, 5)
 
   function navigate(v: ViewKey) {
-    setView(v)
-    setMobileOpen(false)
+    if (v === 'menu' as ViewKey) {
+      setDrawerOpen(!drawerOpen)
+    } else {
+      setView(v)
+    }
   }
 
   const initials = user.name
@@ -77,231 +110,493 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="wope-bg flex min-h-screen flex-col">
       <OfflineBanner online={online} />
 
-      {/* ═══ Top Navigation Bar ════════════════════════════════ */}
-      <header className="sticky top-0 z-30 border-b border-violet-500/10 bg-[#0a0118]/80 backdrop-blur-2xl">
-        <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
-          {/* Left: Logo with breathing glow */}
-          <button
-            onClick={() => navigate('dashboard')}
-            className="flex items-center gap-2.5"
-          >
-            <div className="wope-logo-glow flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-              <HeartPulse className="h-6 w-6" />
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-bold leading-none tracking-wide text-slate-100">ORIOSTER</p>
-              <p className="text-[10px] font-medium tracking-wider text-violet-400">AI-POWERED HMS</p>
-            </div>
-          </button>
-
-          {/* Center: Global Search (desktop) */}
-          <div className="mx-auto hidden max-w-md flex-1 md:block">
-            <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2">
-              <Search className="h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search patients, beneficiaries, programs, cases, reports..."
-                className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none"
-              />
-              <kbd className="hidden items-center gap-0.5 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-400 lg:flex">
-                <Command className="h-2.5 w-2.5" />K
-              </kbd>
-            </div>
-          </div>
-
-          {/* Right: Icons */}
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-            {/* Online toggle */}
+      {/* ═══ Android App Container (max-width, centered) ══════ */}
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col shadow-2xl">
+        {/* ── Header ─────────────────────────────────────────── */}
+        <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0a0118]/90 backdrop-blur-2xl">
+          <div className="flex h-14 items-center gap-2 px-3">
+            {/* Logo */}
             <button
-              onClick={() => setOnline(!online)}
-              className="hidden sm:block"
-              title="Toggle connectivity"
+              onClick={() => navigate('dashboard')}
+              className="flex items-center gap-2"
             >
-              <OnlineIndicator online={online} />
+              <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+                <HeartPulse className="h-5 w-5" />
+              </div>
+              <span className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>
+                Orioster
+              </span>
             </button>
 
-            {/* Notifications */}
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300">
-              <Bell className="h-4.5 w-4.5" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-violet-400 wope-pulse" />
-            </button>
+            {/* Search button */}
+            <SearchButton />
 
-            {/* AI Assistant quick access */}
-            {(role === 'DOCTOR' || role === 'ADMIN') && (
+            <div className="ml-auto flex items-center gap-1">
+              {/* Online indicator */}
               <button
-                onClick={() => navigate('orio-ai')}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-violet-500/10 hover:text-violet-300"
-                title="Orio AI Assistant"
+                onClick={() => setOnline(!online)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5"
+                title="Toggle connectivity"
               >
-                <Sparkles className="h-4.5 w-4.5" />
+                {online ? <Wifi className="h-4 w-4 text-emerald-400" /> : <WifiOff className="h-4 w-4 text-amber-400" />}
               </button>
-            )}
 
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileOpen((o) => !o)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 md:hidden"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+              {/* Notifications */}
+              <NotificationButton />
 
-            {/* Profile */}
-            <div className="hidden items-center gap-2 rounded-lg border border-white/10 bg-white/5 py-1 pl-1 pr-3 sm:flex">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-violet-500/20 text-[11px] font-semibold text-violet-300">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden lg:block">
-                <p className="text-xs font-medium leading-none text-slate-200">{user.name}</p>
-                <div className="mt-0.5">
-                  <RoleBadge role={role} />
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={logout}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
-              title="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Horizontal nav row (desktop) */}
-        <nav className="hidden items-center gap-0.5 border-t border-violet-500/5 px-4 md:flex sm:px-6">
-          {visibleNav.map((item) => (
-            <NavTab
-              key={item.key}
-              item={item}
-              active={view === item.key}
-              onClick={() => navigate(item.key)}
-            />
-          ))}
-        </nav>
-      </header>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-72 border-r border-violet-500/15 bg-[#0a0118] p-4 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-                  <HeartPulse className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-100">ORIOSTER</p>
-                  <p className="text-[10px] text-violet-400">AI-POWERED HMS</p>
-                </div>
-              </div>
-              <button onClick={() => setMobileOpen(false)} className="rounded-lg p-1 text-slate-400 hover:bg-white/5">
-                <X className="h-5 w-5" />
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
+                title="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
-            </div>
 
-            {/* Mobile search */}
-            <div className="glass-input mb-3 flex items-center gap-2 rounded-lg px-3 py-2">
-              <Search className="h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none"
+              {/* Profile */}
+              <ProfileButton
+                user={user}
+                profileImage={profileImage}
+                initials={initials}
+                role={role}
+                onNavigate={setView}
+                onLogout={logout}
               />
             </div>
-
-            <nav className="flex flex-col gap-1">
-              {visibleNav.map((item) => (
-                <NavButton
-                  key={item.key}
-                  item={item}
-                  active={view === item.key}
-                  onClick={() => navigate(item.key)}
-                />
-              ))}
-            </nav>
-
-            <button
-              onClick={() => setOnline(!online)}
-              className="mt-4 flex w-full items-center justify-center"
-            >
-              <OnlineIndicator online={online} />
-            </button>
           </div>
-        </div>
-      )}
+        </header>
 
-      {/* Main content */}
-      <main className="min-w-0 flex-1 p-3 sm:p-5 lg:p-6">{children}</main>
+        {/* ── Main Content ───────────────────────────────────── */}
+        <main className="min-w-0 flex-1 overflow-y-auto wope-scroll pb-20" style={{ paddingBottom: '80px' }}>
+          {children}
+        </main>
 
-      {/* Sticky footer */}
-      <footer className="mt-auto border-t border-violet-500/10 bg-[#0a0118]/60 px-4 py-3 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold text-violet-400">ORIOSTER</span>
-            <span className="hidden sm:inline">·</span>
-            <span className="hidden sm:inline">Hospital Operations</span>
-            <span>·</span>
-            <span>Local SQLite is runtime authority</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline">AI is advisory only — The doctor always has the final say</span>
-            <span>·</span>
-            <span>v1.0</span>
-          </div>
-        </div>
-      </footer>
+        {/* ── Bottom Navigation Bar ──────────────────────────── */}
+        <BottomNav
+          items={bottomNav}
+          activeView={view}
+          drawerOpen={drawerOpen}
+          onNavigate={navigate}
+        />
+      </div>
+
+      {/* ── Side Drawer (Glassmorphism) ─────────────────────── */}
+      <SideDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        navItems={visibleNav}
+        activeView={view}
+        onNavigate={navigate}
+        user={user}
+        profileImage={profileImage}
+        initials={initials}
+        role={role}
+        onLogout={logout}
+      />
     </div>
   )
 }
 
-// ── Horizontal nav tab (desktop) — Border Trace style ────────
-function NavTab({
-  item,
-  active,
-  onClick,
-}: {
-  item: NavItem
-  active: boolean
-  onClick: () => void
-}) {
+// ═══════════════════════════════════════════════════════════════
+// SEARCH BUTTON — Opens search overlay
+// ═══════════════════════════════════════════════════════════════
+
+function SearchButton() {
+  const { searchOpen, setSearchOpen } = useAppStore()
   return (
     <button
-      onClick={onClick}
-      className={cn(
-        'btn-press ripple fx-btn-border-trace fx-btn-border-trace-sm flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all',
-        active && 'fx-btn-border-trace-active'
-      )}
+      onClick={() => setSearchOpen(!searchOpen)}
+      className="glass-input ml-1 flex h-8 flex-1 items-center gap-1.5 rounded-lg px-2.5 text-xs text-slate-400"
     >
-      <span className="transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
-      {item.label}
+      <Search className="h-3.5 w-3.5" />
+      <span className="hidden sm:inline">Search...</span>
+      <kbd className="ml-auto hidden rounded border border-white/10 bg-white/5 px-1 text-[9px] sm:inline">
+        ⌘K
+      </kbd>
     </button>
   )
 }
 
-// ── Vertical nav button (mobile drawer) ───────────────────────
-function NavButton({
-  item,
-  active,
-  onClick,
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICATION BUTTON — Opens notification panel
+// ═══════════════════════════════════════════════════════════════
+
+function NotificationButton() {
+  const { notifications, markAllNotificationsRead, markNotificationRead } = useAppStore()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const unreadCount = notifications.filter((n) => !n.read).length
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
+      >
+        <Bell className="h-4 w-4" />
+        {unreadCount > 0 && (
+          <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-violet-500 px-1 text-[8px] font-bold text-white">
+            {unreadCount}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="anim-fade-in-up absolute right-0 top-10 z-50 w-80 max-w-[calc(100vw-1.5rem)] glass-strong rounded-xl p-3 shadow-2xl">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-semibold text-white">Notifications</p>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllNotificationsRead}
+                className="text-[11px] text-violet-400 hover:text-violet-300"
+              >
+                Mark all read
+              </button>
+            )}
+          </div>
+          <div className="max-h-80 space-y-1.5 overflow-y-auto wope-scroll">
+            {notifications.length === 0 ? (
+              <p className="py-6 text-center text-xs text-slate-500">No notifications</p>
+            ) : (
+              notifications.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => markNotificationRead(n.id)}
+                  className={cn(
+                    'flex w-full gap-2.5 rounded-lg p-2.5 text-left transition-colors',
+                    n.read ? 'bg-transparent' : 'bg-violet-500/8'
+                  )}
+                >
+                  <div className={cn(
+                    'mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg',
+                    n.type === 'critical' ? 'bg-red-500/15 text-red-400' :
+                    n.type === 'success' ? 'bg-emerald-500/15 text-emerald-400' :
+                    n.type === 'warning' ? 'bg-amber-500/15 text-amber-400' :
+                    'bg-violet-500/15 text-violet-400'
+                  )}>
+                    <Bell className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate text-xs font-medium text-white">{n.title}</p>
+                      {!n.read && <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-400" />}
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-400">{n.message}</p>
+                    <p className="mt-0.5 text-[10px] text-slate-600">{n.time}</p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROFILE BUTTON — Dropdown with My Profile, Company, Tasks, Documents
+// ═══════════════════════════════════════════════════════════════
+
+function ProfileButton({
+  user,
+  profileImage,
+  initials,
+  role,
+  onNavigate,
+  onLogout,
 }: {
-  item: NavItem
-  active: boolean
-  onClick: () => void
+  user: { name: string; email: string }
+  profileImage: string | null
+  initials: string
+  role: AppRole
+  onNavigate: (v: ViewKey) => void
+  onLogout: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 rounded-full p-0.5 transition-transform active:scale-95"
+      >
+        <Avatar className="h-8 w-8 border border-violet-500/30">
+          {profileImage ? (
+            <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
+          ) : null}
+          <AvatarFallback className="bg-violet-500/20 text-[11px] font-semibold text-violet-300">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+      </button>
+
+      {open && (
+        <div className="anim-fade-in-up absolute right-0 top-11 z-50 w-64 glass-strong rounded-xl p-2 shadow-2xl">
+          {/* User info header */}
+          <div className="flex items-center gap-2.5 rounded-lg p-2">
+            <Avatar className="h-10 w-10 border border-violet-500/30">
+              {profileImage ? (
+                <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
+              ) : null}
+              <AvatarFallback className="bg-violet-500/20 text-xs font-semibold text-violet-300">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-white">{user.name}</p>
+              <p className="truncate text-[11px] text-slate-400">{user.email}</p>
+              <div className="mt-0.5">
+                <RoleBadge role={role} />
+              </div>
+            </div>
+          </div>
+
+          <div className="my-1.5 h-px bg-white/5" />
+
+          {/* Menu items */}
+          <div className="space-y-0.5">
+            {PROFILE_MENU.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => {
+                  onNavigate(item.key)
+                  setOpen(false)
+                }}
+                className="btn-press flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-violet-500/10 hover:text-white"
+              >
+                <span className="text-violet-400">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
+              </button>
+            ))}
+          </div>
+
+          <div className="my-1.5 h-px bg-white/5" />
+
+          {/* Logout */}
+          <button
+            onClick={onLogout}
+            className="btn-press flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOTTOM NAVIGATION — 5 items, middle is the Menu button
+// ═══════════════════════════════════════════════════════════════
+
+function BottomNav({
+  items,
+  activeView,
+  drawerOpen,
+  onNavigate,
+}: {
+  items: Array<{ key: ViewKey; label: string; icon: ReactNode }>
+  activeView: ViewKey
+  drawerOpen: boolean
+  onNavigate: (v: ViewKey) => void
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'btn-press ripple fx-btn-border-trace fx-btn-border-trace-sm flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all',
-        active && 'fx-btn-border-trace-active'
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2">
+      <div className="glass-strong mx-2 mb-2 flex items-center justify-around rounded-2xl px-2 py-2 shadow-2xl">
+        {items.map((item, idx) => {
+          const isMenu = item.label === 'Menu'
+          const isActive = isMenu ? drawerOpen : activeView === item.key
+          return (
+            <button
+              key={idx}
+              onClick={() => onNavigate(item.key)}
+              className={cn(
+                'btn-press ripple flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all',
+                isMenu
+                  ? 'relative -mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-[0_0_20px_rgba(113,61,255,0.4)]'
+                  : isActive
+                    ? 'text-violet-300'
+                    : 'text-slate-500 hover:text-slate-300'
+              )}
+            >
+              {isMenu ? (
+                <span className={cn('transition-transform', drawerOpen && 'rotate-90')}>
+                  {item.icon}
+                </span>
+              ) : (
+                item.icon
+              )}
+              <span className={cn('text-[9px] font-medium', isMenu && 'sr-only')}>{item.label}</span>
+              {isActive && !isMenu && (
+                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-violet-400" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDE DRAWER — Premium glassmorphism, slides from left
+// ═══════════════════════════════════════════════════════════════
+
+function SideDrawer({
+  open,
+  onClose,
+  navItems,
+  activeView,
+  onNavigate,
+  user,
+  profileImage,
+  initials,
+  role,
+  onLogout,
+}: {
+  open: boolean
+  onClose: () => void
+  navItems: NavItem[]
+  activeView: ViewKey
+  onNavigate: (v: ViewKey) => void
+  user: { name: string; email: string }
+  profileImage: string | null
+  initials: string
+  role: AppRole
+  onLogout: () => void
+}) {
+  return (
+    <>
+      {/* Backdrop */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm anim-fade-in"
+          onClick={onClose}
+        />
       )}
-    >
-      {item.icon}
-      {item.label}
-    </button>
+
+      {/* Drawer */}
+      <div
+        className={cn(
+          'fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] transition-transform duration-300 ease-out',
+          open ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="glass-strong flex h-full flex-col rounded-r-2xl border-r border-violet-500/15 shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-white/5 p-4">
+            <div className="flex items-center gap-2.5">
+              <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+                <HeartPulse className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Orioster</p>
+                <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* User card */}
+          <div className="border-b border-white/5 p-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 border border-violet-500/30">
+                {profileImage ? (
+                  <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
+                ) : null}
+                <AvatarFallback className="bg-violet-500/20 text-sm font-semibold text-violet-300">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+                <p className="truncate text-[11px] text-slate-400">{user.email}</p>
+                <div className="mt-1">
+                  <RoleBadge role={role} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Nav items */}
+          <nav className="flex-1 space-y-1 overflow-y-auto p-3 wope-scroll">
+            {navItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => onNavigate(item.key)}
+                className={cn(
+                  'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+                  activeView === item.key
+                    ? 'bg-violet-500/15 text-white shadow-[0_0_20px_rgba(113,61,255,0.15)]'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                )}
+              >
+                <span className={activeView === item.key ? 'text-violet-300' : ''}>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+
+            {/* Profile menu items */}
+            <div className="my-2 h-px bg-white/5" />
+            <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Account</p>
+            {PROFILE_MENU.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => onNavigate(item.key)}
+                className={cn(
+                  'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+                  activeView === item.key
+                    ? 'bg-violet-500/15 text-white'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                )}
+              >
+                <span className="text-violet-400">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Footer */}
+          <div className="border-t border-white/5 p-3">
+            <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-500/5 px-3 py-2 text-[11px] text-slate-400">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              Privacy Firewall Active
+            </div>
+            <button
+              onClick={onLogout}
+              className="btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }

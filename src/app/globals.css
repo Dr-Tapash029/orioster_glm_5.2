@@ -117,6 +117,54 @@
   --sidebar-ring: #713DFF;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT THEME — Soft lavender white for light mode
+   ═══════════════════════════════════════════════════════════════ */
+
+html.light {
+  --background: #f6f3fc;
+  --foreground: #1a0f2e;
+
+  --card: #ffffff;
+  --card-foreground: #1a0f2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a0f2e;
+
+  --primary: #713DFF;
+  --primary-foreground: #ffffff;
+
+  --secondary: rgba(113, 61, 255, 0.06);
+  --secondary-foreground: #2d1b4e;
+  --muted: rgba(113, 61, 255, 0.04);
+  --muted-foreground: #6b5b8a;
+  --accent: #713DFF;
+  --accent-foreground: #ffffff;
+
+  --text-primary: #1a0f2e;
+  --text-heading: #140B25;
+  --text-secondary: #4a3b6b;
+  --text-muted: #6b5b8a;
+  --text-faint: #9b8fb5;
+
+  --surface-1: #ffffff;
+  --surface-2: #f0ebfa;
+  --surface-3: #e8e0f5;
+  --surface-border: #d4c8ed;
+
+  --border: rgba(113, 61, 255, 0.12);
+  --input: rgba(113, 61, 255, 0.08);
+  --ring: #713DFF;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a0f2e;
+  --sidebar-primary: #713DFF;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(113, 61, 255, 0.08);
+  --sidebar-accent-foreground: #713DFF;
+  --sidebar-border: rgba(113, 61, 255, 0.10);
+  --sidebar-ring: #713DFF;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -174,6 +222,71 @@
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
   33% { transform: translate(1.5%, -1%) scale(1.04); opacity: 0.85; }
   66% { transform: translate(-1%, 1.5%) scale(0.98); opacity: 0.9; }
+}
+
+/* ── Light mode atmospheric background ────────────────────── */
+html.light .wope-bg::before {
+  background:
+    radial-gradient(ellipse 50% 40% at 15% 20%, rgba(113, 61, 255, 0.12), transparent 60%),
+    radial-gradient(ellipse 45% 50% at 85% 15%, rgba(133, 102, 255, 0.10), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 90%, rgba(113, 61, 255, 0.06), transparent 60%);
+}
+html.light .wope-bg::after { opacity: 0.015; }
+
+/* ── Light mode glassmorphism ─────────────────────────────── */
+html.light .glass {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(113, 61, 255, 0.10);
+  box-shadow: 0 8px 32px rgba(113, 61, 255, 0.08);
+}
+html.light .glass-strong {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid rgba(113, 61, 255, 0.12);
+  box-shadow: 0 12px 40px rgba(113, 61, 255, 0.10);
+}
+html.light .glass-subtle {
+  background: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(113, 61, 255, 0.06);
+}
+html.light .glass-input {
+  background: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(113, 61, 255, 0.10);
+}
+
+/* ── Light mode input overrides ───────────────────────────── */
+html.light input[type="text"], html.light input[type="email"], html.light input[type="password"],
+html.light input[type="number"], html.light input[type="datetime-local"], html.light input[type="search"],
+html.light textarea, html.light select {
+  background: rgba(255, 255, 255, 0.60) !important;
+  border-color: rgba(113, 61, 255, 0.12) !important;
+  color: #1a0f2e !important;
+}
+html.light input::placeholder, html.light textarea::placeholder { color: #9b8fb5 !important; }
+
+/* ── Light mode shadcn overrides ──────────────────────────── */
+html.light [data-radix-popper-content-wrapper] * {
+  background: #ffffff !important;
+  border-color: rgba(113, 61, 255, 0.12) !important;
+}
+html.light [data-radix-overlay] { background: rgba(246, 243, 252, 0.80) !important; }
+html.light [data-radix-dialog-content] {
+  background: #ffffff !important;
+  border: 1px solid rgba(113, 61, 255, 0.12) !important;
+  box-shadow: 0 24px 60px rgba(113, 61, 255, 0.15) !important;
+}
+html.light [data-radix-tooltip-content] {
+  background: #ffffff !important;
+  border: 1px solid rgba(113, 61, 255, 0.12) !important;
+  color: #1a0f2e !important;
+}
+html.light [data-sonner-toast] {
+  background: #ffffff !important;
+  border: 1px solid rgba(113, 61, 255, 0.12) !important;
+  color: #1a0f2e !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════

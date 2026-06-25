@@ -11,7 +11,6 @@ const inter = Inter({
   display: "swap",
 });
 
-// Sora as a close approximation to Wope's "Rebond Grotesque" heading font
 const sora = Sora({
   variable: "--font-heading",
   subsets: ["latin"],
@@ -33,6 +32,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var s = JSON.parse(localStorage.getItem('orioster-session') || '{}');
+                var t = s.state && s.state.theme ? s.state.theme : 'dark';
+                document.documentElement.classList.toggle('light', t === 'light');
+                document.documentElement.classList.toggle('dark', t === 'dark');
+              } catch(e) {}
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${inter.variable} ${sora.variable} antialiased bg-background text-foreground`}
       >

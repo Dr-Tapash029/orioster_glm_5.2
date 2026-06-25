@@ -3,6 +3,7 @@
 import { useAppStore } from '@/lib/store'
 import { LoginScreen } from '@/components/orioster/login-screen'
 import { AppShell } from '@/components/orioster/app-shell'
+import { SearchOverlay } from '@/components/orioster/search-overlay'
 import { DashboardView } from '@/components/orioster/views/dashboard'
 import { PatientsListView } from '@/components/orioster/views/patients-list'
 import { PatientDetailView } from '@/components/orioster/views/patient-detail'
@@ -12,6 +13,7 @@ import { AiHubView } from '@/components/orioster/views/ai-hub'
 import { AppointmentsView } from '@/components/orioster/views/appointments'
 import { LabReportsView } from '@/components/orioster/views/lab-reports'
 import { InvoicesView } from '@/components/orioster/views/invoices'
+import { MyProfileView, MyCompanyView, MyTasksView, MyDocumentsView } from '@/components/orioster/views/profile-views'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const viewVariants = {
@@ -57,8 +59,13 @@ export default function Home() {
           {view === 'appointments' && <AppointmentsView />}
           {view === 'lab-reports' && <LabReportsView />}
           {view === 'invoices' && <InvoicesView />}
+          {view === 'my-profile' && <MyProfileView />}
+          {view === 'my-company' && <MyCompanyView />}
+          {view === 'my-tasks' && <MyTasksView />}
+          {view === 'my-documents' && <MyDocumentsView />}
         </motion.div>
       </AnimatePresence>
+      <SearchOverlay />
     </AppShell>
   )
 }
