@@ -63,7 +63,7 @@ export function LoginScreen() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Login failed')
-      toast.success(`Assalamu Alaikum, ${data.user.name}`)
+      toast.success(`Welcome, ${data.user.name}`)
       setUser(data.user)
     } catch (e) {
       toast.error((e as Error).message)
@@ -86,7 +86,7 @@ export function LoginScreen() {
           <HeartPulse className="h-10 w-10" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-wide text-slate-100">MUSLIM HANDS</h1>
+          <h1 className="text-2xl font-bold tracking-wide text-slate-100">ORIOSTER</h1>
           <p className="text-sm font-medium tracking-wider text-cyan-400">AI-POWERED HOSPITAL MANAGEMENT SYSTEM</p>
         </div>
         <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
@@ -157,7 +157,7 @@ export function LoginScreen() {
       </div>
 
       <footer className="mt-auto pt-8 text-center text-[11px] text-slate-600">
-        Muslim Hands · AI-Powered HMS v1.0 · Humanitarian Command Center · &copy; {new Date().getFullYear()}
+        Orioster · AI-Powered HMS v1.0 · &copy; {new Date().getFullYear()}
       </footer>
     </div>
   )

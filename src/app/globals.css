@@ -42,8 +42,8 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MUSLIM HANDS AI-POWERED HMS — Design Language v1.0
-   Dark navy humanitarian command center + cyan glow glassmorphism
+   ORIOSTER AI-POWERED HMS — Design Language v1.0
+   Dark navy command center + cyan glow glassmorphism
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -60,7 +60,7 @@
   --popover: #0A1B31;
   --popover-foreground: #e8f4f8;
 
-  /* ── Muslim Hands Cyan Brand ──────────────────────────── */
+  /* ── Orioster Cyan Brand ──────────────────────────── */
   --primary: #36B8D8;
   --primary-foreground: #061425;
   --deep-cyan: #1E9FC0;

@@ -89,7 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <HeartPulse className="h-6 w-6" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-bold leading-none tracking-wide text-slate-100">MUSLIM HANDS</p>
+              <p className="text-sm font-bold leading-none tracking-wide text-slate-100">ORIOSTER</p>
               <p className="text-[10px] font-medium tracking-wider text-cyan-400">AI-POWERED HMS</p>
             </div>
           </button>
@@ -194,7 +194,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <HeartPulse className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-100">MUSLIM HANDS</p>
+                  <p className="text-sm font-bold text-slate-100">ORIOSTER</p>
                   <p className="text-[10px] text-cyan-400">AI-POWERED HMS</p>
                 </div>
               </div>
@@ -241,9 +241,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="mt-auto border-t border-cyan-500/10 bg-[#061425]/60 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-cyan-400">MUSLIM HANDS</span>
+            <span className="font-semibold text-cyan-400">ORIOSTER</span>
             <span className="hidden sm:inline">·</span>
-            <span className="hidden sm:inline">Humanitarian Health Operations</span>
+            <span className="hidden sm:inline">Hospital Operations</span>
             <span>·</span>
             <span>Local SQLite is runtime authority</span>
           </div>

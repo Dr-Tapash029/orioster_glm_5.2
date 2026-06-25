@@ -1,7 +1,7 @@
 'use client'
 
 // ═══════════════════════════════════════════════════════════════
-// MUSLIM HANDS HMS — Shared UI primitives
+// ORIOSTER HMS — Shared UI primitives
 // Dark navy + cyan glow glassmorphism design system
 // ═══════════════════════════════════════════════════════════════
 
@@ -172,7 +172,7 @@ export function OfflineBanner({ online }: { online: boolean }) {
   return (
     <div className="flex items-center gap-2 bg-amber-500/90 px-4 py-1.5 text-xs font-medium text-amber-950">
       <WifiOff className="h-3.5 w-3.5" />
-      Offline mode — all humanitarian operations remain fully functional. Data will sync when connection returns.
+      Offline mode — all clinical workflows remain fully functional. Data will sync when connection returns.
     </div>
   )
 }

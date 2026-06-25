@@ -114,7 +114,7 @@ export function DashboardView() {
             <p className="text-sm font-medium text-cyan-400">{roleGreeting(role)}</p>
             <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">{user?.name}</h1>
             <p className="mt-1 text-sm text-slate-400">
-              Here is today&apos;s humanitarian health operations overview.
+              Here is today&apos;s hospital operations overview.
             </p>
           </div>
           {(role === 'NURSE' || role === 'ADMIN' || role === 'DOCTOR') && (
@@ -223,7 +223,7 @@ export function DashboardView() {
       <GlassPanel className="p-4 sm:p-5 mh-stagger-5">
         <SectionHeader
           title="Recent Activities"
-          subtitle="Latest humanitarian operations across all roles"
+          subtitle="Latest activities across all roles"
           action={
             <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="gap-1.5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
               <Users className="h-3.5 w-3.5" />
@@ -295,6 +295,6 @@ export function DashboardView() {
 
 function roleGreeting(role: AppRole): string {
   const hours = new Date().getHours()
-  const tod = hours < 12 ? 'Assalamu Alaikum' : hours < 18 ? 'Assalamu Alaikum' : 'Assalamu Alaikum'
+  const tod = hours < 12 ? 'Good morning' : hours < 18 ? 'Good afternoon' : 'Good evening'
   return tod
 }

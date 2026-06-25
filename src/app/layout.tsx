@@ -18,10 +18,10 @@ const jetMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Muslim Hands — AI-Powered HMS",
+  title: "Orioster — AI-Powered HMS",
   description:
-    "Offline-first, AI-assisted humanitarian health operations command center. Built for low-resource healthcare environments.",
-  keywords: ["Muslim Hands", "HMS", "Humanitarian", "AI Healthcare", "Clinical Decision Support"],
+    "Offline-first, AI-assisted hospital management command center. Built for low-resource healthcare environments.",
+  keywords: ["Orioster", "HMS", "Hospital Management", "AI Healthcare", "Clinical Decision Support"],
 };
 
 export default function RootLayout({
