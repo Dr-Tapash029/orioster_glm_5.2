@@ -1571,7 +1571,7 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
             <Check className="h-3.5 w-3.5" />
             No known allergies
           </Button>
-          <Button variant="outline" size="sm" onClick={addAllAllergy} disabled={hasNone} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="gap-1.5">
             <Plus className="h-3.5 w-3.5" />
             Add allergy
           </Button>

@@ -118,3 +118,23 @@ Stage Summary:
 - 4-tier failover adapted to z-ai-web-dev-sdk with retry logic
 - Glassmorphism medical theme (teal/emerald), dark mode, responsive, sticky footer
 - App is live and runnable in the Preview Panel
+
+---
+Task ID: FIX-1
+Agent: Main (Z.ai Code)
+Task: Fix runtime error shown in user screenshots (Screenshot 22 & 23)
+
+Work Log:
+- Analyzed both screenshots with VLM skill
+- Screenshot 22: Runtime ReferenceError "addAllergy is not defined" at patient-entry-wizard.tsx:1574:56 in StepAllergies component (Next.js error overlay)
+- Screenshot 23: Resulting "Application error: a client-side exception has occurred" page (production-style crash from the same error bubbling up)
+- Root cause: Typo in the "Add allergy" button onClick handler — referenced `addAllAllergy` (extra "All") but the function is defined as `addAllergy` at line 1505
+- Fix: Changed `onClick={addAllAllergy}` → `onClick={addAllergy}` on line 1574
+- Audited ALL other onClick handlers in the wizard file (handleCancel, goBack, handleContinue, addMed, markNone, addAllergy, generate, runNotify, onSubmit) — all are properly defined or are valid props. `onSubmit` confirmed to be a prop of StepReview component (defined at line 2249, passed as handleFinalSubmit at line 525).
+- Verified fix end-to-end with Agent Browser: logged in as Nurse → opened wizard → filled Steps 1-5 → reached Step 6 (Hypersensitivity) which previously crashed → step rendered correctly with "Add allergy" and "No known allergies" buttons visible → advanced to Step 7 (Assign Doctor) → zero browser console errors
+- Lint: 0 errors, 0 warnings
+
+Stage Summary:
+- Fixed the `addAllergy is not defined` runtime crash in the Patient Entry Wizard
+- The wizard now works through Step 6 (Allergies) without crashing
+- Both screenshots' errors (the dev overlay and the production crash page) are resolved
