@@ -313,9 +313,9 @@ html.light [data-sonner-toast] {
     0 0 50px rgba(113, 61, 255, 0.06);
 }
 
-/* ── Glass panel for dropdowns (50% transparency) ── */
+/* ── Solid glass panel for dropdowns (fully opaque, no bleed-through) ── */
 .glass-panel-solid {
-  background: rgba(16, 8, 30, 0.50);
+  background: rgb(16, 8, 30);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
   border: 1px solid rgba(186, 179, 255, 0.15);
@@ -326,7 +326,7 @@ html.light [data-sonner-toast] {
 }
 /* Light mode override for dropdown panels */
 html.light .glass-panel-solid {
-  background: rgba(255, 255, 255, 0.50) !important;
+  background: rgb(255, 255, 255) !important;
   border: 1px solid rgba(113, 61, 255, 0.15) !important;
   box-shadow:
     0 16px 48px rgba(113, 61, 255, 0.15),
