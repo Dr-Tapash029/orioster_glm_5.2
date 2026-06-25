@@ -158,7 +158,7 @@ export function PatientDetailView() {
         <User className="h-10 w-10 text-slate-500" />
         <p className="font-semibold text-slate-100">No patient selected</p>
         <p className="text-sm text-slate-400">Choose a patient from the list to view their record.</p>
-        <Button onClick={() => setView('patients')} className="btn-cyan gap-1.5">
+        <Button onClick={() => setView('patients')} className="fx-btn-border-trace gap-1.5">
           <ArrowLeft className="h-4 w-4" /> Go to Patients
         </Button>
       </GlassPanel>
@@ -179,7 +179,7 @@ export function PatientDetailView() {
         <User className="h-10 w-10 text-slate-500" />
         <p className="font-semibold text-slate-100">Patient not found</p>
         <p className="text-sm text-slate-400">The selected patient record could not be loaded.</p>
-        <Button onClick={() => setView('patients')} className="btn-cyan gap-1.5">
+        <Button onClick={() => setView('patients')} className="fx-btn-border-trace gap-1.5">
           <ArrowLeft className="h-4 w-4" /> Go to Patients
         </Button>
       </GlassPanel>
@@ -387,7 +387,7 @@ function OverviewTab({
                 <p className="mt-1 text-sm text-slate-400">
                   The local summary (privacy firewall) has not been generated. Orio AI tasks are hard-disabled for this patient until the wizard is completed through Step 8.
                 </p>
-                <Button size="sm" className="mt-3 btn-cyan gap-1.5" onClick={onGoToWizard}>
+                <Button size="sm" className="mt-3 fx-btn-border-trace gap-1.5" onClick={onGoToWizard}>
                   <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
                 </Button>
               </div>

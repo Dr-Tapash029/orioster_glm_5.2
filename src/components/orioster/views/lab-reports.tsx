@@ -183,7 +183,7 @@ export function LabReportsView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-cyan gap-2">
+              <Button className="fx-btn-border-trace gap-2">
                 <Plus className="h-4 w-4" />
                 New Report
               </Button>
@@ -254,7 +254,7 @@ export function LabReportsView() {
                   AI will analyze the parameters and provide advisory feedback after saving.
                 </div>
 
-                <Button onClick={createAndAnalyze} disabled={analyzing} className="btn-cyan w-full gap-2">
+                <Button onClick={createAndAnalyze} disabled={analyzing} className="fx-btn-border-trace w-full gap-2">
                   {analyzing ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Generating & Analyzing...</>
                   ) : (

@@ -169,7 +169,7 @@ export function InvoicesView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-cyan gap-2">
+              <Button className="fx-btn-border-trace gap-2">
                 <Plus className="h-4 w-4" />
                 New Invoice
               </Button>
@@ -266,7 +266,7 @@ export function InvoicesView() {
                   <span>Use AI to suggest line items (advisory — requires Step 8 summary)</span>
                 </label>
 
-                <Button onClick={generateInvoice} disabled={generating} className="btn-cyan w-full gap-2">
+                <Button onClick={generateInvoice} disabled={generating} className="fx-btn-border-trace w-full gap-2">
                   {generating ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
                   ) : (

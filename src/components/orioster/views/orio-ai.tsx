@@ -340,7 +340,7 @@ function FirewallWarning({ onGoToWizard }: { onGoToWizard: () => void }) {
             Complete the Patient Entry Wizard through <span className="font-medium">Step 8 (Local Summary)</span> first.
             The privacy firewall requires a de-identified summary before any AI task can run.
           </p>
-          <Button size="sm" className="btn-cyan mt-3 gap-1.5" onClick={onGoToWizard}>
+          <Button size="sm" className="fx-btn-border-trace mt-3 gap-1.5" onClick={onGoToWizard}>
             <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
           </Button>
         </div>
@@ -459,7 +459,7 @@ function DiagnosisPanel({
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading} className="btn-cyan gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading} className="fx-btn-border-trace gap-1.5">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Run AI'}
           </Button>
@@ -526,7 +526,7 @@ function DiagnosisPanel({
                         <Button
                           size="sm"
                           variant={isConfirmed ? 'default' : 'outline'}
-                          className={cn('gap-1.5', isConfirmed && 'btn-cyan')}
+                          className={cn('gap-1.5', isConfirmed && 'fx-btn-border-trace')}
                           onClick={() => onConfirm(d.condition)}
                         >
                           {isConfirmed ? (
@@ -600,7 +600,7 @@ function TreatmentPanel({
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="btn-cyan gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="fx-btn-border-trace gap-1.5">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ClipboardList className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Generate Plan'}
           </Button>
@@ -745,7 +745,7 @@ function PrescriptionPanel({
               </Button>
             </>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading} className="btn-cyan gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading} className="fx-btn-border-trace gap-1.5">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pill className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Generate Rx'}
           </Button>

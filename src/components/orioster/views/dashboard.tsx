@@ -121,7 +121,7 @@ export function DashboardView() {
             <Button
               size="lg"
               onClick={() => setView('patient-entry')}
-              className="btn-cyan gap-2"
+              className="fx-btn-border-trace gap-2"
             >
               <UserPlus className="h-4.5 w-4.5" />
               Add Patient

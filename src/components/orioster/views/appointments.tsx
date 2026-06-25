@@ -122,7 +122,7 @@ export function AppointmentsView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-cyan gap-2">
+              <Button className="fx-btn-border-trace gap-2">
                 <Plus className="h-4 w-4" />
                 Schedule
               </Button>
@@ -180,7 +180,7 @@ export function AppointmentsView() {
                     placeholder="Consultation"
                   />
                 </div>
-                <Button onClick={createAppt} className="btn-cyan w-full">Schedule Appointment</Button>
+                <Button onClick={createAppt} className="fx-btn-border-trace w-full">Schedule Appointment</Button>
               </div>
             </DialogContent>
           </Dialog>

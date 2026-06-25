@@ -358,6 +358,118 @@
   transform: translateY(-1px);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   BORDER TRACE BUTTON — Signature animated border-trace effect
+   Two 2px lines slide in from opposite ends on hover + glow
+   ═══════════════════════════════════════════════════════════════ */
+
+.fx-btn-border-trace {
+  position: relative;
+  padding: 12px 30px !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6ED4EC !important;
+  background: rgba(54, 184, 216, 0.08) !important;
+  border: 1px solid rgba(54, 184, 216, 0.20) !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  letter-spacing: 0.01em;
+  box-shadow: none !important;
+}
+.fx-btn-border-trace::before,
+.fx-btn-border-trace::after {
+  content: "";
+  position: absolute;
+  background: #73E8FF;
+  z-index: 1;
+}
+.fx-btn-border-trace::before {
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  transform: translateX(-100%);
+  transition: transform 0.35s ease;
+}
+.fx-btn-border-trace::after {
+  bottom: 0; right: 0;
+  width: 100%; height: 2px;
+  transform: translateX(100%);
+  transition: transform 0.35s ease 0.2s;
+}
+.fx-btn-border-trace:hover::before,
+.fx-btn-border-trace:hover::after { transform: translateX(0); }
+.fx-btn-border-trace:hover {
+  background: rgba(54, 184, 216, 0.15) !important;
+  color: #73E8FF !important;
+  box-shadow: 0 0 24px rgba(54, 184, 216, 0.35) !important;
+}
+.fx-btn-border-trace > * { position: relative; z-index: 2; }
+.fx-btn-border-trace:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #5a7a8a !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+.fx-btn-border-trace:disabled::before,
+.fx-btn-border-trace:disabled::after { display: none; }
+.fx-btn-border-trace:disabled:hover { box-shadow: none !important; background: rgba(255, 255, 255, 0.03) !important; }
+
+/* Amber variant (for active cases / warnings) */
+.fx-btn-border-trace-amber {
+  color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.06) !important;
+  border-color: rgba(251, 191, 36, 0.20) !important;
+}
+.fx-btn-border-trace-amber::before,
+.fx-btn-border-trace-amber::after { background: #fbbf24; }
+.fx-btn-border-trace-amber:hover {
+  background: rgba(251, 191, 36, 0.12) !important;
+  color: #fcd34d !important;
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.35) !important;
+}
+
+/* Emerald variant (for success / confirm) */
+.fx-btn-border-trace-emerald {
+  color: #4ade80 !important;
+  background: rgba(34, 197, 94, 0.06) !important;
+  border-color: rgba(34, 197, 94, 0.20) !important;
+}
+.fx-btn-border-trace-emerald::before,
+.fx-btn-border-trace-emerald::after { background: #4ade80; }
+.fx-btn-border-trace-emerald:hover {
+  background: rgba(34, 197, 94, 0.12) !important;
+  color: #86efac !important;
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.35) !important;
+}
+
+/* Red variant (for critical / delete) */
+.fx-btn-border-trace-red {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+  border-color: rgba(239, 68, 68, 0.20) !important;
+}
+.fx-btn-border-trace-red::before,
+.fx-btn-border-trace-red::after { background: #f87171; }
+.fx-btn-border-trace-red:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #fca5a5 !important;
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Size variants */
+.fx-btn-border-trace-sm {
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.fx-btn-border-trace-lg {
+  padding: 14px 36px;
+  font-size: 15px;
+  border-radius: 12px;
+}
+
 /* Text gradient for headings */
 .text-gradient-cyan {
   background: linear-gradient(135deg, #6ED4EC 0%, #36B8D8 50%, #1E9FC0 100%);
