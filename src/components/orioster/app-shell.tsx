@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { useAppStore, type ViewKey } from '@/lib/store'
-import { useTheme } from 'next-themes'
 import { OnlineIndicator, OfflineBanner, RoleBadge } from '@/components/orioster/ui-primitives'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -76,12 +75,7 @@ const PROFILE_MENU: Array<{ key: ViewKey; label: string; icon: ReactNode }> = [
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, logout, view, setView, online, setOnline, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
-  const { theme, setTheme } = useTheme()
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light')
-  }
+  const { user, logout, view, setView, online, setOnline, theme, toggleTheme, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
 
   if (!user) return null
 
@@ -172,7 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
                   title="Toggle theme"
                 >
-                  {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </button>
 
                 {/* Profile */}
