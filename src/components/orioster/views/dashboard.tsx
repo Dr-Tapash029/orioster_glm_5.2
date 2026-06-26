@@ -103,53 +103,55 @@ export function DashboardView() {
   ]
 
   return (
-    <div className="space-y-3 p-3">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* ═══ Welcome Panel ══════════════════════════════════════ */}
-      <GlassPanel variant="strong" className="section-slide-up p-4">
+      <GlassPanel variant="strong" className="section-slide-up p-4 lg:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-violet-400 word-reveal" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
-            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-100 text-glow-pulse word-reveal" style={{ animationDelay: '0.2s' }}>
+            <p className="text-xs font-medium text-violet-400 word-reveal lg:text-sm" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-100 text-glow-pulse word-reveal lg:text-3xl" style={{ animationDelay: '0.2s' }}>
               {user?.name}
             </h1>
-            <p className="mt-0.5 text-[11px] text-slate-400 word-reveal" style={{ animationDelay: '0.35s' }}>
+            <p className="mt-0.5 text-[11px] text-slate-400 word-reveal lg:text-sm" style={{ animationDelay: '0.35s' }}>
               Here is today&apos;s hospital operations overview.
             </p>
           </div>
           {(role === 'NURSE' || role === 'ADMIN' || role === 'DOCTOR') && (
             <Button
               onClick={() => setView('patient-entry')}
-              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 word-reveal flex-shrink-0"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 word-reveal flex-shrink-0 lg:fx-btn-border-trace-lg"
               style={{ animationDelay: '0.5s' }}
             >
-              <UserPlus className="h-3.5 w-3.5" />
-              Add
+              <UserPlus className="h-3.5 w-3.5 lg:h-4.5 lg:w-4.5" />
+              <span className="hidden sm:inline">Add Patient</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           )}
         </div>
       </GlassPanel>
 
-      {/* ═══ KPI Cards — 2×2 grid (compact) ═════════════════════ */}
-      <div className="grid grid-cols-2 gap-2.5">
+      {/* ═══ KPI Cards — responsive grid ════════════════════════ */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-4">
         <div className="card-enter stagger-1">
-          <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-4 w-4" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
+          <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-4 w-4 lg:h-5 lg:w-5" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
         </div>
         <div className="card-enter stagger-2">
-          <StatCard label="Active Cases" value={s.inProgressAppts + s.scheduledAppts} icon={<Activity className="h-4 w-4" />} trend={`${s.scheduledAppts} scheduled`} accent="amber" />
+          <StatCard label="Active Cases" value={s.inProgressAppts + s.scheduledAppts} icon={<Activity className="h-4 w-4 lg:h-5 lg:w-5" />} trend={`${s.scheduledAppts} scheduled`} accent="amber" />
         </div>
         <div className="card-enter stagger-3">
-          <StatCard label="Beneficiaries" value={s.completedPatients} icon={<Users className="h-4 w-4" />} trend={`${s.reviewedPatients} reviewed`} accent="turquoise" />
+          <StatCard label="Beneficiaries" value={s.completedPatients} icon={<Users className="h-4 w-4 lg:h-5 lg:w-5" />} trend={`${s.reviewedPatients} reviewed`} accent="turquoise" />
         </div>
         <div className="card-enter stagger-4">
-          <StatCard label="AI Alerts" value={s.triage.red} icon={<AlertTriangle className="h-4 w-4" />} trend="Critical triage" accent="critical" />
+          <StatCard label="AI Alerts" value={s.triage.red} icon={<AlertTriangle className="h-4 w-4 lg:h-5 lg:w-5" />} trend="Critical triage" accent="critical" />
         </div>
       </div>
 
-      {/* ═══ Charts — stacked (area chart taller, donut below) ══ */}
-      <GlassPanel className="wope-card-hover card-enter stagger-3 p-3.5">
-        <SectionHeader title="Patient Trends" subtitle="Patients · Medicine Distribution" />
-        <div className="mt-3 h-44">
-          <ResponsiveContainer width="100%" height="100%">
+      {/* ═══ Charts — stacked on mobile, side-by-side on desktop ══ */}
+      <div className="grid gap-2.5 sm:gap-3 lg:grid-cols-5 lg:gap-4">
+        <GlassPanel className="wope-card-hover card-enter stagger-3 p-3.5 lg:col-span-3 lg:p-5">
+          <SectionHeader title="Patient Trends" subtitle="Patients · Medicine Distribution" />
+          <div className="mt-3 h-44 lg:h-64">
+            <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <defs>
                 <linearGradient id="gPatients" x1="0" y1="0" x2="0" y2="1">
@@ -180,9 +182,9 @@ export function DashboardView() {
         </div>
       </GlassPanel>
 
-      <GlassPanel className="wope-card-hover card-enter stagger-4 p-3.5">
+      <GlassPanel className="wope-card-hover card-enter stagger-4 p-3.5 lg:col-span-2 lg:p-5">
         <SectionHeader title="Triage Distribution" subtitle="Local clinical triage" />
-        <div className="mt-3 h-40">
+        <div className="mt-3 h-40 lg:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -213,6 +215,7 @@ export function DashboardView() {
           </ResponsiveContainer>
         </div>
       </GlassPanel>
+      </div>
 
       {/* ═══ Recent Activities / Patients ═══════════════════════ */}
       <GlassPanel className="wope-card-hover card-enter stagger-5 p-3.5">
