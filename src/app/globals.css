@@ -670,6 +670,102 @@ html.light .glass-panel-solid {
   opacity: 0.5;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   WOPE-INSPIRED ANIMATIONS — From screen capture analysis
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Word-by-word staggered reveal ────────────────────────── */
+@keyframes wope-word-reveal {
+  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.word-reveal {
+  display: inline-block;
+  opacity: 0;
+  animation: wope-word-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Glow pulse on text/headings ──────────────────────────── */
+@keyframes wope-text-glow {
+  0%, 100% { text-shadow: 0 0 20px rgba(167, 139, 250, 0.3); }
+  50% { text-shadow: 0 0 30px rgba(167, 139, 250, 0.5), 0 0 50px rgba(113, 61, 255, 0.2); }
+}
+.text-glow-pulse {
+  animation: wope-text-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Card scale+fade entrance ─────────────────────────────── */
+@keyframes wope-card-enter {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.card-enter {
+  animation: wope-card-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Section slide-up + fade (Wope ease) ──────────────────── */
+@keyframes wope-section-slide {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.section-slide-up {
+  animation: wope-section-slide 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* ── Wope card hover (background lightening) ──────────────── */
+.wope-card-hover {
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.wope-card-hover:hover {
+  background: rgba(113, 61, 255, 0.10) !important;
+  border-color: rgba(186, 179, 255, 0.30) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(113, 61, 255, 0.15) !important;
+  transform: translateY(-2px);
+}
+html.light .wope-card-hover:hover {
+  background: rgba(113, 61, 255, 0.06) !important;
+  border-color: rgba(113, 61, 255, 0.20) !important;
+  box-shadow: 0 12px 40px rgba(113, 61, 255, 0.12) !important;
+}
+
+/* ── Background glow intensify (on load) ──────────────────── */
+@keyframes wope-bg-glow-in {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.bg-glow-in {
+  animation: wope-bg-glow-in 1.2s ease-out both;
+}
+
+/* ── Clockwise border-trace reveal (SVG-style on div) ─────── */
+@keyframes wope-border-trace-reveal {
+  0% { clip-path: inset(0 100% 0 0); }
+  25% { clip-path: inset(0 0 100% 0); }
+  50% { clip-path: inset(0 0 0 100%); }
+  75% { clip-path: inset(100% 0 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+.border-trace-reveal {
+  position: relative;
+}
+.border-trace-reveal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(113, 61, 255, 0.5);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: wope-border-trace-reveal 0.6s ease-out forwards;
+}
+
+/* ── Stagger helpers for card grids ───────────────────────── */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.19s; }
+.stagger-4 { animation-delay: 0.26s; }
+.stagger-5 { animation-delay: 0.33s; }
+.stagger-6 { animation-delay: 0.40s; }
+
 /* ── Respect reduced motion ────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

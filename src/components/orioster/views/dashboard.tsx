@@ -108,12 +108,14 @@ export function DashboardView() {
   return (
     <div className="space-y-5">
       {/* ═══ Welcome Panel ══════════════════════════════════════ */}
-      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6 wope-stagger-1">
+      <GlassPanel variant="strong" className="section-slide-up overflow-hidden p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-violet-400">{roleGreeting(role)}</p>
-            <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">{user?.name}</h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="text-sm font-medium text-violet-400 word-reveal" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
+            <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl text-glow-pulse word-reveal" style={{ animationDelay: '0.2s' }}>
+              {user?.name}
+            </h1>
+            <p className="mt-1 text-sm text-slate-400 word-reveal" style={{ animationDelay: '0.35s' }}>
               Here is today&apos;s hospital operations overview.
             </p>
           </div>
@@ -121,7 +123,8 @@ export function DashboardView() {
             <Button
               size="lg"
               onClick={() => setView('patient-entry')}
-              className="fx-btn-border-trace btn-press ripple gap-2"
+              className="fx-btn-border-trace btn-press ripple gap-2 word-reveal"
+              style={{ animationDelay: '0.5s' }}
             >
               <UserPlus className="h-4.5 w-4.5" />
               Add Patient
@@ -132,16 +135,16 @@ export function DashboardView() {
 
       {/* ═══ KPI Cards (gradient + glow) ════════════════════════ */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <div className="wope-stagger-1">
+        <div className="card-enter stagger-1">
           <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-5 w-5" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
         </div>
-        <div className="wope-stagger-2">
+        <div className="card-enter stagger-2">
           <StatCard label="Active Cases" value={s.inProgressAppts + s.scheduledAppts} icon={<Activity className="h-5 w-5" />} trend={`${s.scheduledAppts} scheduled`} accent="amber" />
         </div>
-        <div className="wope-stagger-3">
+        <div className="card-enter stagger-3">
           <StatCard label="Beneficiaries" value={s.completedPatients} icon={<Users className="h-5 w-5" />} trend={`${s.reviewedPatients} reviewed`} accent="turquoise" />
         </div>
-        <div className="wope-stagger-4">
+        <div className="card-enter stagger-4">
           <StatCard label="AI Alerts" value={s.triage.red} icon={<AlertTriangle className="h-5 w-5" />} trend="Critical triage" accent="critical" />
         </div>
       </div>
@@ -149,7 +152,7 @@ export function DashboardView() {
       {/* ═══ Charts row ═════════════════════════════════════════ */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Humanitarian Trends — area chart */}
-        <GlassPanel className="p-4 sm:p-5 wope-stagger-3 lg:col-span-2">
+        <GlassPanel className="wope-card-hover p-4 sm:p-5 card-enter stagger-3 lg:col-span-2">
           <SectionHeader title="Humanitarian Trends" subtitle="Patients · Referrals · Medicine Distribution" />
           <div className="mt-4 h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -184,7 +187,7 @@ export function DashboardView() {
         </GlassPanel>
 
         {/* Triage distribution */}
-        <GlassPanel className="p-4 sm:p-5 wope-stagger-4">
+        <GlassPanel className="wope-card-hover p-4 sm:p-5 card-enter stagger-4">
           <SectionHeader title="Triage Distribution" subtitle="Local clinical triage" />
           <div className="mt-4 h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -220,7 +223,7 @@ export function DashboardView() {
       </div>
 
       {/* ═══ Recent Activities / Patients ═══════════════════════ */}
-      <GlassPanel className="p-4 sm:p-5 wope-stagger-5">
+      <GlassPanel className="wope-card-hover p-4 sm:p-5 card-enter stagger-5">
         <SectionHeader
           title="Recent Activities"
           subtitle="Latest activities across all roles"

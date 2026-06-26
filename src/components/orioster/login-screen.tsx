@@ -24,6 +24,7 @@ import {
 import type { AppRole } from '@/lib/types'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { WordReveal } from '@/components/orioster/word-reveal'
 
 interface StaffMember {
   id: string
@@ -114,19 +115,21 @@ export function LoginScreen() {
 
       {/* Top brand */}
       <div className="relative mb-6 flex flex-col items-center gap-3 text-center">
-        <div className="wope-logo-glow flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-2xl">
+        <div className="wope-logo-glow bg-glow-in flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-2xl">
           <HeartPulse className="h-9 w-9" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white-gradient sm:text-3xl" style={{ fontFamily: 'var(--font-heading)' }}>
-            ORIOSTER
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl text-glow-pulse" style={{ fontFamily: 'var(--font-heading)' }}>
+            <WordReveal text="ORIOSTER" delay={0.2} wordDelay={0.12} />
           </h1>
-          <p className="mt-1 text-xs font-medium tracking-wider text-violet-400">AI-POWERED HOSPITAL MANAGEMENT SYSTEM</p>
+          <p className="mt-1 text-xs font-medium tracking-wider text-violet-400 word-reveal" style={{ animationDelay: '0.6s' }}>
+            AI-POWERED HOSPITAL MANAGEMENT SYSTEM
+          </p>
         </div>
       </div>
 
       {/* Auth card with Sign In / Sign Up tabs */}
-      <div className="glass-strong relative w-full max-w-md rounded-2xl p-5 sm:p-6">
+      <div className="glass-strong section-slide-up relative w-full max-w-md rounded-2xl p-5 sm:p-6" style={{ animationDelay: '0.4s' }}>
         {/* Tab switcher */}
         <div className="mb-5 flex gap-1 rounded-xl bg-white/5 p-1">
           <button
