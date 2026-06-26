@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { DynamicBackground } from "@/components/ui/DynamicBackground";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -31,17 +32,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Prevent theme flash: read persisted theme before hydration */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var s = JSON.parse(localStorage.getItem('orioster-session') || '{}');
-                var t = s.state && s.state.theme ? s.state.theme : 'dark';
-                document.documentElement.classList.toggle('light', t === 'light');
-                document.documentElement.classList.toggle('dark', t === 'dark');
-              } catch(e) {}
+                var stored = localStorage.getItem('theme');
+                var theme = stored || 'dark';
+                document.documentElement.classList.toggle('light', theme === 'light');
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+                document.documentElement.style.colorScheme = theme;
+              } catch(e) {
+                document.documentElement.classList.add('dark');
+              }
             `,
           }}
         />
@@ -55,9 +60,11 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          {/* Layout-level animated background — sits behind all content */}
+          <DynamicBackground />
           {children}
           <Toaster />
-          <SonnerToaster position="top-right" theme="dark" richColors closeButton />
+          <SonnerToaster position="top-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

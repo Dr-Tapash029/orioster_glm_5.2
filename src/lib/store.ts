@@ -1,23 +1,51 @@
 // ORIOSTER — Client state store (Zustand)
-// Handles auth session, SPA navigation, profile, theme, notifications, search
+// Handles auth session, SPA navigation, profile, notifications, search
+// Theme is now managed by next-themes (not Zustand) for proper SSR hydration.
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { AppRole } from '@/lib/types'
 
+// ── View Keys ─────────────────────────────────────────────────
+// Admin-only views are isolated from general user views.
+// The view switcher in page.tsx uses canAccessView() to enforce this.
 export type ViewKey =
+  // Shared views (all roles)
   | 'dashboard'
   | 'patients'
   | 'patient-detail'
   | 'patient-entry'
-  | 'orio-ai'
-  | 'ai-hub'
   | 'appointments'
   | 'lab-reports'
+  // Admin-only views
+  | 'ai-hub'
   | 'invoices'
+  // Doctor/Admin views
+  | 'orio-ai'
+  // Account views (all roles)
   | 'my-profile'
   | 'my-company'
   | 'my-tasks'
   | 'my-documents'
+
+// ── Role-Based View Access Control ────────────────────────────
+// Defines which views each role can access. The view switcher
+// filters rendered views based on the current user's role.
+const ADMIN_ONLY_VIEWS: ViewKey[] = ['ai-hub', 'invoices']
+const DOCTOR_ADMIN_VIEWS: ViewKey[] = ['orio-ai']
+const LAB_TECH_VIEWS: ViewKey[] = ['lab-reports']
+
+export function canAccessView(view: ViewKey, role: AppRole): boolean {
+  if (ADMIN_ONLY_VIEWS.includes(view)) return role === 'ADMIN'
+  if (DOCTOR_ADMIN_VIEWS.includes(view)) return role === 'DOCTOR' || role === 'ADMIN'
+  if (LAB_TECH_VIEWS.includes(view)) return role === 'LAB_TECH' || role === 'DOCTOR' || role === 'ADMIN'
+  return true
+}
+
+// Convenience sets for nav rendering
+export const ADMIN_VIEWS = new Set<ViewKey>(ADMIN_ONLY_VIEWS)
+export const USER_VIEWS = new Set<ViewKey>([
+  'dashboard', 'patients', 'patient-detail', 'patient-entry', 'appointments', 'lab-reports',
+])
 
 interface SessionUser {
   id: string
@@ -41,7 +69,7 @@ interface AppState {
   setUser: (u: SessionUser | null) => void
   logout: () => void
 
-  // Navigation (SPA — single route)
+  // Navigation (SPA — single route, role-filtered)
   view: ViewKey
   setView: (v: ViewKey) => void
 
@@ -56,11 +84,6 @@ interface AppState {
   // Online/offline indicator (simulated sync status)
   online: boolean
   setOnline: (v: boolean) => void
-
-  // Theme: 'dark' | 'light'
-  theme: 'dark' | 'light'
-  toggleTheme: () => void
-  setTheme: (t: 'dark' | 'light') => void
 
   // Profile image (base64 data URL — uploaded by user)
   profileImage: string | null
@@ -126,7 +149,12 @@ export const useAppStore = create<AppState>()(
       logout: () => set({ user: null, view: 'dashboard', activePatientId: null, wizardPatientId: null }),
 
       view: 'dashboard',
-      setView: (v) => set({ view: v, drawerOpen: false }),
+      setView: (v) => {
+        // Enforce role-based view access at the store level
+        const role = get().user?.role
+        if (role && !canAccessView(v, role)) return // silently block
+        set({ view: v, drawerOpen: false })
+      },
 
       activePatientId: null,
       setActivePatient: (id) => set({ activePatientId: id }),
@@ -136,23 +164,6 @@ export const useAppStore = create<AppState>()(
 
       online: true,
       setOnline: (v) => set({ online: v }),
-
-      theme: 'dark',
-      toggleTheme: () => {
-        const next = get().theme === 'dark' ? 'light' : 'dark'
-        set({ theme: next })
-        if (typeof document !== 'undefined') {
-          document.documentElement.classList.toggle('light', next === 'light')
-          document.documentElement.classList.toggle('dark', next === 'dark')
-        }
-      },
-      setTheme: (t) => {
-        set({ theme: t })
-        if (typeof document !== 'undefined') {
-          document.documentElement.classList.toggle('light', t === 'light')
-          document.documentElement.classList.toggle('dark', t === 'dark')
-        }
-      },
 
       profileImage: null,
       setProfileImage: (img) => set({ profileImage: img }),
@@ -184,7 +195,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'orioster-session',
-      partialize: (s) => ({ user: s.user, view: s.view, theme: s.theme, profileImage: s.profileImage }),
+      partialize: (s) => ({ user: s.user, view: s.view, profileImage: s.profileImage }),
     }
   )
 )
