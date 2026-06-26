@@ -18,8 +18,6 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -33,7 +31,6 @@ import {
   AreaChart,
 } from 'recharts'
 import type { AppRole } from '@/lib/types'
-import { formatDistanceToNow } from 'date-fns'
 
 interface DashboardData {
   stats: {
@@ -106,190 +103,150 @@ export function DashboardView() {
   ]
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 p-3">
       {/* ═══ Welcome Panel ══════════════════════════════════════ */}
-      <GlassPanel variant="strong" className="section-slide-up overflow-hidden p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-violet-400 word-reveal" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
-            <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl text-glow-pulse word-reveal" style={{ animationDelay: '0.2s' }}>
+      <GlassPanel variant="strong" className="section-slide-up p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-violet-400 word-reveal" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-100 text-glow-pulse word-reveal" style={{ animationDelay: '0.2s' }}>
               {user?.name}
             </h1>
-            <p className="mt-1 text-sm text-slate-400 word-reveal" style={{ animationDelay: '0.35s' }}>
+            <p className="mt-0.5 text-[11px] text-slate-400 word-reveal" style={{ animationDelay: '0.35s' }}>
               Here is today&apos;s hospital operations overview.
             </p>
           </div>
           {(role === 'NURSE' || role === 'ADMIN' || role === 'DOCTOR') && (
             <Button
-              size="lg"
               onClick={() => setView('patient-entry')}
-              className="fx-btn-border-trace btn-press ripple gap-2 word-reveal"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 word-reveal flex-shrink-0"
               style={{ animationDelay: '0.5s' }}
             >
-              <UserPlus className="h-4.5 w-4.5" />
-              Add Patient
+              <UserPlus className="h-3.5 w-3.5" />
+              Add
             </Button>
           )}
         </div>
       </GlassPanel>
 
-      {/* ═══ KPI Cards (gradient + glow) ════════════════════════ */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      {/* ═══ KPI Cards — 2×2 grid (compact) ═════════════════════ */}
+      <div className="grid grid-cols-2 gap-2.5">
         <div className="card-enter stagger-1">
-          <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-5 w-5" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
+          <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-4 w-4" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
         </div>
         <div className="card-enter stagger-2">
-          <StatCard label="Active Cases" value={s.inProgressAppts + s.scheduledAppts} icon={<Activity className="h-5 w-5" />} trend={`${s.scheduledAppts} scheduled`} accent="amber" />
+          <StatCard label="Active Cases" value={s.inProgressAppts + s.scheduledAppts} icon={<Activity className="h-4 w-4" />} trend={`${s.scheduledAppts} scheduled`} accent="amber" />
         </div>
         <div className="card-enter stagger-3">
-          <StatCard label="Beneficiaries" value={s.completedPatients} icon={<Users className="h-5 w-5" />} trend={`${s.reviewedPatients} reviewed`} accent="turquoise" />
+          <StatCard label="Beneficiaries" value={s.completedPatients} icon={<Users className="h-4 w-4" />} trend={`${s.reviewedPatients} reviewed`} accent="turquoise" />
         </div>
         <div className="card-enter stagger-4">
-          <StatCard label="AI Alerts" value={s.triage.red} icon={<AlertTriangle className="h-5 w-5" />} trend="Critical triage" accent="critical" />
+          <StatCard label="AI Alerts" value={s.triage.red} icon={<AlertTriangle className="h-4 w-4" />} trend="Critical triage" accent="critical" />
         </div>
       </div>
 
-      {/* ═══ Charts row ═════════════════════════════════════════ */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Humanitarian Trends — area chart */}
-        <GlassPanel className="wope-card-hover p-4 sm:p-5 card-enter stagger-3 lg:col-span-2">
-          <SectionHeader title="Humanitarian Trends" subtitle="Patients · Referrals · Medicine Distribution" />
-          <div className="mt-4 h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-                <defs>
-                  <linearGradient id="gPatients" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#36B8D8" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#36B8D8" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gMedicine" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22C55E" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#22C55E" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#8ba8b8' }} stroke="rgba(255,255,255,0.1)" />
-                <YAxis tick={{ fontSize: 11, fill: '#8ba8b8' }} stroke="rgba(255,255,255,0.1)" allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: '#0A1B31',
-                    border: '1px solid rgba(115,232,255,0.15)',
-                    borderRadius: 8,
-                    fontSize: 12,
-                    color: '#e8f4f8',
-                  }}
-                />
-                <Area type="monotone" dataKey="patients" stroke="#36B8D8" strokeWidth={2} fill="url(#gPatients)" name="Patients" />
-                <Area type="monotone" dataKey="medicine" stroke="#22C55E" strokeWidth={2} fill="url(#gMedicine)" name="Medicine" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassPanel>
+      {/* ═══ Charts — stacked (area chart taller, donut below) ══ */}
+      <GlassPanel className="wope-card-hover card-enter stagger-3 p-3.5">
+        <SectionHeader title="Patient Trends" subtitle="Patients · Medicine Distribution" />
+        <div className="mt-3 h-44">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+              <defs>
+                <linearGradient id="gPatients" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#713DFF" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="#713DFF" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gMedicine" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#22C55E" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#22C55E" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+              <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#9b96b0' }} stroke="rgba(255,255,255,0.06)" />
+              <YAxis tick={{ fontSize: 9, fill: '#9b96b0' }} stroke="rgba(255,255,255,0.06)" allowDecimals={false} />
+              <Tooltip
+                contentStyle={{
+                  background: '#140B25',
+                  border: '1px solid rgba(186,179,255,0.15)',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  color: '#ffffff',
+                }}
+              />
+              <Area type="monotone" dataKey="patients" stroke="#713DFF" strokeWidth={2} fill="url(#gPatients)" name="Patients" />
+              <Area type="monotone" dataKey="medicine" stroke="#22C55E" strokeWidth={2} fill="url(#gMedicine)" name="Medicine" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </GlassPanel>
 
-        {/* Triage distribution */}
-        <GlassPanel className="wope-card-hover p-4 sm:p-5 card-enter stagger-4">
-          <SectionHeader title="Triage Distribution" subtitle="Local clinical triage" />
-          <div className="mt-4 h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={triageData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={3}
-                >
-                  {triageData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: '#0A1B31',
-                    border: '1px solid rgba(115,232,255,0.15)',
-                    borderRadius: 8,
-                    fontSize: 12,
-                    color: '#e8f4f8',
-                  }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 12, color: '#8ba8b8' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassPanel>
-      </div>
+      <GlassPanel className="wope-card-hover card-enter stagger-4 p-3.5">
+        <SectionHeader title="Triage Distribution" subtitle="Local clinical triage" />
+        <div className="mt-3 h-40">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={triageData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={38}
+                outerRadius={60}
+                paddingAngle={3}
+              >
+                {triageData.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  background: '#140B25',
+                  border: '1px solid rgba(186,179,255,0.15)',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  color: '#ffffff',
+                }}
+              />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: 10, color: '#9b96b0' }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </GlassPanel>
 
       {/* ═══ Recent Activities / Patients ═══════════════════════ */}
-      <GlassPanel className="wope-card-hover p-4 sm:p-5 card-enter stagger-5">
+      <GlassPanel className="wope-card-hover card-enter stagger-5 p-3.5">
         <SectionHeader
           title="Recent Activities"
-          subtitle="Latest activities across all roles"
+          subtitle="Latest patient entries"
           action={
-            <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="fx-btn-border-trace btn-press ripple gap-1.5 text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
-              <Users className="h-3.5 w-3.5" />
-              View all
+            <Button variant="ghost" size="sm" onClick={() => setView('patients')} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1 text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
+              <Users className="h-3 w-3" />
+              All
             </Button>
           }
         />
-        <div className="mt-4 overflow-x-auto wope-scroll">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/5 text-left text-xs text-slate-500">
-                <th className="pb-2 pr-3 font-medium">Patient</th>
-                <th className="pb-2 pr-3 font-medium">Complaint</th>
-                <th className="hidden pb-2 pr-3 font-medium sm:table-cell">Triage</th>
-                <th className="hidden pb-2 pr-3 font-medium md:table-cell">Doctor</th>
-                <th className="pb-2 pr-3 font-medium">Status</th>
-                <th className="pb-2 pr-3 font-medium">Sync</th>
-                <th className="pb-2 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.recentPatients.map((p) => (
-                <tr
-                  key={p.id}
-                  className="row-slide cursor-pointer border-b border-white/5"
-                  onClick={() => {
-                    setActivePatient(p.id)
-                    setView('patient-detail')
-                  }}
-                >
-                  <td className="py-2.5 pr-3">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-300">
-                        {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
-                      </div>
-                      <div>
-                        <p className="font-medium leading-tight text-slate-100">{p.fullName}</p>
-                        <p className="text-[11px] text-slate-500">{p.localId} · {p.age ?? '?'}y · {p.gender.toLowerCase()}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="max-w-[180px] truncate py-2.5 pr-3 text-slate-400">
-                    {p.chiefComplaint ?? '—'}
-                  </td>
-                  <td className="hidden py-2.5 pr-3 sm:table-cell">
-                    <TriageBadge level={(p.vitals[0]?.triageLevel as 'GREEN' | 'YELLOW' | 'RED') ?? null} />
-                  </td>
-                  <td className="hidden py-2.5 pr-3 md:table-cell text-slate-400">
-                    {p.appointments[0]?.doctor.name ?? '—'}
-                  </td>
-                  <td className="py-2.5 pr-3">
-                    <span className="text-xs font-medium text-slate-300">{p.status}</span>
-                  </td>
-                  <td className="py-2.5 pr-3">
-                    <SyncStatusBadge status={p.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
-                  </td>
-                  <td className="py-2.5 text-right text-[11px] text-slate-500">
-                    {formatDistanceToNow(new Date(p.createdAt), { addSuffix: true })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-3 space-y-1.5">
+          {data.recentPatients.slice(0, 5).map((p) => (
+            <button
+              key={p.id}
+              onClick={() => {
+                setActivePatient(p.id)
+                setView('patient-detail')
+              }}
+              className="row-slide flex w-full items-center gap-2.5 rounded-lg p-2 text-left hover:bg-violet-500/8"
+            >
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-[10px] font-semibold text-violet-300">
+                {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium text-slate-100">{p.fullName}</p>
+                <p className="truncate text-[10px] text-slate-500">{p.chiefComplaint ?? '—'}</p>
+              </div>
+              <TriageBadge level={(p.vitals[0]?.triageLevel as 'GREEN' | 'YELLOW' | 'RED') ?? null} />
+              <SyncStatusBadge status={p.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
+            </button>
+          ))}
         </div>
       </GlassPanel>
     </div>
