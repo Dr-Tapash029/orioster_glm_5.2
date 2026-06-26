@@ -110,77 +110,94 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="wope-bg flex min-h-screen flex-col">
       <OfflineBanner online={online} />
 
-      {/* ═══ Android App Container (max-width, centered) ══════ */}
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col shadow-2xl">
-        {/* ── Header ─────────────────────────────────────────── */}
-        <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0a0118]/90 backdrop-blur-2xl">
-          <div className="flex h-14 items-center gap-2 px-3">
-            {/* Logo */}
-            <button
-              onClick={() => navigate('dashboard')}
-              className="flex items-center gap-2"
-            >
-              <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-                <HeartPulse className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>
-                Orioster
-              </span>
-            </button>
-
-            {/* Search button */}
-            <SearchButton />
-
-            <div className="ml-auto flex items-center gap-1">
-              {/* Online indicator */}
-              <button
-                onClick={() => setOnline(!online)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5"
-                title="Toggle connectivity"
-              >
-                {online ? <Wifi className="h-4 w-4 text-emerald-400" /> : <WifiOff className="h-4 w-4 text-amber-400" />}
-              </button>
-
-              {/* Notifications */}
-              <NotificationButton />
-
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
-                title="Toggle theme"
-              >
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-
-              {/* Profile */}
-              <ProfileButton
-                user={user}
-                profileImage={profileImage}
-                initials={initials}
-                role={role}
-                onNavigate={setView}
-                onLogout={logout}
-              />
-            </div>
-          </div>
-        </header>
-
-        {/* ── Main Content ───────────────────────────────────── */}
-        <main className="min-w-0 flex-1 overflow-y-auto wope-scroll pb-20" style={{ paddingBottom: '80px' }}>
-          {children}
-        </main>
-
-        {/* ── Bottom Navigation Bar ──────────────────────────── */}
-        <BottomNav
-          items={bottomNav}
+      {/* ═══ Responsive Container ════════════════════════════ */}
+      {/* Mobile: max-w-md centered phone layout                         */}
+      {/* Desktop (lg+): full-width with persistent sidebar + wide content */}
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col shadow-2xl lg:max-w-7xl lg:flex-row lg:shadow-none">
+        {/* ── Desktop Sidebar (lg+ only) ─────────────────────── */}
+        <DesktopSidebar
+          navItems={visibleNav}
           activeView={view}
-          drawerOpen={drawerOpen}
           onNavigate={navigate}
+          user={user}
+          profileImage={profileImage}
+          initials={initials}
+          role={role}
+          onLogout={logout}
         />
+
+        {/* ── Main Column ────────────────────────────────────── */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* ── Header ─────────────────────────────────────────── */}
+          <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0a0118]/90 backdrop-blur-2xl">
+            <div className="flex h-14 items-center gap-2 px-3 lg:px-6">
+              {/* Logo — hidden on desktop (shown in sidebar) */}
+              <button
+                onClick={() => navigate('dashboard')}
+                className="flex items-center gap-2 lg:hidden"
+              >
+                <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+                  <HeartPulse className="h-5 w-5" />
+                </div>
+                <span className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>
+                  Orioster
+                </span>
+              </button>
+
+              {/* Search button — expands on desktop */}
+              <SearchButton />
+
+              <div className="ml-auto flex items-center gap-1">
+                {/* Online indicator */}
+                <button
+                  onClick={() => setOnline(!online)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5"
+                  title="Toggle connectivity"
+                >
+                  {online ? <Wifi className="h-4 w-4 text-emerald-400" /> : <WifiOff className="h-4 w-4 text-amber-400" />}
+                </button>
+
+                {/* Notifications */}
+                <NotificationButton />
+
+                {/* Theme toggle */}
+                <button
+                  onClick={toggleTheme}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
+                  title="Toggle theme"
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+
+                {/* Profile */}
+                <ProfileButton
+                  user={user}
+                  profileImage={profileImage}
+                  initials={initials}
+                  role={role}
+                  onNavigate={setView}
+                  onLogout={logout}
+                />
+              </div>
+            </div>
+          </header>
+
+          {/* ── Main Content ───────────────────────────────────── */}
+          <main className="min-w-0 flex-1 overflow-y-auto wope-scroll pb-20 lg:pb-6" style={{ paddingBottom: '80px' }}>
+            <div className="mx-auto max-w-md lg:max-w-none">{children}</div>
+          </main>
+
+          {/* ── Bottom Navigation Bar (mobile only) ───────────── */}
+          <BottomNav
+            items={bottomNav}
+            activeView={view}
+            drawerOpen={drawerOpen}
+            onNavigate={navigate}
+          />
+        </div>
       </div>
 
-      {/* ── Side Drawer (Glassmorphism) ─────────────────────── */}
+      {/* ── Side Drawer (mobile only, glassmorphism) ──────────── */}
       <SideDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -206,7 +223,7 @@ function SearchButton() {
   return (
     <button
       onClick={() => setSearchOpen(!searchOpen)}
-      className="glass-input ml-1 flex h-8 flex-1 items-center gap-1.5 rounded-lg px-2.5 text-xs text-slate-400"
+      className="glass-input ml-1 flex h-9 max-w-md flex-1 items-center gap-2 rounded-lg px-3 text-xs text-slate-400 lg:h-10 lg:text-sm"
     >
       <Search className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">Search...</span>
@@ -406,7 +423,119 @@ function ProfileButton({
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BOTTOM NAVIGATION — 5 items, middle is the Menu button
+// DESKTOP SIDEBAR — Persistent left nav (lg+ only)
+// ═══════════════════════════════════════════════════════════════
+
+function DesktopSidebar({
+  navItems,
+  activeView,
+  onNavigate,
+  user,
+  profileImage,
+  initials,
+  role,
+  onLogout,
+}: {
+  navItems: NavItem[]
+  activeView: ViewKey
+  onNavigate: (v: ViewKey) => void
+  user: { name: string; email: string }
+  profileImage: string | null
+  initials: string
+  role: AppRole
+  onLogout: () => void
+}) {
+  return (
+    <aside className="hidden w-60 flex-shrink-0 border-r border-white/5 bg-[#0a0118]/60 backdrop-blur-xl lg:flex lg:flex-col">
+      {/* Logo */}
+      <div className="flex h-14 items-center gap-2.5 border-b border-white/5 px-5">
+        <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+          <HeartPulse className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>Orioster</p>
+          <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
+        </div>
+      </div>
+
+      {/* User card */}
+      <div className="border-b border-white/5 p-4">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border border-violet-500/30">
+            {profileImage ? (
+              <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
+            ) : null}
+            <AvatarFallback className="bg-violet-500/20 text-xs font-semibold text-violet-300">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+            <div className="mt-0.5">
+              <RoleBadge role={role} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav items */}
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3 wope-scroll">
+        {navItems.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => onNavigate(item.key)}
+            className={cn(
+              'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+              activeView === item.key
+                ? 'bg-violet-500/15 text-white shadow-[0_0_20px_rgba(113,61,255,0.15)]'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+            )}
+          >
+            <span className={activeView === item.key ? 'text-violet-300' : ''}>{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+
+        {/* Profile menu items */}
+        <div className="my-2 h-px bg-white/5" />
+        <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Account</p>
+        {PROFILE_MENU.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => onNavigate(item.key)}
+            className={cn(
+              'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+              activeView === item.key
+                ? 'bg-violet-500/15 text-white'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+            )}
+          >
+            <span className="text-violet-400">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Footer */}
+      <div className="border-t border-white/5 p-3">
+        <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-500/5 px-3 py-2 text-[11px] text-slate-400">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+          Privacy Firewall Active
+        </div>
+        <button
+          onClick={onLogout}
+          className="btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+        >
+          <LogOut className="h-5 w-5" />
+          Sign Out
+        </button>
+      </div>
+    </aside>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOTTOM NAVIGATION — 5 items, middle is the Menu button (mobile only)
 // ═══════════════════════════════════════════════════════════════
 
 function BottomNav({
@@ -421,7 +550,7 @@ function BottomNav({
   onNavigate: (v: ViewKey) => void
 }) {
   return (
-    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2">
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 lg:hidden">
       <div className="glass-strong mx-2 mb-2 flex items-center justify-around rounded-2xl px-2 py-2 shadow-2xl">
         {items.map((item, idx) => {
           const isMenu = item.label === 'Menu'
