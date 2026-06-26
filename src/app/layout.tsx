@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { DynamicBackground } from "@/components/ui/DynamicBackground";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -52,7 +52,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${sora.variable} antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${sora.variable} antialiased bg-background text-foreground font-sans`}
       >
         <ThemeProvider
           attribute="class"
@@ -62,7 +62,9 @@ export default function RootLayout({
         >
           {/* Layout-level animated background — sits behind all content */}
           <DynamicBackground />
-          {children}
+          <main className="relative z-0 min-h-screen w-full">
+            {children}
+          </main>
           <Toaster />
           <SonnerToaster position="top-right" richColors closeButton />
         </ThemeProvider>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { useAppStore, type ViewKey } from '@/lib/store'
+import { useTheme } from 'next-themes'
 import { OnlineIndicator, OfflineBanner, RoleBadge } from '@/components/orioster/ui-primitives'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -75,7 +76,12 @@ const PROFILE_MENU: Array<{ key: ViewKey; label: string; icon: ReactNode }> = [
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, logout, view, setView, online, setOnline, theme, toggleTheme, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
+  const { user, logout, view, setView, online, setOnline, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
+  const { theme, setTheme } = useTheme()
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light')
+  }
 
   if (!user) return null
 
