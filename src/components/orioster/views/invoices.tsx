@@ -162,7 +162,7 @@ export function InvoicesView() {
   const totalRevenue = invoices.reduce((s, i) => s + i.total, 0)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader
         title="Invoices"
         subtitle={`${invoices.length} invoices · Total revenue: ৳${totalRevenue.toLocaleString()}`}

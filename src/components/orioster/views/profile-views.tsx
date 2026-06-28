@@ -60,7 +60,7 @@ export function MyProfileView() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader title="My Profile" subtitle="Manage your personal information" />
 
       {/* Profile card with image upload */}
@@ -76,7 +76,7 @@ export function MyProfileView() {
           </Avatar>
           <button
             onClick={() => fileRef.current?.click()}
-            className="btn-press absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-lg"
+            className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-lg"
           >
             <Camera className="h-4 w-4" />
           </button>
@@ -167,7 +167,7 @@ export function MyProfileView() {
 export function MyCompanyView() {
   const { user } = useAppStore()
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader title="My Company" subtitle="Organization details" />
 
       <GlassPanel variant="strong" className="card-lift p-5">
@@ -254,7 +254,7 @@ export function MyTasksView() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader title="My Tasks" subtitle={`${pending.length} pending · ${completed.length} completed`} />
 
       <div className="grid grid-cols-3 gap-3">
@@ -277,7 +277,7 @@ export function MyTasksView() {
           <GlassPanel key={task.id} className={cn('card-lift flex items-center gap-3 p-3', task.done && 'opacity-50')}>
             <button
               onClick={() => toggle(task.id)}
-              className="btn-press flex-shrink-0"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex-shrink-0"
             >
               {task.done ? (
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" />
@@ -323,7 +323,7 @@ export function MyDocumentsView() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader
         title="My Documents"
         subtitle={`${documents.length} documents`}
@@ -351,7 +351,7 @@ export function MyDocumentsView() {
                 <span>{doc.size}</span>
               </div>
             </div>
-            <button className="btn-press flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-violet-500/10 hover:text-violet-300">
+            <button className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-violet-500/10 hover:text-violet-300">
               <Download className="h-4 w-4" />
             </button>
           </GlassPanel>

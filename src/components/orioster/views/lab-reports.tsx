@@ -176,7 +176,7 @@ export function LabReportsView() {
   const template = PARAM_TEMPLATES[reportType] ?? []
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader
         title="Lab Reports"
         subtitle={`${reports.length} reports · AI analysis is advisory only`}

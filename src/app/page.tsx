@@ -3,7 +3,6 @@
 import { useAppStore, canAccessView } from '@/lib/store'
 import { LoginScreen } from '@/components/orioster/login-screen'
 import { AppShell } from '@/components/orioster/app-shell'
-import { SearchOverlay } from '@/components/orioster/search-overlay'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMemo } from 'react'
 import type { ViewKey } from '@/lib/store'
@@ -87,7 +86,6 @@ export default function Home() {
           <ViewComponent />
         </motion.div>
       </AnimatePresence>
-      <SearchOverlay />
     </AppShell>
   )
 }

@@ -190,7 +190,7 @@ export function PatientDetailView() {
   const firewallOk = !!patient.localSummary
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* Back button */}
       <Button
         variant="ghost"

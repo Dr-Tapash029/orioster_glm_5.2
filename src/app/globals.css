@@ -133,46 +133,47 @@
    ═══════════════════════════════════════════════════════════════ */
 
 html.light {
-  --background: #f6f3fc;
-  --foreground: #1a0f2e;
+  /* Creamy white canvas */
+  --background: #faf7f2;
+  --foreground: #2a2520;
 
-  --card: #ffffff;
-  --card-foreground: #1a0f2e;
-  --popover: #ffffff;
-  --popover-foreground: #1a0f2e;
+  --card: #fffefb;
+  --card-foreground: #2a2520;
+  --popover: #fffefb;
+  --popover-foreground: #2a2520;
 
   --primary: #713DFF;
   --primary-foreground: #ffffff;
 
   --secondary: rgba(113, 61, 255, 0.06);
-  --secondary-foreground: #2d1b4e;
-  --muted: rgba(113, 61, 255, 0.04);
-  --muted-foreground: #6b5b8a;
+  --secondary-foreground: #3a2e55;
+  --muted: rgba(42, 37, 32, 0.04);
+  --muted-foreground: #6b6358;
   --accent: #713DFF;
   --accent-foreground: #ffffff;
 
-  --text-primary: #1a0f2e;
-  --text-heading: #140B25;
-  --text-secondary: #4a3b6b;
-  --text-muted: #6b5b8a;
-  --text-faint: #9b8fb5;
+  --text-primary: #2a2520;
+  --text-heading: #1c1814;
+  --text-secondary: #4a4238;
+  --text-muted: #6b6358;
+  --text-faint: #9b9388;
 
-  --surface-1: #ffffff;
-  --surface-2: #f0ebfa;
-  --surface-3: #e8e0f5;
-  --surface-border: #d4c8ed;
+  --surface-1: #fffefb;
+  --surface-2: #f5f0e8;
+  --surface-3: #ede7dc;
+  --surface-border: #d8cfc0;
 
-  --border: rgba(113, 61, 255, 0.12);
-  --input: rgba(113, 61, 255, 0.08);
+  --border: rgba(42, 37, 32, 0.10);
+  --input: rgba(42, 37, 32, 0.06);
   --ring: #713DFF;
 
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1a0f2e;
+  --sidebar: #fffefb;
+  --sidebar-foreground: #2a2520;
   --sidebar-primary: #713DFF;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: rgba(113, 61, 255, 0.08);
   --sidebar-accent-foreground: #713DFF;
-  --sidebar-border: rgba(113, 61, 255, 0.10);
+  --sidebar-border: rgba(42, 37, 32, 0.08);
   --sidebar-ring: #713DFF;
 }
 
@@ -244,62 +245,62 @@ html.light .wope-bg::before {
 }
 html.light .wope-bg::after { opacity: 0.015; }
 
-/* ── Light mode glassmorphism ─────────────────────────────── */
+/* ── Light mode glassmorphism (creamy white) ──────────────── */
 html.light .glass {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(113, 61, 255, 0.14);
-  box-shadow: 0 8px 32px rgba(113, 61, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: rgba(255, 254, 251, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(42, 37, 32, 0.10);
+  box-shadow: 0 8px 32px rgba(42, 37, 32, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 html.light .glass-strong {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  border: 1px solid rgba(113, 61, 255, 0.16);
-  box-shadow: 0 12px 40px rgba(113, 61, 255, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: rgba(255, 254, 251, 0.90);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  border: 1px solid rgba(42, 37, 32, 0.12);
+  box-shadow: 0 12px 40px rgba(42, 37, 32, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 html.light .glass-subtle {
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(113, 61, 255, 0.10);
+  background: rgba(255, 254, 251, 0.50);
+  border: 1px solid rgba(42, 37, 32, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 html.light .glass-input {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(113, 61, 255, 0.14);
-  box-shadow: inset 0 1px 2px rgba(113, 61, 255, 0.04);
+  background: rgba(255, 254, 251, 0.65);
+  border: 1px solid rgba(42, 37, 32, 0.10);
+  box-shadow: inset 0 1px 2px rgba(42, 37, 32, 0.03);
 }
 
 /* ── Light mode input overrides ───────────────────────────── */
 html.light input[type="text"], html.light input[type="email"], html.light input[type="password"],
 html.light input[type="number"], html.light input[type="datetime-local"], html.light input[type="search"],
 html.light textarea, html.light select {
-  background: rgba(255, 255, 255, 0.60) !important;
-  border-color: rgba(113, 61, 255, 0.12) !important;
-  color: #1a0f2e !important;
+  background: rgba(255, 254, 251, 0.60) !important;
+  border-color: rgba(42, 37, 32, 0.10) !important;
+  color: #2a2520 !important;
 }
-html.light input::placeholder, html.light textarea::placeholder { color: #9b8fb5 !important; }
+html.light input::placeholder, html.light textarea::placeholder { color: #9b9388 !important; }
 
 /* ── Light mode shadcn overrides ──────────────────────────── */
 html.light [data-radix-popper-content-wrapper] * {
-  background: #ffffff !important;
-  border-color: rgba(113, 61, 255, 0.12) !important;
+  background: #fffefb !important;
+  border-color: rgba(42, 37, 32, 0.10) !important;
 }
-html.light [data-radix-overlay] { background: rgba(246, 243, 252, 0.80) !important; }
+html.light [data-radix-overlay] { background: rgba(250, 247, 242, 0.80) !important; }
 html.light [data-radix-dialog-content] {
-  background: #ffffff !important;
-  border: 1px solid rgba(113, 61, 255, 0.12) !important;
-  box-shadow: 0 24px 60px rgba(113, 61, 255, 0.15) !important;
+  background: #fffefb !important;
+  border: 1px solid rgba(42, 37, 32, 0.12) !important;
+  box-shadow: 0 24px 60px rgba(42, 37, 32, 0.12) !important;
 }
 html.light [data-radix-tooltip-content] {
-  background: #ffffff !important;
-  border: 1px solid rgba(113, 61, 255, 0.12) !important;
-  color: #1a0f2e !important;
+  background: #fffefb !important;
+  border: 1px solid rgba(42, 37, 32, 0.10) !important;
+  color: #2a2520 !important;
 }
 html.light [data-sonner-toast] {
-  background: #ffffff !important;
-  border: 1px solid rgba(113, 61, 255, 0.12) !important;
-  color: #1a0f2e !important;
+  background: #fffefb !important;
+  border: 1px solid rgba(42, 37, 32, 0.10) !important;
+  color: #2a2520 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -339,11 +340,11 @@ html.light [data-sonner-toast] {
 }
 /* Light mode override for dropdown panels */
 html.light .glass-panel-solid {
-  background: rgb(255, 255, 255) !important;
-  border: 1px solid rgba(113, 61, 255, 0.15) !important;
+  background: rgb(255, 254, 251) !important;
+  border: 1px solid rgba(42, 37, 32, 0.12) !important;
   box-shadow:
-    0 16px 48px rgba(113, 61, 255, 0.15),
-    0 0 60px rgba(113, 61, 255, 0.08) !important;
+    0 16px 48px rgba(42, 37, 32, 0.10),
+    0 0 60px rgba(113, 61, 255, 0.06) !important;
 }
 .glass-subtle {
   background: rgba(20, 11, 37, 0.40);

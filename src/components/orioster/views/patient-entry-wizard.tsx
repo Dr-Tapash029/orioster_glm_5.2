@@ -389,7 +389,7 @@ export function PatientEntryWizard() {
   const progressPct = ((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>

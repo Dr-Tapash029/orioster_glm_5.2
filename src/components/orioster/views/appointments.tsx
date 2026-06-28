@@ -115,7 +115,7 @@ export function AppointmentsView() {
   )
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader
         title="Appointments"
         subtitle={`${appointments.length} total · ${counts.SCHEDULED ?? 0} scheduled · ${counts.IN_PROGRESS ?? 0} in progress`}

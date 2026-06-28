@@ -1,0 +1,856 @@
+     1→'use client'
+     2→
+     3→import { useState, useEffect, useRef, type ReactNode } from 'react'
+     4→import { useAppStore, type ViewKey } from '@/lib/store'
+     5→import { useTheme } from 'next-themes'
+     6→import { OnlineIndicator, OfflineBanner, RoleBadge } from '@/components/orioster/ui-primitives'
+     7→import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+     8→import {
+     9→  HeartPulse,
+    10→  LayoutDashboard,
+    11→  Users,
+    12→  UserPlus,
+    13→  Sparkles,
+    14→  LayoutGrid,
+    15→  CalendarClock,
+    16→  FlaskConical,
+    17→  Receipt,
+    18→  LogOut,
+    19→  Menu,
+    20→  X,
+    21→  Search,
+    22→  Bell,
+    23→  Moon,
+    24→  Sun,
+    25→  Wifi,
+    26→  WifiOff,
+    27→  ShieldCheck,
+    28→  Command,
+    29→  Home,
+    30→  Calendar,
+    31→  User,
+    32→  Building2,
+    33→  CheckSquare,
+    34→  FileText,
+    35→  ChevronRight,
+    36→  Settings,
+    37→  type LucideIcon,
+    38→} from 'lucide-react'
+    39→import { cn } from '@/lib/utils'
+    40→import type { AppRole } from '@/lib/types'
+    41→
+    42→// ── Navigation items ──────────────────────────────────────────
+    43→interface NavItem {
+    44→  key: ViewKey
+    45→  label: string
+    46→  icon: ReactNode
+    47→  roles?: AppRole[]
+    48→}
+    49→
+    50→const ALL_NAV: NavItem[] = [
+    51→  { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+    52→  { key: 'patients', label: 'Patients', icon: <Users className="h-5 w-5" /> },
+    53→  { key: 'patient-entry', label: 'New Patient', icon: <UserPlus className="h-5 w-5" />, roles: ['NURSE', 'ADMIN', 'DOCTOR'] },
+    54→  { key: 'orio-ai', label: 'Orio AI', icon: <Sparkles className="h-5 w-5" />, roles: ['DOCTOR', 'ADMIN'] },
+    55→  { key: 'ai-hub', label: 'AI Hub', icon: <LayoutGrid className="h-5 w-5" />, roles: ['ADMIN', 'DOCTOR'] },
+    56→  { key: 'appointments', label: 'Appointments', icon: <CalendarClock className="h-5 w-5" /> },
+    57→  { key: 'lab-reports', label: 'Lab Reports', icon: <FlaskConical className="h-5 w-5" />, roles: ['LAB_TECH', 'DOCTOR', 'ADMIN'] },
+    58→  { key: 'invoices', label: 'Invoices', icon: <Receipt className="h-5 w-5" />, roles: ['ADMIN'] },
+    59→]
+    60→
+    61→// Bottom nav items (5 slots, middle is menu)
+    62→const BOTTOM_NAV: Array<{ key: ViewKey; label: string; icon: ReactNode; roles?: AppRole[] }> = [
+    63→  { key: 'dashboard', label: 'Home', icon: <Home className="h-5 w-5" /> },
+    64→  { key: 'patients', label: 'Patients', icon: <Users className="h-5 w-5" /> },
+    65→  { key: 'menu' as ViewKey, label: 'Menu', icon: <Menu className="h-6 w-6" /> },
+    66→  { key: 'appointments', label: 'Schedule', icon: <Calendar className="h-5 w-5" /> },
+    67→  { key: 'orio-ai', label: 'AI', icon: <Sparkles className="h-5 w-5" />, roles: ['DOCTOR', 'ADMIN'] },
+    68→]
+    69→
+    70→// Profile dropdown items
+    71→const PROFILE_MENU: Array<{ key: ViewKey; label: string; icon: ReactNode }> = [
+    72→  { key: 'my-profile', label: 'My Profile', icon: <User className="h-4 w-4" /> },
+    73→  { key: 'my-company', label: 'My Company', icon: <Building2 className="h-4 w-4" /> },
+    74→  { key: 'my-tasks', label: 'My Tasks', icon: <CheckSquare className="h-4 w-4" /> },
+    75→  { key: 'my-documents', label: 'My Documents', icon: <FileText className="h-4 w-4" /> },
+    76→]
+    77→
+    78→export function AppShell({ children }: { children: ReactNode }) {
+    79→  const { user, logout, view, setView, online, setOnline, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
+    80→  const { theme, setTheme } = useTheme()
+    81→
+    82→  const toggleTheme = () => {
+    83→    setTheme(theme === 'light' ? 'dark' : 'light')
+    84→  }
+    85→
+    86→  if (!user) return null
+    87→
+    88→  const role = user.role as AppRole
+    89→  const visibleNav = ALL_NAV.filter((n) => !n.roles || n.roles.includes(role))
+    90→  const visibleBottom = BOTTOM_NAV.filter((n) => !n.roles || n.roles.includes(role))
+    91→
+    92→  // If bottom nav has only 4 items (AI filtered out), add invoices or labs as 5th
+    93→  const bottomNav = visibleBottom.length >= 5 ? visibleBottom : [
+    94→    ...visibleBottom.slice(0, 2),
+    95→    { key: 'menu' as ViewKey, label: 'Menu', icon: <Menu className="h-6 w-6" /> },
+    96→    ...visibleBottom.slice(2),
+    97→    { key: 'lab-reports' as ViewKey, label: 'Labs', icon: <FlaskConical className="h-5 w-5" /> },
+    98→  ].slice(0, 5)
+    99→
+   100→  function navigate(v: ViewKey) {
+   101→    if (v === 'menu' as ViewKey) {
+   102→      setDrawerOpen(!drawerOpen)
+   103→    } else {
+   104→      setView(v)
+   105→    }
+   106→  }
+   107→
+   108→  const initials = user.name
+   109→    .split(' ')
+   110→    .map((p) => p[0])
+   111→    .slice(0, 2)
+   112→    .join('')
+   113→    .toUpperCase()
+   114→
+   115→  return (
+   116→    <div className="wope-bg flex min-h-screen flex-col">
+   117→      <OfflineBanner online={online} />
+   118→
+   119→      {/* ═══ Responsive Container ════════════════════════════ */}
+   120→      {/* Mobile: max-w-md centered phone layout                         */}
+   121→      {/* Desktop (lg+): full-width with persistent sidebar + wide content */}
+   122→      <div className="mx-auto flex w-full max-w-md flex-1 flex-col shadow-2xl lg:max-w-7xl lg:flex-row lg:shadow-none">
+   123→        {/* ── Desktop Sidebar (lg+ only) ─────────────────────── */}
+   124→        <DesktopSidebar
+   125→          navItems={visibleNav}
+   126→          activeView={view}
+   127→          onNavigate={navigate}
+   128→          user={user}
+   129→          profileImage={profileImage}
+   130→          initials={initials}
+   131→          role={role}
+   132→          onLogout={logout}
+   133→        />
+   134→
+   135→        {/* ── Main Column ────────────────────────────────────── */}
+   136→        <div className="flex min-w-0 flex-1 flex-col">
+   137→          {/* ── Header ─────────────────────────────────────────── */}
+   138→          <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0a0118]/90 backdrop-blur-2xl">
+   139→            <div className="flex h-14 items-center gap-2 px-3 lg:px-6">
+   140→              {/* Logo — hidden on desktop (shown in sidebar) */}
+   141→              <button
+   142→                onClick={() => navigate('dashboard')}
+   143→                className="flex items-center gap-2 lg:hidden"
+   144→              >
+   145→                <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+   146→                  <HeartPulse className="h-5 w-5" />
+   147→                </div>
+   148→                <span className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>
+   149→                  Orioster
+   150→                </span>
+   151→              </button>
+   152→
+   153→              {/* Search — inline input with dropdown results */}
+   154→              <SearchInput />
+   155→
+   156→              <div className="ml-auto flex items-center gap-1">
+   157→                {/* Online/offline auto-detecting indicator (not a button) */}
+   158→                <OnlineStatus />
+   159→
+   160→                {/* Notifications */}
+   161→                <NotificationButton />
+   162→
+   163→                {/* Theme toggle */}
+   164→                <button
+   165→                  onClick={toggleTheme}
+   166→                  className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 items-center justify-center"
+   167→                  title="Toggle theme"
+   168→                >
+   169→                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+   170→                </button>
+   171→
+   172→                {/* Profile */}
+   173→                <ProfileButton
+   174→                  user={user}
+   175→                  profileImage={profileImage}
+   176→                  initials={initials}
+   177→                  role={role}
+   178→                  onNavigate={setView}
+   179→                  onLogout={logout}
+   180→                />
+   181→              </div>
+   182→            </div>
+   183→          </header>
+   184→
+   185→          {/* ── Main Content ───────────────────────────────────── */}
+   186→          <main className="min-w-0 flex-1 overflow-y-auto wope-scroll pb-20 lg:pb-6" style={{ paddingBottom: '80px' }}>
+   187→            <div className="mx-auto max-w-md lg:max-w-none">{children}</div>
+   188→          </main>
+   189→
+   190→          {/* ── Bottom Navigation Bar (mobile only) ───────────── */}
+   191→          <BottomNav
+   192→            items={bottomNav}
+   193→            activeView={view}
+   194→            drawerOpen={drawerOpen}
+   195→            onNavigate={navigate}
+   196→          />
+   197→        </div>
+   198→      </div>
+   199→
+   200→      {/* ── Side Drawer (mobile only, glassmorphism) ──────────── */}
+   201→      <SideDrawer
+   202→        open={drawerOpen}
+   203→        onClose={() => setDrawerOpen(false)}
+   204→        navItems={visibleNav}
+   205→        activeView={view}
+   206→        onNavigate={navigate}
+   207→        user={user}
+   208→        profileImage={profileImage}
+   209→        initials={initials}
+   210→        role={role}
+   211→        onLogout={logout}
+   212→      />
+   213→    </div>
+   214→  )
+   215→}
+   216→
+   217→// ═══════════════════════════════════════════════════════════════
+   218→// ONLINE STATUS — Auto-detecting indicator (NOT a button)
+   219→// Uses navigator.onLine + online/offline event listeners
+   220→// ═══════════════════════════════════════════════════════════════
+   221→
+   222→function OnlineStatus() {
+   223→  const { online, setOnline } = useAppStore()
+   224→
+   225→  useEffect(() => {
+   226→    // Sync with browser's online/offline status on mount
+   227→    setOnline(navigator.onLine)
+   228→    const goOnline = () => setOnline(true)
+   229→    const goOffline = () => setOnline(false)
+   230→    window.addEventListener('online', goOnline)
+   231→    window.addEventListener('offline', goOffline)
+   232→    return () => {
+   233→      window.removeEventListener('online', goOnline)
+   234→      window.removeEventListener('offline', goOffline)
+   235→    }
+   236→  }, [setOnline])
+   237→
+   238→  return (
+   239→    <div
+   240→      className="flex h-8 items-center gap-1.5 rounded-lg px-2"
+   241→      title={online ? 'Online' : 'Offline'}
+   242→    >
+   243→      {online ? (
+   244→        <Wifi className="h-4 w-4 text-emerald-400" />
+   245→      ) : (
+   246→        <WifiOff className="h-4 w-4 text-amber-400" />
+   247→      )}
+   248→      <span className={`hidden text-[10px] font-medium sm:inline ${online ? 'text-emerald-400' : 'text-amber-400'}`}>
+   249→        {online ? 'Online' : 'Offline'}
+   250→      </span>
+   251→    </div>
+   252→  )
+   253→}
+   254→
+   255→// ═══════════════════════════════════════════════════════════════
+   256→// SEARCH INPUT — Inline header input with dropdown results
+   257→// User types directly in the header; dropdown shows matching patients
+   258→// ═══════════════════════════════════════════════════════════════
+   259→
+   260→interface SearchResult {
+   261→  id: string
+   262→  localId: string
+   263→  fullName: string
+   264→  gender: string
+   265→  age: number | null
+   266→  chiefComplaint: string | null
+   267→  vitals: Array<{ triageLevel: string | null }>
+   268→}
+   269→
+   270→function SearchInput() {
+   271→  const { setActivePatient, setView } = useAppStore()
+   272→  const [query, setQuery] = useState('')
+   273→  const [results, setResults] = useState<SearchResult[]>([])
+   274→  const [focused, setFocused] = useState(false)
+   275→  const [loading, setLoading] = useState(false)
+   276→  const containerRef = useRef<HTMLDivElement>(null)
+   277→
+   278→  // Debounced search
+   279→  useEffect(() => {
+   280→    if (!query.trim()) {
+   281→      return
+   282→    }
+   283→    const t = setTimeout(() => {
+   284→      setLoading(true)
+   285→      fetch(`/api/patients?search=${encodeURIComponent(query)}&limit=8`)
+   286→        .then((r) => r.json())
+   287→        .then((d) => setResults(d.patients ?? []))
+   288→        .finally(() => setLoading(false))
+   289→    }, 250)
+   290→    return () => clearTimeout(t)
+   291→  }, [query])
+   292→
+   293→  const displayResults = query.trim() ? results : []
+   294→
+   295→  // Close dropdown on outside click
+   296→  useEffect(() => {
+   297→    function handler(e: MouseEvent) {
+   298→      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+   299→        setFocused(false)
+   300→      }
+   301→    }
+   302→    document.addEventListener('mousedown', handler)
+   303→    return () => document.removeEventListener('mousedown', handler)
+   304→  }, [])
+   305→
+   306→  function selectPatient(id: string) {
+   307→    setActivePatient(id)
+   308→    setView('patient-detail')
+   309→    setQuery('')
+   310→    setFocused(false)
+   311→  }
+   312→
+   313→  const showDropdown = focused && query.trim().length > 0
+   314→
+   315→  return (
+   316→    <div className="relative ml-1 flex-1" ref={containerRef}>
+   317→      <div className="glass-input flex h-9 items-center gap-2 rounded-lg px-3 lg:h-10">
+   318→        <Search className="h-3.5 w-3.5 flex-shrink-0 text-slate-400 lg:h-4 lg:w-4" />
+   319→        <input
+   320→          type="text"
+   321→          value={query}
+   322→          onChange={(e) => setQuery(e.target.value)}
+   323→          onFocus={() => setFocused(true)}
+   324→          placeholder="Search patients..."
+   325→          className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none lg:text-sm"
+   326→        />
+   327→        {loading && (
+   328→          <div className="h-3 w-3 flex-shrink-0 animate-spin rounded-full border border-violet-400 border-t-transparent" />
+   329→        )}
+   330→      </div>
+   331→
+   332→      {/* Dropdown results */}
+   333→      {showDropdown && (
+   334→        <div className="glass-panel-solid anim-fade-in-up absolute left-0 right-0 top-11 z-50 max-h-80 overflow-y-auto rounded-xl p-2 shadow-2xl wope-scroll">
+   335→          {displayResults.length === 0 && !loading && (
+   336→            <p className="py-4 text-center text-xs text-slate-500">No patients found for &quot;{query}&quot;</p>
+   337→          )}
+   338→          {displayResults.map((p) => (
+   339→            <button
+   340→              key={p.id}
+   341→              onClick={() => selectPatient(p.id)}
+   342→              className="row-slide flex w-full items-center gap-2.5 rounded-lg p-2 text-left hover:bg-violet-500/8"
+   343→            >
+   344→              <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-[10px] font-semibold text-violet-300">
+   345→                {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+   346→              </div>
+   347→              <div className="min-w-0 flex-1">
+   348→                <p className="truncate text-xs font-medium text-white">{p.fullName}</p>
+   349→                <p className="truncate text-[10px] text-slate-400">
+   350→                  {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? '—'}
+   351→                </p>
+   352→              </div>
+   353→            </button>
+   354→          ))}
+   355→        </div>
+   356→      )}
+   357→    </div>
+   358→  )
+   359→}
+   360→
+   361→// ═══════════════════════════════════════════════════════════════
+   362→// NOTIFICATION BUTTON — Opens notification panel
+   363→// ═══════════════════════════════════════════════════════════════
+   364→
+   365→function NotificationButton() {
+   366→  const { notifications, markAllNotificationsRead, markNotificationRead } = useAppStore()
+   367→  const [open, setOpen] = useState(false)
+   368→  const ref = useRef<HTMLDivElement>(null)
+   369→  const unreadCount = notifications.filter((n) => !n.read).length
+   370→
+   371→  useEffect(() => {
+   372→    function handler(e: MouseEvent) {
+   373→      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+   374→    }
+   375→    document.addEventListener('mousedown', handler)
+   376→    return () => document.removeEventListener('mousedown', handler)
+   377→  }, [])
+   378→
+   379→  return (
+   380→    <div className="relative" ref={ref}>
+   381→      <button
+   382→        onClick={() => setOpen(!open)}
+   383→        className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple relative flex h-8 w-8 items-center justify-center"
+   384→      >
+   385→        <Bell className="h-4 w-4" />
+   386→        {unreadCount > 0 && (
+   387→          <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-violet-500 px-1 text-[8px] font-bold text-white">
+   388→            {unreadCount}
+   389→          </span>
+   390→        )}
+   391→      </button>
+   392→
+   393→      {open && (
+   394→        <div className="anim-fade-in-up absolute right-0 top-10 z-50 w-80 max-w-[calc(100vw-1.5rem)] glass-panel-solid rounded-xl p-3 shadow-2xl">
+   395→          <div className="mb-2 flex items-center justify-between">
+   396→            <p className="text-sm font-semibold text-white">Notifications</p>
+   397→            {unreadCount > 0 && (
+   398→              <button
+   399→                onClick={markAllNotificationsRead}
+   400→                className="text-[11px] text-violet-400 hover:text-violet-300"
+   401→              >
+   402→                Mark all read
+   403→              </button>
+   404→            )}
+   405→          </div>
+   406→          <div className="max-h-80 space-y-1.5 overflow-y-auto wope-scroll">
+   407→            {notifications.length === 0 ? (
+   408→              <p className="py-6 text-center text-xs text-slate-500">No notifications</p>
+   409→            ) : (
+   410→              notifications.map((n) => (
+   411→                <button
+   412→                  key={n.id}
+   413→                  onClick={() => markNotificationRead(n.id)}
+   414→                  className={cn(
+   415→                    'flex w-full gap-2.5 rounded-lg p-2.5 text-left transition-colors',
+   416→                    n.read ? 'bg-transparent' : 'bg-violet-500/8'
+   417→                  )}
+   418→                >
+   419→                  <div className={cn(
+   420→                    'mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg',
+   421→                    n.type === 'critical' ? 'bg-red-500/15 text-red-400' :
+   422→                    n.type === 'success' ? 'bg-emerald-500/15 text-emerald-400' :
+   423→                    n.type === 'warning' ? 'bg-amber-500/15 text-amber-400' :
+   424→                    'bg-violet-500/15 text-violet-400'
+   425→                  )}>
+   426→                    <Bell className="h-3.5 w-3.5" />
+   427→                  </div>
+   428→                  <div className="min-w-0 flex-1">
+   429→                    <div className="flex items-center gap-1.5">
+   430→                      <p className="truncate text-xs font-medium text-white">{n.title}</p>
+   431→                      {!n.read && <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-400" />}
+   432→                    </div>
+   433→                    <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-400">{n.message}</p>
+   434→                    <p className="mt-0.5 text-[10px] text-slate-600">{n.time}</p>
+   435→                  </div>
+   436→                </button>
+   437→              ))
+   438→            )}
+   439→          </div>
+   440→        </div>
+   441→      )}
+   442→    </div>
+   443→  )
+   444→}
+   445→
+   446→// ═══════════════════════════════════════════════════════════════
+   447→// PROFILE BUTTON — Dropdown with My Profile, Company, Tasks, Documents
+   448→// ═══════════════════════════════════════════════════════════════
+   449→
+   450→function ProfileButton({
+   451→  user,
+   452→  profileImage,
+   453→  initials,
+   454→  role,
+   455→  onNavigate,
+   456→  onLogout,
+   457→}: {
+   458→  user: { name: string; email: string }
+   459→  profileImage: string | null
+   460→  initials: string
+   461→  role: AppRole
+   462→  onNavigate: (v: ViewKey) => void
+   463→  onLogout: () => void
+   464→}) {
+   465→  const [open, setOpen] = useState(false)
+   466→  const ref = useRef<HTMLDivElement>(null)
+   467→
+   468→  useEffect(() => {
+   469→    function handler(e: MouseEvent) {
+   470→      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+   471→    }
+   472→    document.addEventListener('mousedown', handler)
+   473→    return () => document.removeEventListener('mousedown', handler)
+   474→  }, [])
+   475→
+   476→  return (
+   477→    <div className="relative" ref={ref}>
+   478→      <button
+   479→        onClick={() => setOpen(!open)}
+   480→        className="flex items-center gap-1.5 rounded-full p-0.5 transition-transform active:scale-95"
+   481→      >
+   482→        <Avatar className="h-9 w-9 border-2 border-violet-500/40 overflow-hidden">
+   483→          {profileImage && (
+   484→            <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
+   485→          )}
+   486→          <AvatarFallback className="bg-violet-500/20 text-[11px] font-semibold text-violet-300">
+   487→            {initials}
+   488→          </AvatarFallback>
+   489→        </Avatar>
+   490→      </button>
+   491→
+   492→      {open && (
+   493→        <div className="anim-fade-in-up absolute right-0 top-12 z-50 w-64 glass-panel-solid rounded-xl p-2 shadow-2xl">
+   494→          {/* User info header */}
+   495→          <div className="flex items-center gap-2.5 rounded-lg p-2">
+   496→            <Avatar className="h-11 w-11 border-2 border-violet-500/40 overflow-hidden">
+   497→              {profileImage && (
+   498→                <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
+   499→              )}
+   500→              <AvatarFallback className="bg-violet-500/20 text-xs font-semibold text-violet-300">
+   501→                {initials}
+   502→              </AvatarFallback>
+   503→            </Avatar>
+   504→            <div className="min-w-0">
+   505→              <p className="truncate text-sm font-medium text-white">{user.name}</p>
+   506→              <p className="truncate text-[11px] text-slate-400">{user.email}</p>
+   507→              <div className="mt-0.5">
+   508→                <RoleBadge role={role} />
+   509→              </div>
+   510→            </div>
+   511→          </div>
+   512→
+   513→          <div className="my-1.5 h-px bg-white/5" />
+   514→
+   515→          {/* Menu items */}
+   516→          <div className="space-y-0.5">
+   517→            {PROFILE_MENU.map((item) => (
+   518→              <button
+   519→                key={item.key}
+   520→                onClick={() => {
+   521→                  onNavigate(item.key)
+   522→                  setOpen(false)
+   523→                }}
+   524→                className="btn-press flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-violet-500/10 hover:text-white"
+   525→              >
+   526→                <span className="text-violet-400">{item.icon}</span>
+   527→                <span className="flex-1">{item.label}</span>
+   528→                <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
+   529→              </button>
+   530→            ))}
+   531→          </div>
+   532→
+   533→          <div className="my-1.5 h-px bg-white/5" />
+   534→
+   535→          {/* Logout */}
+   536→          <button
+   537→            onClick={onLogout}
+   538→            className="btn-press flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10"
+   539→          >
+   540→            <LogOut className="h-4 w-4" />
+   541→            <span>Sign Out</span>
+   542→          </button>
+   543→        </div>
+   544→      )}
+   545→    </div>
+   546→  )
+   547→}
+   548→
+   549→// ═══════════════════════════════════════════════════════════════
+   550→// DESKTOP SIDEBAR — Persistent left nav (lg+ only)
+   551→// ═══════════════════════════════════════════════════════════════
+   552→
+   553→function DesktopSidebar({
+   554→  navItems,
+   555→  activeView,
+   556→  onNavigate,
+   557→  user,
+   558→  profileImage,
+   559→  initials,
+   560→  role,
+   561→  onLogout,
+   562→}: {
+   563→  navItems: NavItem[]
+   564→  activeView: ViewKey
+   565→  onNavigate: (v: ViewKey) => void
+   566→  user: { name: string; email: string }
+   567→  profileImage: string | null
+   568→  initials: string
+   569→  role: AppRole
+   570→  onLogout: () => void
+   571→}) {
+   572→  return (
+   573→    <aside className="hidden w-60 flex-shrink-0 border-r border-white/5 bg-[#0a0118]/60 backdrop-blur-xl lg:flex lg:flex-col">
+   574→      {/* Logo */}
+   575→      <div className="flex h-14 items-center gap-2.5 border-b border-white/5 px-5">
+   576→        <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+   577→          <HeartPulse className="h-5 w-5" />
+   578→        </div>
+   579→        <div>
+   580→          <p className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>Orioster</p>
+   581→          <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
+   582→        </div>
+   583→      </div>
+   584→
+   585→      {/* User card */}
+   586→      <div className="border-b border-white/5 p-4">
+   587→        <div className="flex items-center gap-3">
+   588→          <Avatar className="h-10 w-10 border border-violet-500/30">
+   589→            {profileImage ? (
+   590→              <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
+   591→            ) : null}
+   592→            <AvatarFallback className="bg-violet-500/20 text-xs font-semibold text-violet-300">
+   593→              {initials}
+   594→            </AvatarFallback>
+   595→          </Avatar>
+   596→          <div className="min-w-0 flex-1">
+   597→            <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+   598→            <div className="mt-0.5">
+   599→              <RoleBadge role={role} />
+   600→            </div>
+   601→          </div>
+   602→        </div>
+   603→      </div>
+   604→
+   605→      {/* Nav items */}
+   606→      <nav className="flex-1 space-y-1 overflow-y-auto p-3 wope-scroll">
+   607→        {navItems.map((item) => (
+   608→          <button
+   609→            key={item.key}
+   610→            onClick={() => onNavigate(item.key)}
+   611→            className={cn(
+   612→              'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+   613→              activeView === item.key
+   614→                ? 'bg-violet-500/15 text-white shadow-[0_0_20px_rgba(113,61,255,0.15)]'
+   615→                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+   616→            )}
+   617→          >
+   618→            <span className={activeView === item.key ? 'text-violet-300' : ''}>{item.icon}</span>
+   619→            {item.label}
+   620→          </button>
+   621→        ))}
+   622→
+   623→        {/* Profile menu items */}
+   624→        <div className="my-2 h-px bg-white/5" />
+   625→        <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Account</p>
+   626→        {PROFILE_MENU.map((item) => (
+   627→          <button
+   628→            key={item.key}
+   629→            onClick={() => onNavigate(item.key)}
+   630→            className={cn(
+   631→              'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+   632→              activeView === item.key
+   633→                ? 'bg-violet-500/15 text-white'
+   634→                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+   635→            )}
+   636→          >
+   637→            <span className="text-violet-400">{item.icon}</span>
+   638→            {item.label}
+   639→          </button>
+   640→        ))}
+   641→      </nav>
+   642→
+   643→      {/* Footer */}
+   644→      <div className="border-t border-white/5 p-3">
+   645→        <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-500/5 px-3 py-2 text-[11px] text-slate-400">
+   646→          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+   647→          Privacy Firewall Active
+   648→        </div>
+   649→        <button
+   650→          onClick={onLogout}
+   651→          className="btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+   652→        >
+   653→          <LogOut className="h-5 w-5" />
+   654→          Sign Out
+   655→        </button>
+   656→      </div>
+   657→    </aside>
+   658→  )
+   659→}
+   660→
+   661→// ═══════════════════════════════════════════════════════════════
+   662→// BOTTOM NAVIGATION — 5 items, middle is the Menu button (mobile only)
+   663→// ═══════════════════════════════════════════════════════════════
+   664→
+   665→function BottomNav({
+   666→  items,
+   667→  activeView,
+   668→  drawerOpen,
+   669→  onNavigate,
+   670→}: {
+   671→  items: Array<{ key: ViewKey; label: string; icon: ReactNode }>
+   672→  activeView: ViewKey
+   673→  drawerOpen: boolean
+   674→  onNavigate: (v: ViewKey) => void
+   675→}) {
+   676→  return (
+   677→    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 lg:hidden">
+   678→      <div className="glass-strong mx-2 mb-2 flex items-center justify-around rounded-2xl px-2 py-2 shadow-2xl">
+   679→        {items.map((item, idx) => {
+   680→          const isMenu = item.label === 'Menu'
+   681→          const isActive = isMenu ? drawerOpen : activeView === item.key
+   682→          return (
+   683→            <button
+   684→              key={idx}
+   685→              onClick={() => onNavigate(item.key)}
+   686→              className={cn(
+   687→                'btn-press ripple flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all',
+   688→                isMenu
+   689→                  ? 'relative -mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-[0_0_20px_rgba(113,61,255,0.4)]'
+   690→                  : isActive
+   691→                    ? 'text-violet-300'
+   692→                    : 'text-slate-500 hover:text-slate-300'
+   693→              )}
+   694→            >
+   695→              {isMenu ? (
+   696→                <span className={cn('transition-transform', drawerOpen && 'rotate-90')}>
+   697→                  {item.icon}
+   698→                </span>
+   699→              ) : (
+   700→                item.icon
+   701→              )}
+   702→              <span className={cn('text-[9px] font-medium', isMenu && 'sr-only')}>{item.label}</span>
+   703→              {isActive && !isMenu && (
+   704→                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-violet-400" />
+   705→              )}
+   706→            </button>
+   707→          )
+   708→        })}
+   709→      </div>
+   710→    </nav>
+   711→  )
+   712→}
+   713→
+   714→// ═══════════════════════════════════════════════════════════════
+   715→// SIDE DRAWER — Premium glassmorphism, slides from left
+   716→// ═══════════════════════════════════════════════════════════════
+   717→
+   718→function SideDrawer({
+   719→  open,
+   720→  onClose,
+   721→  navItems,
+   722→  activeView,
+   723→  onNavigate,
+   724→  user,
+   725→  profileImage,
+   726→  initials,
+   727→  role,
+   728→  onLogout,
+   729→}: {
+   730→  open: boolean
+   731→  onClose: () => void
+   732→  navItems: NavItem[]
+   733→  activeView: ViewKey
+   734→  onNavigate: (v: ViewKey) => void
+   735→  user: { name: string; email: string }
+   736→  profileImage: string | null
+   737→  initials: string
+   738→  role: AppRole
+   739→  onLogout: () => void
+   740→}) {
+   741→  return (
+   742→    <>
+   743→      {/* Backdrop */}
+   744→      {open && (
+   745→        <div
+   746→          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm anim-fade-in"
+   747→          onClick={onClose}
+   748→        />
+   749→      )}
+   750→
+   751→      {/* Drawer */}
+   752→      <div
+   753→        className={cn(
+   754→          'fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] transition-transform duration-300 ease-out',
+   755→          open ? 'translate-x-0' : '-translate-x-full'
+   756→        )}
+   757→      >
+   758→        <div className="glass-strong flex h-full flex-col rounded-r-2xl border-r border-violet-500/15 shadow-2xl">
+   759→          {/* Header */}
+   760→          <div className="flex items-center justify-between border-b border-white/5 p-4">
+   761→            <div className="flex items-center gap-2.5">
+   762→              <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+   763→                <HeartPulse className="h-5 w-5" />
+   764→              </div>
+   765→              <div>
+   766→                <p className="text-sm font-bold text-white">Orioster</p>
+   767→                <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
+   768→              </div>
+   769→            </div>
+   770→            <button
+   771→              onClick={onClose}
+   772→              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
+   773→            >
+   774→              <X className="h-5 w-5" />
+   775→            </button>
+   776→          </div>
+   777→
+   778→          {/* User card */}
+   779→          <div className="border-b border-white/5 p-4">
+   780→            <div className="flex items-center gap-3">
+   781→              <Avatar className="h-12 w-12 border border-violet-500/30">
+   782→                {profileImage ? (
+   783→                  <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
+   784→                ) : null}
+   785→                <AvatarFallback className="bg-violet-500/20 text-sm font-semibold text-violet-300">
+   786→                  {initials}
+   787→                </AvatarFallback>
+   788→              </Avatar>
+   789→              <div className="min-w-0 flex-1">
+   790→                <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+   791→                <p className="truncate text-[11px] text-slate-400">{user.email}</p>
+   792→                <div className="mt-1">
+   793→                  <RoleBadge role={role} />
+   794→                </div>
+   795→              </div>
+   796→            </div>
+   797→          </div>
+   798→
+   799→          {/* Nav items */}
+   800→          <nav className="flex-1 space-y-1 overflow-y-auto p-3 wope-scroll">
+   801→            {navItems.map((item) => (
+   802→              <button
+   803→                key={item.key}
+   804→                onClick={() => onNavigate(item.key)}
+   805→                className={cn(
+   806→                  'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+   807→                  activeView === item.key
+   808→                    ? 'bg-violet-500/15 text-white shadow-[0_0_20px_rgba(113,61,255,0.15)]'
+   809→                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
+   810→                )}
+   811→              >
+   812→                <span className={activeView === item.key ? 'text-violet-300' : ''}>{item.icon}</span>
+   813→                {item.label}
+   814→              </button>
+   815→            ))}
+   816→
+   817→            {/* Profile menu items */}
+   818→            <div className="my-2 h-px bg-white/5" />
+   819→            <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Account</p>
+   820→            {PROFILE_MENU.map((item) => (
+   821→              <button
+   822→                key={item.key}
+   823→                onClick={() => onNavigate(item.key)}
+   824→                className={cn(
+   825→                  'btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all',
+   826→                  activeView === item.key
+   827→                    ? 'bg-violet-500/15 text-white'
+   828→                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
+   829→                )}
+   830→              >
+   831→                <span className="text-violet-400">{item.icon}</span>
+   832→                {item.label}
+   833→              </button>
+   834→            ))}
+   835→          </nav>
+   836→
+   837→          {/* Footer */}
+   838→          <div className="border-t border-white/5 p-3">
+   839→            <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-500/5 px-3 py-2 text-[11px] text-slate-400">
+   840→              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+   841→              Privacy Firewall Active
+   842→            </div>
+   843→            <button
+   844→              onClick={onLogout}
+   845→              className="btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+   846→            >
+   847→              <LogOut className="h-5 w-5" />
+   848→              Sign Out
+   849→            </button>
+   850→          </div>
+   851→        </div>
+   852→      </div>
+   853→    </>
+   854→  )
+   855→}
+   856→

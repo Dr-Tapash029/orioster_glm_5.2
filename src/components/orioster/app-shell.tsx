@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { useAppStore, type ViewKey } from '@/lib/store'
 import { useTheme } from 'next-themes'
 import { OnlineIndicator, OfflineBanner, RoleBadge } from '@/components/orioster/ui-primitives'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   HeartPulse,
   LayoutDashboard,
@@ -140,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               {/* Logo — hidden on desktop (shown in sidebar) */}
               <button
                 onClick={() => navigate('dashboard')}
-                className="flex items-center gap-2 lg:hidden"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 lg:hidden"
               >
                 <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
                   <HeartPulse className="h-5 w-5" />
@@ -150,18 +150,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </span>
               </button>
 
-              {/* Search button — expands on desktop */}
-              <SearchButton />
+              {/* Search — inline input with dropdown results */}
+              <SearchInput />
 
               <div className="ml-auto flex items-center gap-1">
-                {/* Online indicator */}
-                <button
-                  onClick={() => setOnline(!online)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5"
-                  title="Toggle connectivity"
-                >
-                  {online ? <Wifi className="h-4 w-4 text-emerald-400" /> : <WifiOff className="h-4 w-4 text-amber-400" />}
-                </button>
+                {/* Online/offline auto-detecting indicator (not a button) */}
+                <OnlineStatus />
 
                 {/* Notifications */}
                 <NotificationButton />
@@ -169,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {/* Theme toggle */}
                 <button
                   onClick={toggleTheme}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
+                  className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 items-center justify-center"
                   title="Toggle theme"
                 >
                   {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -221,22 +215,146 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SEARCH BUTTON — Opens search overlay
+// ONLINE STATUS — Auto-detecting indicator (NOT a button)
+// Uses navigator.onLine + online/offline event listeners
 // ═══════════════════════════════════════════════════════════════
 
-function SearchButton() {
-  const { searchOpen, setSearchOpen } = useAppStore()
+function OnlineStatus() {
+  const { online, setOnline } = useAppStore()
+
+  useEffect(() => {
+    // Sync with browser's online/offline status on mount
+    setOnline(navigator.onLine)
+    const goOnline = () => setOnline(true)
+    const goOffline = () => setOnline(false)
+    window.addEventListener('online', goOnline)
+    window.addEventListener('offline', goOffline)
+    return () => {
+      window.removeEventListener('online', goOnline)
+      window.removeEventListener('offline', goOffline)
+    }
+  }, [setOnline])
+
   return (
-    <button
-      onClick={() => setSearchOpen(!searchOpen)}
-      className="glass-input ml-1 flex h-9 max-w-md flex-1 items-center gap-2 rounded-lg px-3 text-xs text-slate-400 lg:h-10 lg:text-sm"
+    <div
+      className="flex h-8 items-center gap-1.5 rounded-lg px-2"
+      title={online ? 'Online' : 'Offline'}
     >
-      <Search className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">Search...</span>
-      <kbd className="ml-auto hidden rounded border border-white/10 bg-white/5 px-1 text-[9px] sm:inline">
-        ⌘K
-      </kbd>
-    </button>
+      {online ? (
+        <Wifi className="h-4 w-4 text-emerald-400" />
+      ) : (
+        <WifiOff className="h-4 w-4 text-amber-400" />
+      )}
+      <span className={`hidden text-[10px] font-medium sm:inline ${online ? 'text-emerald-400' : 'text-amber-400'}`}>
+        {online ? 'Online' : 'Offline'}
+      </span>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEARCH INPUT — Inline header input with dropdown results
+// User types directly in the header; dropdown shows matching patients
+// ═══════════════════════════════════════════════════════════════
+
+interface SearchResult {
+  id: string
+  localId: string
+  fullName: string
+  gender: string
+  age: number | null
+  chiefComplaint: string | null
+  vitals: Array<{ triageLevel: string | null }>
+}
+
+function SearchInput() {
+  const { setActivePatient, setView } = useAppStore()
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [focused, setFocused] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Debounced search
+  useEffect(() => {
+    if (!query.trim()) {
+      return
+    }
+    const t = setTimeout(() => {
+      setLoading(true)
+      fetch(`/api/patients?search=${encodeURIComponent(query)}&limit=8`)
+        .then((r) => r.json())
+        .then((d) => setResults(d.patients ?? []))
+        .finally(() => setLoading(false))
+    }, 250)
+    return () => clearTimeout(t)
+  }, [query])
+
+  const displayResults = query.trim() ? results : []
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setFocused(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  function selectPatient(id: string) {
+    setActivePatient(id)
+    setView('patient-detail')
+    setQuery('')
+    setFocused(false)
+  }
+
+  const showDropdown = focused && query.trim().length > 0
+
+  return (
+    <div className="relative ml-1 flex-1" ref={containerRef}>
+      <div className="glass-input flex h-9 items-center gap-2 rounded-lg px-3 lg:h-10">
+        <Search className="h-3.5 w-3.5 flex-shrink-0 text-slate-400 lg:h-4 lg:w-4" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setFocused(true)}
+          placeholder="Search patients..."
+          className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none lg:text-sm"
+        />
+        {loading && (
+          <div className="h-3 w-3 flex-shrink-0 animate-spin rounded-full border border-violet-400 border-t-transparent" />
+        )}
+      </div>
+
+      {/* Dropdown results */}
+      {showDropdown && (
+        <div className="glass-panel-solid anim-fade-in-up absolute left-0 right-0 top-11 z-50 max-h-80 overflow-y-auto rounded-xl p-2 shadow-2xl wope-scroll">
+          {displayResults.length === 0 && !loading && (
+            <p className="py-4 text-center text-xs text-slate-500">No patients found for &quot;{query}&quot;</p>
+          )}
+          {displayResults.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => selectPatient(p.id)}
+              className="row-slide flex w-full items-center gap-2.5 rounded-lg p-2 text-left hover:bg-violet-500/8"
+            >
+              <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-[10px] font-semibold text-violet-300">
+                {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium text-white">{p.fullName}</p>
+                <p className="truncate text-[10px] text-slate-400">
+                  {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? '—'}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -262,7 +380,7 @@ function NotificationButton() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
+        className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple relative flex h-8 w-8 items-center justify-center"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
@@ -279,7 +397,7 @@ function NotificationButton() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllNotificationsRead}
-                className="text-[11px] text-violet-400 hover:text-violet-300"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple rounded-md px-1.5 py-0.5 text-[11px] text-violet-400 hover:text-violet-300"
               >
                 Mark all read
               </button>
@@ -359,12 +477,12 @@ function ProfileButton({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-full p-0.5 transition-transform active:scale-95"
+        className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-1.5 rounded-full p-0.5 transition-transform active:scale-95"
       >
-        <Avatar className="h-8 w-8 border border-violet-500/30">
-          {profileImage ? (
-            <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
-          ) : null}
+        <Avatar className="h-9 w-9 border-2 border-violet-500/40 overflow-hidden">
+          {profileImage && (
+            <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
+          )}
           <AvatarFallback className="bg-violet-500/20 text-[11px] font-semibold text-violet-300">
             {initials}
           </AvatarFallback>
@@ -372,13 +490,13 @@ function ProfileButton({
       </button>
 
       {open && (
-        <div className="anim-fade-in-up absolute right-0 top-11 z-50 w-64 glass-panel-solid rounded-xl p-2 shadow-2xl">
+        <div className="anim-fade-in-up absolute right-0 top-12 z-50 w-64 glass-panel-solid rounded-xl p-2 shadow-2xl">
           {/* User info header */}
           <div className="flex items-center gap-2.5 rounded-lg p-2">
-            <Avatar className="h-10 w-10 border border-violet-500/30">
-              {profileImage ? (
-                <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
-              ) : null}
+            <Avatar className="h-11 w-11 border-2 border-violet-500/40 overflow-hidden">
+              {profileImage && (
+                <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
+              )}
               <AvatarFallback className="bg-violet-500/20 text-xs font-semibold text-violet-300">
                 {initials}
               </AvatarFallback>
@@ -403,7 +521,7 @@ function ProfileButton({
                   onNavigate(item.key)
                   setOpen(false)
                 }}
-                className="btn-press flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-violet-500/10 hover:text-white"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-violet-500/10 hover:text-white"
               >
                 <span className="text-violet-400">{item.icon}</span>
                 <span className="flex-1">{item.label}</span>
@@ -417,7 +535,7 @@ function ProfileButton({
           {/* Logout */}
           <button
             onClick={onLogout}
-            className="btn-press flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10"
+            className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10"
           >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
@@ -469,7 +587,7 @@ function DesktopSidebar({
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-violet-500/30">
             {profileImage ? (
-              <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
+              <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
             ) : null}
             <AvatarFallback className="bg-violet-500/20 text-xs font-semibold text-violet-300">
               {initials}
@@ -530,7 +648,7 @@ function DesktopSidebar({
         </div>
         <button
           onClick={onLogout}
-          className="btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+          className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
         >
           <LogOut className="h-5 w-5" />
           Sign Out
@@ -651,7 +769,7 @@ function SideDrawer({
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>
@@ -662,7 +780,7 @@ function SideDrawer({
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12 border border-violet-500/30">
                 {profileImage ? (
-                  <img src={profileImage} alt={user.name} className="h-full w-full rounded-full object-cover" />
+                  <AvatarImage src={profileImage} alt={user.name} className="h-full w-full object-cover" />
                 ) : null}
                 <AvatarFallback className="bg-violet-500/20 text-sm font-semibold text-violet-300">
                   {initials}
@@ -724,7 +842,7 @@ function SideDrawer({
             </div>
             <button
               onClick={onLogout}
-              className="btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
             >
               <LogOut className="h-5 w-5" />
               Sign Out

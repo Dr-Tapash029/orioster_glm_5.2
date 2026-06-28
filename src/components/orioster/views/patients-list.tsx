@@ -60,7 +60,7 @@ export function PatientsListView() {
   const canAddPatient = user?.role === 'NURSE' || user?.role === 'ADMIN' || user?.role === 'DOCTOR'
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader
         title="Patients"
         subtitle={`${patients.length} ${patients.length === 1 ? 'record' : 'records'} · Local SQLite is runtime authority`}

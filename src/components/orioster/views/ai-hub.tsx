@@ -181,7 +181,7 @@ export function AiHubView() {
   )
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* Header */}
       <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">

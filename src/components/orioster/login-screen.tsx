@@ -135,8 +135,8 @@ export function LoginScreen() {
           <button
             onClick={() => setMode('signin')}
             className={cn(
-              'btn-press flex-1 rounded-lg py-2 text-sm font-medium transition-all',
-              mode === 'signin' ? 'bg-violet-500/20 text-white shadow-[0_0_15px_rgba(113,61,255,0.2)]' : 'text-slate-400 hover:text-white'
+              'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex-1 py-2 text-sm font-medium',
+              mode === 'signin' && 'fx-btn-border-trace-active'
             )}
           >
             Sign In
@@ -144,8 +144,8 @@ export function LoginScreen() {
           <button
             onClick={() => setMode('signup')}
             className={cn(
-              'btn-press flex-1 rounded-lg py-2 text-sm font-medium transition-all',
-              mode === 'signup' ? 'bg-violet-500/20 text-white shadow-[0_0_15px_rgba(113,61,255,0.2)]' : 'text-slate-400 hover:text-white'
+              'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex-1 py-2 text-sm font-medium',
+              mode === 'signup' && 'fx-btn-border-trace-active'
             )}
           >
             Sign Up
@@ -236,7 +236,7 @@ function SignInPanel({
               onClick={() => onLogin(s)}
               disabled={signingIn !== null}
               className={cn(
-                'anim-fade-in-up card-lift btn-press group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-all hover:border-violet-500/30 hover:bg-violet-500/5 disabled:opacity-50'
+                'anim-fade-in-up card-lift btn-press ripple fx-btn-border-trace group flex items-center gap-3 p-3 text-left disabled:opacity-50'
               )}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
@@ -348,7 +348,7 @@ function SignUpPanel({
           <button
             type="button"
             onClick={onTogglePassword}
-            className="text-slate-500 hover:text-violet-300"
+            className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple text-slate-500 hover:text-violet-300"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -365,7 +365,7 @@ function SignUpPanel({
               type="button"
               onClick={() => onRoleChange(r)}
               className={cn(
-                'btn-press flex items-center gap-2 rounded-lg border p-2.5 text-left transition-all',
+                'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 rounded-lg border p-2.5 text-left transition-all',
                 role === r
                   ? 'border-violet-500/40 bg-violet-500/15 text-white'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:border-violet-500/20'

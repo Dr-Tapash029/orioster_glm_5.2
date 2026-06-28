@@ -165,7 +165,7 @@ export function OrioAiView() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* Header */}
       <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -526,7 +526,7 @@ function DiagnosisPanel({
                         <Button
                           size="sm"
                           variant={isConfirmed ? 'default' : 'outline'}
-                          className={cn('gap-1.5', isConfirmed && 'fx-btn-border-trace')}
+                          className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5"
                           onClick={() => onConfirm(d.condition)}
                         >
                           {isConfirmed ? (
