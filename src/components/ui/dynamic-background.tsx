@@ -14,19 +14,19 @@ export function DynamicBackground() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return <div className="fixed inset-0 -z-50 bg-neutral-50 dark:bg-[#090514]" />;
+  if (!mounted) return <div className="fixed inset-0 -z-50 bg-[#faf7f2] dark:bg-[#090514]" />;
 
   const isDark = resolvedTheme === "dark";
 
   return (
-    <div className="pointer-events-none fixed inset-0 -z-50 overflow-hidden bg-neutral-50 transition-colors duration-700 ease-in-out dark:bg-[#090514]">
+    <div className="pointer-events-none fixed inset-0 -z-50 overflow-hidden bg-[#faf7f2] transition-colors duration-700 ease-in-out dark:bg-[#090514]">
       {/* Ambient Glow Orb 1 */}
       <motion.div
         className="absolute -top-[20%] -left-[10%] h-[60vw] w-[60vw] rounded-full opacity-40 blur-[120px] will-change-transform mix-blend-screen dark:opacity-30"
         style={{
           background: isDark
             ? "radial-gradient(circle, rgba(139,92,246,0.5) 0%, rgba(76,29,149,0) 70%)" // Dark Purple / Violet
-            : "radial-gradient(circle, rgba(203,213,225,0.6) 0%, rgba(241,245,249,0) 70%)", // Light Metallic Platinum
+            : "radial-gradient(circle, rgba(113,61,255,0.12) 0%, rgba(250,247,242,0) 70%)", // Creamy white with subtle violet
         }}
         animate={{
           x: [0, 40, -20, 0],
@@ -46,7 +46,7 @@ export function DynamicBackground() {
         style={{
           background: isDark
             ? "radial-gradient(circle, rgba(192,132,252,0.4) 0%, rgba(124,58,237,0) 70%)" // Dark Violet / Magenta trace
-            : "radial-gradient(circle, rgba(148,163,184,0.4) 0%, rgba(248,250,252,0) 70%)", // Light Slate Metallic
+            : "radial-gradient(circle, rgba(186,179,255,0.10) 0%, rgba(250,247,242,0) 70%)", // Creamy with light lavender
         }}
         animate={{
           x: [0, -50, 30, 0],

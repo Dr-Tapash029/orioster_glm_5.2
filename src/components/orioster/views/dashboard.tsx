@@ -242,7 +242,7 @@ export function DashboardView() {
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-[10px] font-semibold text-violet-300">
                 {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <p className="truncate text-xs font-medium text-slate-100">{p.fullName}</p>
                 <p className="truncate text-[10px] text-slate-500">{p.chiefComplaint ?? '—'}</p>
               </div>
