@@ -107,7 +107,7 @@ export function DashboardView() {
       {/* ═══ Welcome Panel ══════════════════════════════════════ */}
       <GlassPanel variant="strong" className="section-slide-up p-4 lg:p-6">
         <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-violet-400 word-reveal lg:text-sm" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
             <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-100 text-glow-pulse word-reveal lg:text-3xl" style={{ animationDelay: '0.2s' }}>
               {user?.name}
@@ -119,12 +119,11 @@ export function DashboardView() {
           {(role === 'NURSE' || role === 'ADMIN' || role === 'DOCTOR') && (
             <Button
               onClick={() => setView('patient-entry')}
-              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 word-reveal flex-shrink-0 lg:fx-btn-border-trace-lg"
+              className="fx-btn-border-trace btn-press ripple gap-1.5 word-reveal flex-shrink-0 whitespace-nowrap"
               style={{ animationDelay: '0.5s' }}
             >
-              <UserPlus className="h-3.5 w-3.5 lg:h-4.5 lg:w-4.5" />
-              <span className="hidden sm:inline">Add Patient</span>
-              <span className="sm:hidden">Add</span>
+              <UserPlus className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
+              <span>Add Patient</span>
             </Button>
           )}
         </div>

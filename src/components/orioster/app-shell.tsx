@@ -140,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               {/* Logo — icon only on mobile, full on tablet+ */}
               <button
                 onClick={() => navigate('dashboard')}
-                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 lg:hidden"
+                className="btn-press flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-white/5 lg:hidden"
               >
                 <div className="wope-logo-glow flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 text-white">
                   <HeartPulse className="h-4 w-4" />
@@ -148,15 +148,15 @@ export function AppShell({ children }: { children: ReactNode }) {
               </button>
 
               {/* Search — hidden on mobile (use search icon instead), inline on tablet+ */}
-              <div className="hidden sm:block flex-1">
+              <div className="hidden min-w-0 flex-1 sm:block">
                 <SearchInput />
               </div>
 
-              <div className="ml-auto flex items-center gap-1">
+              <div className="ml-auto flex items-center gap-0.5">
                 {/* Mobile search icon */}
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple items-center justify-center sm:hidden"
+                  className="btn-press flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300 sm:hidden"
                   title="Search"
                 >
                   <Search className="h-4 w-4" />
@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {/* Theme toggle */}
                 <button
                   onClick={toggleTheme}
-                  className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple items-center justify-center"
+                  className="btn-press flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
                   title="Toggle theme"
                 >
                   {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -395,7 +395,7 @@ function NotificationButton() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple relative items-center justify-center"
+        className="btn-press relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-violet-300"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
@@ -492,7 +492,7 @@ function ProfileButton({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-1.5 rounded-full p-0.5 transition-transform active:scale-95"
+        className="btn-press flex items-center gap-1.5 rounded-full p-0.5 transition-transform active:scale-95"
       >
         <Avatar className="h-9 w-9 border-2 border-violet-500/40 overflow-hidden">
           {profileImage && (
