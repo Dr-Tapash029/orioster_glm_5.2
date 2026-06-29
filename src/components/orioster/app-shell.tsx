@@ -76,7 +76,7 @@ const PROFILE_MENU: Array<{ key: ViewKey; label: string; icon: ReactNode }> = [
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, logout, view, setView, online, setOnline, profileImage, drawerOpen, setDrawerOpen } = useAppStore()
+  const { user, logout, view, setView, online, setOnline, profileImage, drawerOpen, setDrawerOpen, searchOpen, setSearchOpen } = useAppStore()
   const { theme, setTheme } = useTheme()
 
   const toggleTheme = () => {
@@ -137,23 +137,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* ── Header ─────────────────────────────────────────── */}
           <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0a0118]/90 backdrop-blur-2xl">
             <div className="flex h-14 items-center gap-2 px-3 lg:px-6">
-              {/* Logo — hidden on desktop (shown in sidebar) */}
+              {/* Logo — icon only on mobile, full on tablet+ */}
               <button
                 onClick={() => navigate('dashboard')}
                 className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 lg:hidden"
               >
-                <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-                  <HeartPulse className="h-5 w-5" />
+                <div className="wope-logo-glow flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+                  <HeartPulse className="h-4 w-4" />
                 </div>
-                <span className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>
-                  Orioster
-                </span>
               </button>
 
-              {/* Search — inline input with dropdown results */}
-              <SearchInput />
+              {/* Search — hidden on mobile (use search icon instead), inline on tablet+ */}
+              <div className="hidden sm:block flex-1">
+                <SearchInput />
+              </div>
 
               <div className="ml-auto flex items-center gap-1">
+                {/* Mobile search icon */}
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple items-center justify-center sm:hidden"
+                  title="Search"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+
                 {/* Online/offline auto-detecting indicator (not a button) */}
                 <OnlineStatus />
 
@@ -163,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {/* Theme toggle */}
                 <button
                   onClick={toggleTheme}
-                  className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 items-center justify-center"
+                  className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple items-center justify-center"
                   title="Toggle theme"
                 >
                   {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -181,6 +189,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
           </header>
+
+          {/* ── Mobile search dropdown (slides down when search icon tapped) ── */}
+          {searchOpen && (
+            <div className="anim-fade-in-up border-b border-white/5 bg-[#0a0118]/95 px-3 py-2 backdrop-blur-xl sm:hidden">
+              <SearchInput />
+            </div>
+          )}
 
           {/* ── Main Content ───────────────────────────────────── */}
           <main className="min-w-0 flex-1 overflow-y-auto wope-scroll pb-20 lg:pb-6" style={{ paddingBottom: '80px' }}>
@@ -380,7 +395,7 @@ function NotificationButton() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple relative flex h-8 w-8 items-center justify-center"
+        className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple relative items-center justify-center"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
@@ -769,7 +784,7 @@ function SideDrawer({
             </div>
             <button
               onClick={onClose}
-              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
+              className="fx-btn-border-trace fx-btn-border-trace-icon btn-press ripple text-slate-400 hover:bg-white/5 hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>

@@ -891,9 +891,19 @@ html.light .wope-card-hover:hover {
 
 /* Size variants */
 .fx-btn-border-trace-sm {
-  padding: 8px 18px !important;
+  padding: 6px 14px !important;
   font-size: 13px;
   border-radius: 999px !important;
+}
+/* Icon-only variant — no horizontal padding for square icon buttons */
+.fx-btn-border-trace-icon {
+  padding: 0 !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .fx-btn-border-trace-lg {
   padding: 14px 36px !important;
