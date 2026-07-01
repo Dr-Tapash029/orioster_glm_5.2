@@ -403,7 +403,7 @@ function NotificationButton() {
       </button>
 
       {open && (
-        <div className="anim-fade-in-up glass-panel-solid fixed left-2 right-2 top-14 z-50 max-h-[70vh] overflow-hidden rounded-xl p-3 shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-10 sm:w-80 sm:max-w-[calc(100vw-1.5rem)]">
+        <div className="anim-fade-in-up glass-panel-solid absolute right-0 top-10 z-50 w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-2 shadow-2xl">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-white">Notifications</p>
             {unreadCount > 0 && (
@@ -415,7 +415,7 @@ function NotificationButton() {
               </button>
             )}
           </div>
-          <div className="max-h-[60vh] space-y-1.5 overflow-y-auto wope-scroll sm:max-h-80">
+          <div className="max-h-80 space-y-1 overflow-y-auto wope-scroll">
             {notifications.length === 0 ? (
               <p className="py-6 text-center text-xs text-slate-500">No notifications</p>
             ) : (
