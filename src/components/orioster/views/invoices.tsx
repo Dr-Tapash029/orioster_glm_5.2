@@ -174,9 +174,9 @@ export function InvoicesView() {
                 New Invoice
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="w-[calc(100vw-2rem)] max-w-2xl p-4 sm:p-6">
               <DialogHeader>
-                <DialogTitle>Generate Invoice</DialogTitle>
+                <DialogTitle className="text-base lg:text-lg">Generate Invoice</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -197,14 +197,14 @@ export function InvoicesView() {
 
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="text-xs font-medium text-slate-400">Line Items</p>
-                    <Button size="sm" variant="ghost" onClick={addItem} className="fx-btn-border-trace btn-press ripple h-7 text-xs text-slate-300 hover:text-slate-100">
+                    <p className="text-[11px] font-medium text-slate-400">Line Items</p>
+                    <Button size="sm" variant="ghost" onClick={addItem} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-7 text-xs text-slate-300 hover:text-slate-100">
                       <Plus className="h-3 w-3" /> Add
                     </Button>
                   </div>
                   <div className="space-y-2">
                     {items.map((item, idx) => (
-                      <div key={idx} className="grid grid-cols-[1fr_70px_90px_32px] items-center gap-1.5">
+                      <div key={idx} className="grid grid-cols-1 gap-1.5 sm:grid-cols-[1fr_70px_90px_32px] sm:items-center">
                         <Select
                           value={item.description}
                           onValueChange={(v) => {
@@ -213,7 +213,7 @@ export function InvoicesView() {
                             if (tmpl) updateItem(idx, 'unit_price', tmpl.unit_price)
                           }}
                         >
-                          <SelectTrigger className="h-8 text-xs">
+                          <SelectTrigger className="h-9 text-xs sm:h-8">
                             <SelectValue placeholder="Service" />
                           </SelectTrigger>
                           <SelectContent>
@@ -229,19 +229,21 @@ export function InvoicesView() {
                           min="1"
                           value={item.quantity}
                           onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 1)}
-                          className="h-8 text-xs"
+                          className="h-9 text-xs sm:h-8"
+                          placeholder="Qty"
                         />
                         <Input
                           type="number"
                           value={item.unit_price}
                           onChange={(e) => updateItem(idx, 'unit_price', parseFloat(e.target.value) || 0)}
-                          className="h-8 text-xs"
+                          className="h-9 text-xs sm:h-8"
+                          placeholder="Price"
                         />
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => removeItem(idx)}
-                          className="fx-btn-border-trace btn-press ripple h-8 w-8 text-red-400 hover:bg-red-500/10"
+                          className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-9 w-9 text-red-400 hover:bg-red-500/10 sm:h-8 sm:w-8"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -294,27 +296,27 @@ export function InvoicesView() {
           </div>
         </GlassPanel>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
           {invoices.map((inv) => {
             let items: Array<{ description: string; quantity: number; unit_price: number }> = []
             try { items = JSON.parse(inv.items) } catch { /* */ }
             return (
-              <GlassPanel key={inv.id} className="card-lift p-4">
+              <GlassPanel key={inv.id} className="card-lift p-3 lg:p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <Receipt className="h-4 w-4 text-violet-400" />
-                      <span className="font-mono text-sm font-semibold text-slate-100">{inv.invoiceNo}</span>
+                      <Receipt className="h-4 w-4 flex-shrink-0 text-violet-400" />
+                      <span className="truncate font-mono text-xs font-semibold text-slate-100 lg:text-sm">{inv.invoiceNo}</span>
                     </div>
                     <button
                       onClick={() => { setActivePatient(inv.patient.id); setView('patient-detail') }}
-                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-violet-300 hover:underline"
+                      className="mt-0.5 block text-left text-xs text-slate-300 hover:text-violet-300 hover:underline lg:text-sm"
                     >
                       {inv.patient.fullName}
                     </button>
                   </div>
                   <span className={cn(
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
+                    'inline-flex flex-shrink-0 items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
                     inv.status === 'PAID' ? 'bg-emerald-500/15 text-emerald-300'
                       : inv.status === 'CANCELLED' ? 'bg-red-500/15 text-red-400'
                       : 'bg-amber-500/15 text-amber-300'
@@ -324,21 +326,21 @@ export function InvoicesView() {
                 </div>
 
                 <div className="mt-3 space-y-1">
-                  {items.slice(0, 4).map((it, i) => (
-                    <div key={i} className="flex justify-between text-xs">
+                  {items.slice(0, 3).map((it, i) => (
+                    <div key={i} className="flex justify-between gap-2 text-[11px]">
                       <span className="truncate pr-2 text-slate-200">{it.description} ×{it.quantity}</span>
-                      <span className="tabular-nums text-slate-400">৳{(it.quantity * it.unit_price).toLocaleString()}</span>
+                      <span className="flex-shrink-0 tabular-nums text-slate-400">৳{(it.quantity * it.unit_price).toLocaleString()}</span>
                     </div>
                   ))}
-                  {items.length > 4 && (
-                    <p className="text-[11px] text-slate-400">+{items.length - 4} more items</p>
+                  {items.length > 3 && (
+                    <p className="text-[11px] text-slate-400">+{items.length - 3} more items</p>
                   )}
                 </div>
 
-                <div className="mt-3 border-t border-white/10 pt-2 text-xs">
+                <div className="mt-3 border-t border-white/10 pt-2 text-[11px]">
                   <div className="flex justify-between"><span className="text-slate-400">Subtotal</span><span className="tabular-nums text-slate-100">৳{inv.subtotal.toLocaleString()}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">Tax</span><span className="tabular-nums text-slate-100">৳{inv.tax.toLocaleString()}</span></div>
-                  <div className="mt-1 flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="font-bold tabular-nums text-violet-300">৳{inv.total.toLocaleString()}</span></div>
+                  <div className="mt-1 flex justify-between border-t border-white/10 pt-1"><span className="font-semibold text-slate-100">Total</span><span className="text-sm font-bold tabular-nums text-violet-300">৳{inv.total.toLocaleString()}</span></div>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">
@@ -347,7 +349,7 @@ export function InvoicesView() {
                     size="sm"
                     variant="ghost"
                     onClick={() => window.print()}
-                    className="fx-btn-border-trace btn-press ripple h-7 text-xs text-slate-300 hover:text-slate-100"
+                    className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-7 text-xs text-slate-300 hover:text-slate-100"
                   >
                     <Printer className="h-3.5 w-3.5" /> Print
                   </Button>

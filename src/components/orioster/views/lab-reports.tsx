@@ -188,12 +188,12 @@ export function LabReportsView() {
                 New Report
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="w-[calc(100vw-2rem)] max-w-2xl p-4 sm:p-6">
               <DialogHeader>
-                <DialogTitle>Generate Lab Report</DialogTitle>
+                <DialogTitle className="text-base lg:text-lg">Generate Lab Report</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <Label className="text-xs">Patient</Label>
                     <Select value={selectedPatient} onValueChange={setSelectedPatient}>
@@ -227,13 +227,13 @@ export function LabReportsView() {
                 </div>
 
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                  <p className="mb-2 text-xs font-medium text-slate-400">Enter parameter values (ref range shown):</p>
-                  <div className="space-y-2">
+                  <p className="mb-2 text-[11px] font-medium text-slate-400">Enter parameter values (ref range shown):</p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {template.map((t) => (
-                      <div key={t.name} className="grid grid-cols-[1fr_120px_100px] items-center gap-2">
-                        <div>
-                          <span className="text-sm font-medium text-slate-100">{t.name}</span>
-                          <span className="ml-1 text-[11px] text-slate-400">ref {t.refLow}-{t.refHigh} {t.unit}</span>
+                      <div key={t.name} className="space-y-1 rounded-md bg-white/5 p-2">
+                        <div className="flex items-baseline justify-between gap-1">
+                          <span className="truncate text-xs font-medium text-slate-100">{t.name}</span>
+                          <span className="flex-shrink-0 text-[10px] text-slate-500">ref {t.refLow}-{t.refHigh} {t.unit}</span>
                         </div>
                         <Input
                           type="number"
@@ -241,16 +241,15 @@ export function LabReportsView() {
                           placeholder="Value"
                           value={paramValues[t.name] ?? ''}
                           onChange={(e) => setParamValues((v) => ({ ...v, [t.name]: e.target.value }))}
-                          className="h-8 text-sm"
+                          className="h-10 text-sm"
                         />
-                        <span className="text-[11px] text-slate-400">{t.unit}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-[11px] text-slate-300">
-                  <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+                  <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-violet-400" />
                   AI will analyze the parameters and provide advisory feedback after saving.
                 </div>
 
@@ -282,7 +281,7 @@ export function LabReportsView() {
           </div>
         </GlassPanel>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {reports.map((r) => {
             let params: Array<{ name: string; value: string; unit: string; refRange: string; status: string }> = []
             try { params = JSON.parse(r.parameters) } catch { /* */ }
@@ -291,16 +290,16 @@ export function LabReportsView() {
               try { aiFeedback = JSON.parse(r.aiFeedback) } catch { /* */ }
             }
             return (
-              <GlassPanel key={r.id} className="card-lift p-4">
+              <GlassPanel key={r.id} className="card-lift p-3 lg:p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <FlaskConical className="h-4 w-4 text-violet-400" />
-                      <span className="font-semibold text-slate-100">{LAB_REPORT_LABELS[r.reportType] ?? r.reportType}</span>
+                      <FlaskConical className="h-4 w-4 flex-shrink-0 text-violet-400" />
+                      <span className="truncate text-sm font-semibold text-slate-100">{LAB_REPORT_LABELS[r.reportType] ?? r.reportType}</span>
                     </div>
                     <button
                       onClick={() => { setActivePatient(r.patient.id); setView('patient-detail') }}
-                      className="mt-0.5 text-left text-sm text-slate-300 hover:text-violet-300 hover:underline"
+                      className="mt-0.5 block text-left text-xs text-slate-300 hover:text-violet-300 hover:underline lg:text-sm"
                     >
                       {r.patient.fullName} · {r.patient.age ?? '?'}y {r.patient.gender.toLowerCase()}
                     </button>
@@ -314,22 +313,22 @@ export function LabReportsView() {
                   </span>
                 </div>
 
-                <div className="mt-3 overflow-x-auto orio-scroll">
-                  <table className="w-full text-xs">
+                <div className="mt-3 overflow-x-auto wope-scroll">
+                  <table className="w-full min-w-[280px] text-[11px] lg:text-xs">
                     <thead>
                       <tr className="border-b border-white/10 text-left text-slate-400">
-                        <th className="pb-1 font-medium">Parameter</th>
-                        <th className="pb-1 font-medium">Value</th>
-                        <th className="pb-1 font-medium">Ref</th>
+                        <th className="pb-1 pr-2 font-medium">Param</th>
+                        <th className="pb-1 pr-2 font-medium">Value</th>
+                        <th className="pb-1 pr-2 font-medium">Ref</th>
                         <th className="pb-1 font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {params.map((p, i) => (
                         <tr key={i} className="border-b border-white/10 last:border-0">
-                          <td className="py-1.5 font-medium text-slate-100">{p.name}</td>
-                          <td className="py-1.5 text-slate-100">{p.value} {p.unit}</td>
-                          <td className="py-1.5 text-slate-400">{p.refRange}</td>
+                          <td className="py-1.5 pr-2 font-medium text-slate-100">{p.name}</td>
+                          <td className="py-1.5 pr-2 text-slate-100">{p.value} {p.unit}</td>
+                          <td className="py-1.5 pr-2 text-slate-400">{p.refRange}</td>
                           <td className="py-1.5">
                             {p.status === 'normal' && <Badge variant="outline" className="border-emerald-500/30 text-emerald-300 text-[10px]">N</Badge>}
                             {p.status === 'low' && <Badge variant="outline" className="border-amber-500/30 text-amber-300 text-[10px]">L</Badge>}
@@ -342,16 +341,19 @@ export function LabReportsView() {
                 </div>
 
                 {aiFeedback && (
-                  <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
-                      <Sparkles className="h-3.5 w-3.5" />
+                  <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-2.5">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-300 lg:text-xs">
+                      <Sparkles className="h-3.5 w-3.5 flex-shrink-0" />
                       AI Advisory Analysis
                     </div>
-                    {aiFeedback.summary && <p className="mt-1 text-xs text-slate-100">{aiFeedback.summary}</p>}
+                    {aiFeedback.summary && <p className="mt-1 text-[11px] leading-relaxed text-slate-100 lg:text-xs">{aiFeedback.summary}</p>}
                     {aiFeedback.advice && aiFeedback.advice.length > 0 && (
                       <ul className="mt-1.5 space-y-0.5 text-[11px] text-slate-400">
                         {aiFeedback.advice.slice(0, 3).map((a, i) => (
-                          <li key={i}>• {a}</li>
+                          <li key={i} className="flex gap-1">
+                            <span className="flex-shrink-0">•</span>
+                            <span className="min-w-0">{a}</span>
+                          </li>
                         ))}
                       </ul>
                     )}

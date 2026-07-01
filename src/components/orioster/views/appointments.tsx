@@ -122,12 +122,12 @@ export function AppointmentsView() {
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="fx-btn-border-trace btn-press ripple gap-2">
+              <Button className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-2">
                 <Plus className="h-4 w-4" />
                 Schedule
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:w-full">
               <DialogHeader>
                 <DialogTitle>Schedule New Appointment</DialogTitle>
               </DialogHeader>
@@ -135,7 +135,7 @@ export function AppointmentsView() {
                 <div>
                   <Label className="text-xs">Patient</Label>
                   <Select value={form.patientId} onValueChange={(v) => setForm((f) => ({ ...f, patientId: v }))}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 h-10 text-sm">
                       <SelectValue placeholder="Select patient" />
                     </SelectTrigger>
                     <SelectContent>
@@ -150,7 +150,7 @@ export function AppointmentsView() {
                 <div>
                   <Label className="text-xs">Doctor</Label>
                   <Select value={form.doctorId} onValueChange={(v) => setForm((f) => ({ ...f, doctorId: v }))}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 h-10 text-sm">
                       <SelectValue placeholder="Select doctor" />
                     </SelectTrigger>
                     <SelectContent>
@@ -166,7 +166,7 @@ export function AppointmentsView() {
                   <Label className="text-xs">Date & Time</Label>
                   <Input
                     type="datetime-local"
-                    className="mt-1"
+                    className="mt-1 h-10 text-sm"
                     value={form.scheduledAt}
                     onChange={(e) => setForm((f) => ({ ...f, scheduledAt: e.target.value }))}
                   />
@@ -174,7 +174,7 @@ export function AppointmentsView() {
                 <div>
                   <Label className="text-xs">Reason (optional)</Label>
                   <Input
-                    className="mt-1"
+                    className="mt-1 h-10 text-sm"
                     value={form.reason}
                     onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
                     placeholder="Consultation"
@@ -187,13 +187,13 @@ export function AppointmentsView() {
         }
       />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {['ALL', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].map((s) => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
             className={cn(
-              'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              'h-8 rounded-full border px-3 text-xs font-medium transition-colors',
               statusFilter === s
                 ? 'border-violet-500/30 bg-violet-500/15 text-violet-300'
                 : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
@@ -219,18 +219,18 @@ export function AppointmentsView() {
           </div>
         </GlassPanel>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
           {appointments.map((a) => {
             const sc = STATUS_CONFIG[a.status] ?? STATUS_CONFIG.SCHEDULED
             let dt: Date | null = null
             try { dt = parseISO(a.scheduledAt) } catch { dt = null }
             return (
-              <GlassPanel key={a.id} className="card-lift p-4">
+              <GlassPanel key={a.id} className="card-lift p-3 md:p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <button
                       onClick={() => { setActivePatient(a.patientId); setView('patient-detail') }}
-                      className="truncate text-left font-semibold text-slate-100 hover:text-violet-300 hover:underline"
+                      className="truncate text-left text-sm font-medium text-slate-100 hover:text-violet-300 hover:underline"
                     >
                       {a.patient.fullName}
                     </button>
@@ -238,18 +238,18 @@ export function AppointmentsView() {
                       {a.patient.localId} · {a.patient.age ?? '?'}y · {a.patient.gender.toLowerCase()}
                     </p>
                   </div>
-                  <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium', sc.cls)}>
+                  <span className={cn('inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium', sc.cls)}>
                     {sc.icon}
                     {sc.label}
                   </span>
                 </div>
 
                 {a.patient.chiefComplaint && (
-                  <p className="mt-2 truncate text-sm text-slate-400">{a.patient.chiefComplaint}</p>
+                  <p className="mt-2 line-clamp-1 text-xs text-slate-400">{a.patient.chiefComplaint}</p>
                 )}
 
-                <div className="mt-3 flex items-center gap-2 text-sm text-slate-100">
-                  <CalendarClock className="h-4 w-4 text-slate-400" />
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-100">
+                  <CalendarClock className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
                   <span>{dt ? format(dt, 'MMM d, yyyy') : '—'}</span>
                   <span className="text-slate-400">·</span>
                   <span>{dt ? format(dt, 'h:mm a') : '—'}</span>
@@ -257,22 +257,22 @@ export function AppointmentsView() {
 
                 <div className="mt-2 flex items-center gap-2">
                   <RoleBadge role={a.doctor.role} />
-                  <span className="text-sm text-slate-300">{a.doctor.name}</span>
+                  <span className="truncate text-xs text-slate-300">{a.doctor.name}</span>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {a.status === 'SCHEDULED' && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'IN_PROGRESS')} className="fx-btn-border-trace btn-press ripple h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'IN_PROGRESS')} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
                       Start
                     </Button>
                   )}
                   {a.status === 'IN_PROGRESS' && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'COMPLETED')} className="fx-btn-border-trace btn-press ripple h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'COMPLETED')} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-7 border-white/10 text-xs text-slate-300 hover:bg-white/5">
                       Complete
                     </Button>
                   )}
                   {(a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS') && (
-                    <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, 'CANCELLED')} className="fx-btn-border-trace btn-press ripple h-7 text-xs text-red-400">
+                    <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, 'CANCELLED')} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-7 text-xs text-red-400">
                       Cancel
                     </Button>
                   )}
@@ -280,7 +280,7 @@ export function AppointmentsView() {
                     size="sm"
                     variant="ghost"
                     onClick={() => { setActivePatient(a.patientId); setView('patient-detail') }}
-                    className="fx-btn-border-trace btn-press ripple ml-auto h-7 text-xs text-slate-300 hover:text-slate-100"
+                    className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple ml-auto h-7 text-xs text-slate-300 hover:text-slate-100"
                   >
                     View <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>

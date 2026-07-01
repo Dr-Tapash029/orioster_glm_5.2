@@ -183,25 +183,25 @@ export function AiHubView() {
   return (
     <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* Header */}
-      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
-              <LayoutGrid className="h-6 w-6" />
+      <GlassPanel variant="strong" className="overflow-hidden p-4 lg:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 lg:gap-4">
+          <div className="flex min-w-0 items-start gap-2.5 lg:gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300 lg:h-11 lg:w-11">
+              <LayoutGrid className="h-5 w-5 lg:h-6 lg:w-6" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">AI Hub — Document Generation Center</h1>
-              <p className="mt-0.5 max-w-2xl text-sm text-slate-400">
+            <div className="min-w-0">
+              <h1 className="text-base font-bold tracking-tight sm:text-lg lg:text-2xl">AI Hub — Document Generation Center</h1>
+              <p className="mt-0.5 max-w-2xl text-[11px] text-slate-400 lg:text-sm">
                 Generate documents through fixed AI templates. Every output is advisory — review before saving or dispensing.
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300">
+          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300 whitespace-nowrap">
             <ShieldAlert className="h-3 w-3" /> Advisory Templates
           </Badge>
         </div>
         {/* Status row */}
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:mt-4 lg:gap-3">
           <MiniStat label="Patients" value={patients.length} icon={<FileText className="h-3.5 w-3.5" />} />
           <MiniStat label="Firewall Active" value={patients.length - aiDisabledCount} icon={<Lock className="h-3.5 w-3.5" />} accent="emerald" />
           <MiniStat label="AI Disabled" value={aiDisabledCount} icon={<ShieldAlert className="h-3.5 w-3.5" />} accent="red" />
@@ -210,7 +210,7 @@ export function AiHubView() {
       </GlassPanel>
 
       {/* Document cards grid */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4">
         {DOC_CARDS.map((card) => (
           <motion.div
             key={card.type}
@@ -218,19 +218,19 @@ export function AiHubView() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <GlassPanel className="group flex h-full flex-col p-5 transition-all hover:shadow-lg">
-              <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', card.accent)}>
+            <GlassPanel className="group flex h-full flex-col p-3 transition-all hover:shadow-lg lg:p-5">
+              <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg lg:h-11 lg:w-11 lg:rounded-xl', card.accent)}>
                 {card.icon}
               </div>
-              <h3 className="mt-3 text-base font-semibold">{card.title}</h3>
-              <p className="mt-1 flex-1 text-sm text-slate-400">{card.description}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">
-                  Task: <code className="rounded bg-white/5 px-1 py-0.5">{card.task}</code>
+              <h3 className="mt-2 text-xs font-semibold lg:mt-3 lg:text-base">{card.title}</h3>
+              <p className="mt-1 flex-1 text-[10px] leading-snug text-slate-400 lg:text-sm">{card.description}</p>
+              <div className="mt-2 flex items-center justify-between lg:mt-3">
+                <span className="text-[10px] text-slate-400 lg:text-[11px]">
+                  <code className="rounded bg-white/5 px-1 py-0.5">{card.task}</code>
                 </span>
               </div>
               <Button
-                className="fx-btn-border-trace btn-press ripple mt-4 w-full gap-1.5"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple mt-2 h-9 w-full gap-1.5 whitespace-nowrap lg:mt-4 lg:h-auto"
                 onClick={() => setActiveDoc(card.type)}
                 disabled={loadingPatients}
               >
@@ -244,13 +244,13 @@ export function AiHubView() {
       </div>
 
       {/* Footer note */}
-      <p className="px-1 text-center text-[11px] text-slate-400">
+      <p className="px-1 text-center text-[10px] text-slate-400 lg:text-[11px]">
         AI Hub · {user?.name ?? 'User'} · All outputs include the mandatory disclaimer · Privacy firewall enforced server-side
       </p>
 
       {/* Workflow dialog */}
       <Dialog open={!!activeDoc} onOpenChange={(o) => !o && setActiveDoc(null)}>
-        <DialogContent className="max-h-[90vh] w-[95vw] max-w-3xl overflow-hidden p-0">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-md overflow-hidden p-0 lg:max-w-3xl">
           {activeDoc && (
             <DocWorkflow
               docType={activeDoc}
@@ -407,14 +407,14 @@ function DocWorkflow({
 
   return (
     <>
-      <DialogHeader className="border-b border-white/10 px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', card.accent)}>
+      <DialogHeader className="border-b border-white/10 px-4 py-3 lg:px-5 lg:py-4">
+        <div className="flex items-center gap-2.5 lg:gap-3">
+          <div className={cn('flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg lg:h-9 lg:w-9', card.accent)}>
             {card.icon}
           </div>
-          <div>
-            <DialogTitle className="text-base">{card.title} Generation</DialogTitle>
-            <DialogDescription className="text-xs">
+          <div className="min-w-0">
+            <DialogTitle className="text-sm lg:text-base">{card.title} Generation</DialogTitle>
+            <DialogDescription className="text-[11px] lg:text-xs">
               AI task: {AI_TASK_LABELS[card.task]} · Advisory output
             </DialogDescription>
           </div>
@@ -422,7 +422,7 @@ function DocWorkflow({
       </DialogHeader>
 
       <ScrollArea className="max-h-[calc(90vh-72px)]">
-        <div className="space-y-4 px-5 py-4">
+        <div className="space-y-3 px-4 py-3 lg:space-y-4 lg:px-5 lg:py-4">
           {/* Patient selection */}
           <div>
             <Label className="text-xs font-medium text-slate-400">Patient</Label>
@@ -434,18 +434,18 @@ function DocWorkflow({
               />
             </div>
             {patient && (
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] lg:text-xs">
                 <TriageBadge level={(patient.vitals[0]?.triageLevel as TriageLevel) ?? null} />
                 <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
                 <span className="text-slate-400">· {patient.age ?? '?'}y {patient.gender.toLowerCase()}</span>
-                <span className="text-slate-400">· {patient.chiefComplaint ?? 'No complaint'}</span>
+                <span className="min-w-0 truncate text-slate-400">· {patient.chiefComplaint ?? 'No complaint'}</span>
               </div>
             )}
           </div>
 
           {/* Firewall check */}
           {patient && !firewallOk && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-xs">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-2.5 text-[11px] lg:p-3 lg:text-xs">
               <p className="flex items-center gap-1.5 font-semibold text-red-400">
                 <ShieldAlert className="h-3.5 w-3.5" /> AI disabled for this patient
               </p>
@@ -468,16 +468,16 @@ function DocWorkflow({
           {/* Generate button */}
           {firewallOk && (
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={runAi} disabled={loading} className="fx-btn-border-trace btn-press ripple gap-1.5">
+              <Button onClick={runAi} disabled={loading} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-10 w-full gap-1.5 whitespace-nowrap sm:w-auto">
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {result ? 'Regenerate' : 'Generate with AI'}
               </Button>
               {result && (
-                <Button variant="outline" size="sm" onClick={() => setResult(null)} className="fx-btn-border-trace btn-press ripple gap-1.5">
+                <Button variant="outline" size="sm" onClick={() => setResult(null)} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
                   <RefreshCw className="h-3.5 w-3.5" /> Clear
                 </Button>
               )}
-              <span className="ml-auto text-[11px] text-slate-400">
+              <span className="hidden text-[11px] text-slate-400 sm:ml-auto sm:inline">
                 {loading ? '4-tier failover active…' : 'Non-blocking'}
               </span>
             </div>
@@ -485,11 +485,11 @@ function DocWorkflow({
 
           {/* Loading inline */}
           {loading && !result && (
-            <div className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-10">
-              <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
-              <div>
-                <p className="text-sm font-medium">Generating {card.title.toLowerCase()}…</p>
-                <p className="text-[11px] text-slate-400">AI is processing the de-identified summary</p>
+            <div className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-8 lg:px-4 lg:py-10">
+              <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-violet-300" />
+              <div className="min-w-0">
+                <p className="text-xs font-medium lg:text-sm">Generating {card.title.toLowerCase()}…</p>
+                <p className="text-[10px] text-slate-400 lg:text-[11px]">AI is processing the de-identified summary</p>
               </div>
             </div>
           )}
@@ -507,8 +507,8 @@ function DocWorkflow({
 
                 {/* Save actions */}
                 {(docType === 'INVOICE' || docType === 'LAB_REPORT') && (
-                  <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
-                    <div className="text-xs">
+                  <div className="flex flex-col gap-2 rounded-lg border border-white/10 bg-white/5 p-2.5 lg:flex-row lg:items-center lg:justify-between lg:p-3">
+                    <div className="min-w-0 text-[11px] lg:text-xs">
                       <p className="font-medium">
                         {saved
                           ? (docType === 'INVOICE' ? 'Invoice saved to patient record' : 'Lab report saved to patient record')
@@ -522,7 +522,7 @@ function DocWorkflow({
                       size="sm"
                       onClick={docType === 'INVOICE' ? saveInvoice : saveLabReport}
                       disabled={saving || saved}
-                      className="fx-btn-border-trace btn-press ripple gap-1.5"
+                      className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple w-full gap-1.5 whitespace-nowrap lg:w-auto"
                     >
                       {saved ? <CheckCircle2 className="h-3.5 w-3.5" /> : saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                       {saved ? 'Saved' : saving ? 'Saving…' : 'Save'}
@@ -530,7 +530,9 @@ function DocWorkflow({
                   </div>
                 )}
 
-                <DisclaimerChip text={result.disclaimer} />
+                <div className="[&_div]:text-[10px] lg:[&_div]:text-xs">
+                  <DisclaimerChip text={result.disclaimer} />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -551,12 +553,12 @@ function LabReportConfig({
 }) {
   const template = LAB_PARAMETER_TEMPLATES[reportType] ?? []
   return (
-    <GlassPanel variant="subtle" className="p-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-[200px] flex-1">
+    <GlassPanel variant="subtle" className="p-3 lg:p-4">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div className="min-w-0 flex-1">
           <Label className="text-xs font-medium text-slate-400">Report Type</Label>
           <Select value={reportType} onValueChange={onReportTypeChange}>
-            <SelectTrigger className="mt-1.5">
+            <SelectTrigger className="mt-1.5 h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -566,12 +568,12 @@ function LabReportConfig({
             </SelectContent>
           </Select>
         </div>
-        <Badge variant="outline" className="gap-1">
+        <Badge variant="outline" className="gap-1 whitespace-nowrap">
           <FlaskConical className="h-3 w-3" /> {template.length} parameters
         </Badge>
       </div>
       <Separator className="my-3" />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:gap-3">
         {template.map((t) => (
           <div key={t.name} className="space-y-1">
             <Label className="text-xs">
@@ -586,7 +588,7 @@ function LabReportConfig({
               placeholder={`e.g. ${t.refRange}`}
               value={paramValues[t.name] ?? ''}
               onChange={(e) => onParamChange(t.name, e.target.value)}
-              className="h-8 text-sm"
+              className="h-10 text-sm"
             />
           </div>
         ))}
@@ -610,13 +612,13 @@ function ResultDisplay({
   return (
     <div className="space-y-3">
       {/* Common header */}
-      <GlassPanel variant="subtle" className="p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <GlassPanel variant="subtle" className="p-3 lg:p-4">
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-slate-400">AI Summary</p>
-            <p className="mt-1 text-sm">{o.summary}</p>
+            <p className="text-[11px] font-medium text-slate-400 lg:text-xs">AI Summary</p>
+            <p className="mt-1 text-[13px] lg:text-sm">{o.summary}</p>
           </div>
-          <div className="flex flex-col items-end gap-1.5">
+          <div className="flex flex-shrink-0 flex-wrap items-center gap-1.5">
             <RiskBadge level={(o.risk_level as RiskLevel) ?? 'low'} />
             <TierBadge tier={result.tierUsed} />
           </div>
@@ -633,12 +635,46 @@ function ResultDisplay({
       {/* Invoice */}
       {docType === 'INVOICE' && (
         <GlassPanel className="overflow-hidden p-0">
-          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="border-b border-white/10 bg-white/5 px-3 py-2 lg:px-4 lg:py-2.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:text-xs">
               Line Items · {o.line_items?.length ?? 0}
             </p>
           </div>
-          <div className="overflow-x-auto orio-scroll">
+          {/* Mobile: list */}
+          <div className="space-y-2 p-3 lg:hidden">
+            {o.line_items?.map((it, i) => (
+              <div key={i} className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-w-0 flex-1 text-[11px] font-medium text-slate-100">{it.description}</p>
+                  <span className="flex-shrink-0 text-[11px] font-bold tabular-nums text-violet-300">
+                    {formatCurrency((it.quantity ?? 0) * (it.unit_price ?? 0))}
+                  </span>
+                </div>
+                <div className="mt-0.5 flex gap-2 text-[10px] text-slate-400">
+                  <span>Qty: <span className="tabular-nums text-slate-200">{it.quantity}</span></span>
+                  <span>·</span>
+                  <span>Unit: <span className="tabular-nums text-slate-200">{formatCurrency(it.unit_price)}</span></span>
+                </div>
+              </div>
+            ))}
+            {(!o.line_items || o.line_items.length === 0) && (
+              <p className="py-4 text-center text-[11px] text-slate-400">No items.</p>
+            )}
+            {o.line_items && o.line_items.length > 0 && (
+              <div className="rounded-lg bg-white/5 p-2.5 text-[11px]">
+                <div className="flex justify-between text-slate-400">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums">{formatCurrency(o.line_items.reduce((s, it) => s + (it.quantity ?? 0) * (it.unit_price ?? 0), 0))}</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Tax (5%)</span>
+                  <span>On save</span>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Desktop: table */}
+          <div className="hidden overflow-x-auto orio-scroll lg:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-xs text-slate-400">
@@ -688,12 +724,33 @@ function ResultDisplay({
       {/* Lab report */}
       {docType === 'LAB_REPORT' && (
         <GlassPanel className="overflow-hidden p-0">
-          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="border-b border-white/10 bg-white/5 px-3 py-2 lg:px-4 lg:py-2.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:text-xs">
               {LAB_REPORT_LABELS[labReportType]} · AI Parameter Analysis
             </p>
           </div>
-          <div className="overflow-x-auto orio-scroll">
+          {/* Mobile: list */}
+          <div className="space-y-1.5 p-3 lg:hidden">
+            {o.parameters_analysis?.map((p, i) => (
+              <div key={i} className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="min-w-0 flex-1 text-[11px] font-medium text-slate-100">{p.parameter}</p>
+                  <ParamStatus status={p.status} />
+                </div>
+                <div className="mt-0.5 flex items-center justify-between gap-2 text-[10px] text-slate-400">
+                  <span>Value: <span className="tabular-nums text-slate-200">{p.value}</span></span>
+                </div>
+                {p.note && (
+                  <p className="mt-1 text-[10px] leading-snug text-slate-400">{p.note}</p>
+                )}
+              </div>
+            ))}
+            {(!o.parameters_analysis || o.parameters_analysis.length === 0) && (
+              <p className="py-4 text-center text-[11px] text-slate-400">No analysis.</p>
+            )}
+          </div>
+          {/* Desktop: table */}
+          <div className="hidden overflow-x-auto orio-scroll lg:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-xs text-slate-400">
@@ -719,13 +776,13 @@ function ResultDisplay({
             </table>
           </div>
           {o.advice && o.advice.length > 0 && (
-            <div className="border-t border-white/10 px-4 py-3">
-              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+            <div className="border-t border-white/10 px-3 py-2.5 lg:px-4 lg:py-3">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 lg:text-xs">
                 <Activity className="h-3.5 w-3.5" /> Advisory
               </p>
               <ul className="space-y-1">
                 {o.advice.map((a, i) => (
-                  <li key={i} className="text-xs text-slate-100/90">• {a}</li>
+                  <li key={i} className="text-[11px] text-slate-100/90 lg:text-xs">• {a}</li>
                 ))}
               </ul>
             </div>
@@ -736,12 +793,34 @@ function ResultDisplay({
       {/* Prescription */}
       {docType === 'PRESCRIPTION' && (
         <GlassPanel className="overflow-hidden p-0">
-          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="border-b border-white/10 bg-white/5 px-3 py-2 lg:px-4 lg:py-2.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:text-xs">
               Rx · {o.prescription?.length ?? 0} item(s)
             </p>
           </div>
-          <div className="overflow-x-auto orio-scroll">
+          {/* Mobile: cards */}
+          <div className="space-y-2 p-3 lg:hidden">
+            {o.prescription?.map((rx, i) => (
+              <div key={i} className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-[11px] font-semibold text-slate-100">{rx.drug}</p>
+                  <span className="flex-shrink-0 text-[11px] font-medium tabular-nums text-violet-300">{rx.dosage}</span>
+                </div>
+                <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-400">
+                  <span><span className="text-slate-500">Freq:</span> {rx.frequency}</span>
+                  <span><span className="text-slate-500">Duration:</span> {rx.duration}</span>
+                </div>
+                {rx.notes && (
+                  <p className="mt-1 text-[10px] text-slate-400">{rx.notes}</p>
+                )}
+              </div>
+            ))}
+            {(!o.prescription || o.prescription.length === 0) && (
+              <p className="py-4 text-center text-[11px] text-slate-400">No prescription items.</p>
+            )}
+          </div>
+          {/* Desktop: table */}
+          <div className="hidden overflow-x-auto orio-scroll lg:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-xs text-slate-400">
@@ -769,13 +848,13 @@ function ResultDisplay({
             </table>
           </div>
           {o.advice && o.advice.length > 0 && (
-            <div className="border-t border-white/10 px-4 py-3">
-              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+            <div className="border-t border-white/10 px-3 py-2.5 lg:px-4 lg:py-3">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 lg:text-xs">
                 <Activity className="h-3.5 w-3.5" /> Patient Advice
               </p>
               <ul className="space-y-1">
                 {o.advice.map((a, i) => (
-                  <li key={i} className="text-xs text-slate-100/90">• {a}</li>
+                  <li key={i} className="text-[11px] text-slate-100/90 lg:text-xs">• {a}</li>
                 ))}
               </ul>
             </div>
@@ -785,32 +864,32 @@ function ResultDisplay({
 
       {/* Certificate */}
       {docType === 'CERTIFICATE' && (
-        <GlassPanel className="p-5">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-            <FileBadge className="h-5 w-5 text-violet-300" />
-            <p className="text-sm font-semibold">Medical Certificate — Draft</p>
-            <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
+        <GlassPanel className="p-3 lg:p-5">
+          <div className="flex items-center gap-2 border-b border-white/10 pb-2.5 lg:pb-3">
+            <FileBadge className="h-4 w-4 flex-shrink-0 text-violet-300 lg:h-5 lg:w-5" />
+            <p className="text-xs font-semibold lg:text-sm">Medical Certificate — Draft</p>
+            <Badge variant="outline" className="ml-auto gap-1 text-[10px] whitespace-nowrap">
               <AlertTriangle className="h-2.5 w-2.5" /> Requires doctor signature
             </Badge>
           </div>
-          <div className="mt-3 space-y-3 text-sm">
+          <div className="mt-3 space-y-3 text-xs lg:text-sm">
             <p className="text-slate-100/90">{o.summary}</p>
             {o.treatment_plan && o.treatment_plan.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Recommended Rest / Recovery</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:text-xs">Recommended Rest / Recovery</p>
                 <ul className="mt-1 space-y-1">
                   {o.treatment_plan.map((p, i) => (
-                    <li key={i} className="text-sm">• {p}</li>
+                    <li key={i} className="text-[11px] lg:text-sm">• {p}</li>
                   ))}
                 </ul>
               </div>
             )}
             {o.advice && o.advice.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Certificate Recommendation</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:text-xs">Certificate Recommendation</p>
                 <ul className="mt-1 space-y-1">
                   {o.advice.map((a, i) => (
-                    <li key={i} className="text-sm">• {a}</li>
+                    <li key={i} className="text-[11px] lg:text-sm">• {a}</li>
                   ))}
                 </ul>
               </div>
@@ -860,18 +939,18 @@ function PatientPickerInline({
       <Button
         variant="outline"
         role="combobox"
-        className="fx-btn-border-trace btn-press ripple w-full justify-between font-normal"
+        className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-10 w-full justify-between font-normal"
         onClick={() => setOpen((o) => !o)}
       >
         {selected ? (
-          <span className="flex items-center gap-2 truncate">
+          <span className="flex min-w-0 items-center gap-2">
             <span className="truncate">{selected.fullName}</span>
-            <span className="text-[11px] text-slate-400">· {selected.localId}</span>
+            <span className="flex-shrink-0 text-[11px] text-slate-400">· {selected.localId}</span>
           </span>
         ) : (
           <span className="text-slate-400">Select patient…</span>
         )}
-        <ChevronRight className={cn('h-4 w-4 opacity-50 transition-transform', open && 'rotate-90')} />
+        <ChevronRight className={cn('h-4 w-4 flex-shrink-0 opacity-50 transition-transform', open && 'rotate-90')} />
       </Button>
       {open && (
         <>
@@ -882,7 +961,7 @@ function PatientPickerInline({
               placeholder="Search patient…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 text-sm"
+              className="h-9 text-sm"
             />
             <div className="mt-2 max-h-60 overflow-y-auto orio-scroll">
               {filtered.length === 0 ? (
@@ -892,21 +971,21 @@ function PatientPickerInline({
                   <button
                     key={p.id}
                     onClick={() => { onChange(p.id); setOpen(false); setSearch('') }}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/5"
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-white/5"
                   >
                     <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-[10px] font-semibold text-violet-300">
                       {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{p.fullName}</p>
-                      <p className="truncate text-[11px] text-slate-400">
+                      <p className="truncate text-xs font-medium lg:text-sm">{p.fullName}</p>
+                      <p className="truncate text-[10px] text-slate-400 lg:text-[11px]">
                         {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? 'No complaint'}
                       </p>
                     </div>
                     {p.localSummary ? (
-                      <Lock className="h-3 w-3 text-emerald-500" />
+                      <Lock className="h-3 w-3 flex-shrink-0 text-emerald-500" />
                     ) : (
-                      <ShieldAlert className="h-3 w-3 text-red-500" />
+                      <ShieldAlert className="h-3 w-3 flex-shrink-0 text-red-500" />
                     )}
                   </button>
                 ))
@@ -960,11 +1039,11 @@ function MiniStat({
       ? 'text-red-400'
       : 'text-slate-400'
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-      <p className={cn('flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide', cls)}>
-        {icon} {label}
+    <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 lg:px-3 lg:py-2">
+      <p className={cn('flex items-center gap-1 text-[9px] font-medium uppercase tracking-wide lg:text-[10px]', cls)}>
+        {icon} <span className="truncate">{label}</span>
       </p>
-      <p className="mt-0.5 text-lg font-bold tabular-nums">{value}</p>
+      <p className="mt-0.5 text-base font-bold tabular-nums lg:text-lg">{value}</p>
     </div>
   )
 }

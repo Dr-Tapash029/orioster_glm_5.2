@@ -32,7 +32,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import {
   Select,
@@ -389,12 +388,12 @@ export function PatientEntryWizard() {
   const progressPct = ((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100
 
   return (
-    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
+    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Patient Entry Wizard</h1>
-          <p className="mt-0.5 text-sm text-slate-400">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-base font-bold tracking-tight sm:text-xl lg:text-2xl">Patient Entry Wizard</h1>
+          <p className="mt-0.5 text-[11px] text-slate-400 sm:text-sm">
             10-step offline-first intake · privacy firewall at Step 8 · AI advisory only
           </p>
         </div>
@@ -425,7 +424,7 @@ export function PatientEntryWizard() {
         }}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+      <div className="grid gap-3 lg:grid-cols-[220px_1fr]">
         {/* Desktop vertical stepper */}
         <aside className="hidden lg:block">
           <VerticalStepper
@@ -441,13 +440,13 @@ export function PatientEntryWizard() {
         </aside>
 
         {/* Step content */}
-        <div className="space-y-3">
-          <GlassPanel variant="strong" className="p-5 sm:p-6">
+        <div className="space-y-3 min-w-0">
+          <GlassPanel variant="strong" className="p-3 lg:p-5">
             {/* Step header */}
-            <div className="mb-5 flex items-start gap-3 border-b border-white/10 pb-4">
+            <div className="mb-4 flex items-start gap-2.5 border-b border-white/10 pb-3 lg:mb-5 lg:gap-3 lg:pb-4">
               <div
                 className={cn(
-                  'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold',
+                  'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold lg:h-10 lg:w-10',
                   currentStep === 8
                     ? 'bg-violet-500/15 text-violet-300 glow-violet'
                     : currentStep === 9
@@ -455,23 +454,23 @@ export function PatientEntryWizard() {
                       : 'bg-violet-500/15 text-violet-300'
                 )}
               >
-                {completedSteps.has(currentStep) ? <Check className="h-5 w-5" /> : currentStep}
+                {completedSteps.has(currentStep) ? <Check className="h-4 w-4 lg:h-5 lg:w-5" /> : currentStep}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-base font-semibold sm:text-lg">{currentStepMeta.title}</h2>
+                  <h2 className="text-sm font-semibold sm:text-base lg:text-lg">{currentStepMeta.title}</h2>
                   {currentStep === 8 && (
-                    <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30">
-                      <ShieldCheck className="h-3 w-3" /> Privacy Firewall
+                    <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30 text-[10px]">
+                      <ShieldCheck className="h-3 w-3" /> Firewall
                     </Badge>
                   )}
                   {currentStep === 9 && (
-                    <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30">
-                      <Sparkles className="h-3 w-3" /> AI-Assisted
+                    <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30 text-[10px]">
+                      <Sparkles className="h-3 w-3" /> AI
                     </Badge>
                   )}
                 </div>
-                <p className="mt-0.5 text-xs text-slate-400 sm:text-sm">
+                <p className="mt-0.5 text-[11px] leading-snug text-slate-400 lg:text-sm">
                   {stepDescription(currentStep)}
                 </p>
               </div>
@@ -536,7 +535,7 @@ export function PatientEntryWizard() {
               variant="outline"
               onClick={goBack}
               disabled={currentStep === 1}
-              className="fx-btn-border-trace btn-press ripple gap-1.5"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 h-9 whitespace-nowrap"
             >
               <ChevronLeft className="h-4 w-4" />
               Back
@@ -565,16 +564,16 @@ function ProgressRail({
   return (
     <div className="lg:hidden">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-400">
+        <span className="text-[11px] font-medium text-slate-400">
           Step {currentStep} of {WIZARD_STEPS.length}
         </span>
-        <span className="text-xs font-semibold text-violet-300">
+        <span className="text-[11px] font-semibold text-violet-300">
           {Math.round(((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100)}% complete
         </span>
       </div>
       <Progress value={(currentStep / WIZARD_STEPS.length) * 100} className="h-1.5" />
-      <ScrollArea className="mt-2 w-full whitespace-nowrap">
-        <div className="flex gap-2 pb-2">
+      <div className="mt-3 w-full overflow-x-auto wope-scroll">
+        <div className="flex gap-2.5 pb-1">
           {WIZARD_STEPS.map((s) => {
             const isCurrent = s.id === currentStep
             const isDone = completedSteps.has(s.id)
@@ -584,21 +583,32 @@ function ProgressRail({
                 key={s.id}
                 disabled={!canJump}
                 onClick={() => onJump(s.id)}
-                className={cn(
-                  'inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
-                  isCurrent && 'border-violet-400 bg-violet-500 text-white',
-                  !isCurrent && isDone && 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
-                  !isCurrent && !isDone && canJump && 'border-white/10 bg-white/5 text-slate-400',
-                  !canJump && 'border-white/10 bg-white/5 text-slate-500 cursor-not-allowed'
-                )}
+                className="inline-flex flex-shrink-0 flex-col items-center gap-1"
               >
-                {isDone ? <Check className="h-3 w-3" /> : <span className="tabular-nums">{s.id}</span>}
-                {s.short}
+                <span
+                  className={cn(
+                    'flex h-7 w-7 items-center justify-center rounded-full border text-[11px] font-bold transition-colors',
+                    isCurrent && 'border-violet-400 bg-violet-500 text-white',
+                    !isCurrent && isDone && 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300',
+                    !isCurrent && !isDone && canJump && 'border-white/10 bg-white/5 text-slate-400',
+                    !canJump && 'border-white/10 bg-white/5 text-slate-500 cursor-not-allowed'
+                  )}
+                >
+                  {isDone ? <Check className="h-3.5 w-3.5" /> : <span className="tabular-nums">{s.id}</span>}
+                </span>
+                <span
+                  className={cn(
+                    'max-w-[52px] truncate text-[10px]',
+                    isCurrent ? 'font-semibold text-violet-300' : 'text-slate-400'
+                  )}
+                >
+                  {s.short}
+                </span>
               </button>
             )
           })}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   )
 }
@@ -807,15 +817,15 @@ function StepGeneral({ patient, user, onPatientCreated, onPatientUpdated, onAdva
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 lg:space-y-5">
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
-          <AlertTriangle className="h-3.5 w-3.5" />
+          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
           {error}
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:gap-4">
         <Field label="Full name" icon={<User className="h-3.5 w-3.5" />} required>
           <Input
             value={fullName}
@@ -936,7 +946,7 @@ function StepGeneral({ patient, user, onPatientCreated, onPatientUpdated, onAdva
             onCheckedChange={(v) => setConsentGiven(v === true)}
             className="mt-0.5"
           />
-          <div className="space-y-0.5">
+          <div className="space-y-0.5 min-w-0">
             <p className="text-sm font-medium">
               Patient consent given <span className="text-red-500">*</span>
             </p>
@@ -1001,8 +1011,8 @@ function StepComplaint({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
   }
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <div className="space-y-4 lg:space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:gap-4">
         <Field label="Chief complaint" required>
           <Select value={complaint.split(' — ')[0]} onValueChange={setComplaint}>
             <SelectTrigger className="w-full">
@@ -1094,7 +1104,7 @@ function StepHistory({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 lg:space-y-5">
       <div>
         <p className="mb-2 text-sm font-medium">Select relevant history tags</p>
         <div className="flex flex-wrap gap-2">
@@ -1107,7 +1117,7 @@ function StepHistory({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
                 type="button"
                 onClick={() => toggleTag(t)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap',
                   active && isNone && 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300',
                   active && !isNone && 'border-violet-400 bg-violet-500 text-white',
                   !active && 'border-white/10 bg-white/5 text-slate-400 hover:bg-white/5'
@@ -1206,19 +1216,19 @@ function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }:
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-400">
+    <div className="space-y-3 lg:space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-slate-400 lg:text-sm">
           Add each ongoing medication. Leave empty if patient is not on any medication.
         </p>
-        <Button variant="outline" size="sm" onClick={addMed} className="fx-btn-border-trace btn-press ripple gap-1.5">
+        <Button variant="outline" size="sm" onClick={addMed} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
           <Plus className="h-3.5 w-3.5" />
           Add medication
         </Button>
       </div>
 
       {meds.length === 0 ? (
-        <GlassPanel variant="subtle" className="p-6 text-center">
+        <GlassPanel variant="subtle" className="p-4 text-center lg:p-6">
           <Pill className="mx-auto h-8 w-8 text-slate-500" />
           <p className="mt-2 text-sm font-medium">No medications added</p>
           <p className="mt-1 text-xs text-slate-400">
@@ -1230,8 +1240,8 @@ function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }:
           {meds.map((m, idx) => {
             const isDuplicate = m.drug && duplicateDrugs.has(m.drug.toLowerCase())
             return (
-              <GlassPanel key={idx} variant="subtle" className="p-3">
-                <div className="grid gap-2.5 sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-end">
+              <GlassPanel key={idx} variant="subtle" className="p-2.5 sm:p-3">
+                <div className="grid gap-2 sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-end">
                   <Field label={idx === 0 ? 'Drug' : undefined}>
                     <Select
                       value={m.drug}
@@ -1278,19 +1288,21 @@ function StepMedications({ patient, onPatientUpdated, onAdvance, triggerSaved }:
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="fx-btn-border-trace btn-press ripple h-9 w-9 text-slate-400 hover:text-red-500"
-                    onClick={() => removeMed(idx)}
-                    aria-label="Remove medication"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex justify-end sm:items-end">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-8 w-8 flex-shrink-0 text-slate-400 hover:text-red-500"
+                      onClick={() => removeMed(idx)}
+                      aria-label="Remove medication"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 {isDuplicate && (
                   <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-amber-400">
-                    <AlertTriangle className="h-3 w-3" />
+                    <AlertTriangle className="h-3 w-3 flex-shrink-0" />
                     Duplicate drug — patient may already be on this medication
                   </div>
                 )}
@@ -1394,18 +1406,18 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4">
       {/* Triage preview */}
-      <GlassPanel variant="subtle" className="flex items-center justify-between p-3">
-        <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-violet-300" />
-          <span className="text-sm font-medium">Local triage level (computed, no AI)</span>
+      <GlassPanel variant="subtle" className="flex items-center justify-between gap-2 p-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Activity className="h-4 w-4 flex-shrink-0 text-violet-300" />
+          <span className="text-xs font-medium lg:text-sm">Local triage level (computed, no AI)</span>
         </div>
         <TriageBadge level={triagePreview} />
       </GlassPanel>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Field label="Temperature (°C)" icon={<Thermometer className="h-3.5 w-3.5" />}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-4">
+        <Field label="Temperature (°C)" icon={<Thermometer className="h-3.5 w-3.5" />} hint="36.5–37.5">
           <Input
             type="number"
             step="0.1"
@@ -1414,7 +1426,7 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
             placeholder="36.5"
           />
         </Field>
-        <Field label="BP systolic (mmHg)" icon={<HeartPulse className="h-3.5 w-3.5" />}>
+        <Field label="BP systolic (mmHg)" icon={<HeartPulse className="h-3.5 w-3.5" />} hint="90–120">
           <Input
             type="number"
             value={bpSystolic}
@@ -1422,7 +1434,7 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
             placeholder="120"
           />
         </Field>
-        <Field label="BP diastolic (mmHg)">
+        <Field label="BP diastolic (mmHg)" hint="60–80">
           <Input
             type="number"
             value={bpDiastolic}
@@ -1430,7 +1442,7 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
             placeholder="80"
           />
         </Field>
-        <Field label="Heart rate (BPM)" icon={<HeartPulse className="h-3.5 w-3.5" />}>
+        <Field label="Heart rate (BPM)" icon={<HeartPulse className="h-3.5 w-3.5" />} hint="60–100">
           <Input
             type="number"
             value={heartRate}
@@ -1438,7 +1450,7 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
             placeholder="72"
           />
         </Field>
-        <Field label="SpO₂ (%)" icon={<Wind className="h-3.5 w-3.5" />}>
+        <Field label="SpO₂ (%)" icon={<Wind className="h-3.5 w-3.5" />} hint="95–100">
           <Input
             type="number"
             min={0}
@@ -1469,7 +1481,7 @@ function StepVitals({ patient, user, existingVitals, onVitalsRecorded, onAdvance
       {abnormalFlags.length > 0 && (
         <GlassPanel variant="subtle" className="space-y-1.5 p-3">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-300">
-            <AlertTriangle className="h-3.5 w-3.5" />
+            <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
             {abnormalFlags.length} abnormal value{abnormalFlags.length > 1 ? 's' : ''} detected
           </div>
           {abnormalFlags.map((f, i) => (
@@ -1561,17 +1573,17 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-slate-400">
+        <p className="text-xs text-slate-400 lg:text-sm">
           Record known hypersensitivities. At least one entry (or "None") is required.
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={markNone} disabled={hasNone} className="fx-btn-border-trace btn-press ripple gap-1.5">
+          <Button variant="outline" size="sm" onClick={markNone} disabled={hasNone} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
             <Check className="h-3.5 w-3.5" />
-            No known allergies
+            NKA
           </Button>
-          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="fx-btn-border-trace btn-press ripple gap-1.5">
+          <Button variant="outline" size="sm" onClick={addAllergy} disabled={hasNone} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
             <Plus className="h-3.5 w-3.5" />
             Add allergy
           </Button>
@@ -1579,11 +1591,11 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
       </div>
 
       {hasNone ? (
-        <GlassPanel variant="subtle" className="flex items-center gap-3 p-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+        <GlassPanel variant="subtle" className="flex items-center gap-3 p-3 lg:p-4">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
             <Check className="h-4 w-4" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium">No known allergies (NKA)</p>
             <p className="text-xs text-slate-400">Patient has no documented hypersensitivities.</p>
           </div>
@@ -1591,8 +1603,8 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
       ) : (
         <div className="space-y-2.5">
           {allergies.map((a, idx) => (
-            <GlassPanel key={idx} variant="subtle" className="p-3">
-              <div className="grid gap-2.5 sm:grid-cols-[1.5fr_1fr_auto] sm:items-end">
+            <GlassPanel key={idx} variant="subtle" className="p-2.5 sm:p-3">
+              <div className="grid gap-2 sm:grid-cols-[1.5fr_1fr_auto] sm:items-end">
                 <Field label={idx === 0 ? 'Allergen' : undefined}>
                   <Input
                     placeholder="e.g. Penicillin, Peanuts, Latex"
@@ -1615,15 +1627,17 @@ function StepAllergies({ patient, onPatientUpdated, onAdvance, triggerSaved }: S
                     </SelectContent>
                   </Select>
                 </Field>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="fx-btn-border-trace btn-press ripple h-9 w-9 text-slate-400 hover:text-red-500"
-                  onClick={() => removeAllergy(idx)}
-                  aria-label="Remove allergy"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex justify-end sm:items-end">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-8 w-8 flex-shrink-0 text-slate-400 hover:text-red-500"
+                    onClick={() => removeAllergy(idx)}
+                    aria-label="Remove allergy"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </GlassPanel>
           ))}
@@ -1707,7 +1721,7 @@ function StepDoctor({ patient, onAdvance, triggerSaved }: StepProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4">
       {doctors.length === 0 ? (
         <GlassPanel variant="subtle" className="p-4 text-center text-sm text-slate-400">
           <Stethoscope className="mx-auto h-8 w-8 opacity-50" />
@@ -1731,7 +1745,7 @@ function StepDoctor({ patient, onAdvance, triggerSaved }: StepProps) {
             </Select>
           </Field>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:gap-4">
             <Field label="Appointment date" icon={<Calendar className="h-3.5 w-3.5" />} required>
               <Input
                 type="date"
@@ -1765,8 +1779,8 @@ function StepDoctor({ patient, onAdvance, triggerSaved }: StepProps) {
 
           {doctorId && date && slot && (
             <GlassPanel variant="subtle" className="flex items-center gap-3 p-3">
-              <Calendar className="h-4 w-4 text-violet-300" />
-              <p className="text-sm">
+              <Calendar className="h-4 w-4 flex-shrink-0 text-violet-300" />
+              <p className="text-xs lg:text-sm min-w-0">
                 <span className="font-medium">
                   {doctors.find((d) => d.id === doctorId)?.name}
                 </span>
@@ -1857,23 +1871,23 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4">
       {/* Firewall banner */}
-      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4 glow-violet">
-        <div className="flex items-start gap-3">
+      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-3 glow-violet lg:p-4">
+        <div className="flex items-start gap-2.5 lg:gap-3">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
-            <ShieldCheck className="h-5 w-5" />
+            <ShieldCheck className="h-4 w-4 lg:h-5 lg:w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-semibold">Privacy Firewall</p>
               {hasGenerated && (
-                <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30">
+                <Badge className="gap-1 bg-violet-500/15 text-violet-300 hover:bg-violet-500/20 border-violet-500/30 text-[10px]">
                   <Check className="h-3 w-3" /> Complete
                 </Badge>
               )}
             </div>
-            <p className="mt-0.5 text-xs leading-snug text-slate-400">
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-400 lg:text-xs">
               This step is <strong>strictly local</strong>. No AI, no network. A de-identified
               summary (<code className="rounded bg-white/5 px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>) is
               generated from the structured data captured so far. All downstream AI calls
@@ -1884,19 +1898,19 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
       </GlassPanel>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
-          <AlertTriangle className="h-3.5 w-3.5" />
-          {error}
-          <Button variant="ghost" size="sm" onClick={generate} className="fx-btn-border-trace btn-press ripple ml-auto h-6 px-2 text-[11px]">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="min-w-0 flex-1">{error}</span>
+          <Button variant="ghost" size="sm" onClick={generate} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple ml-auto h-7 px-2 text-[11px]">
             Retry
           </Button>
         </div>
       )}
 
       {generating && !hasGenerated && (
-        <GlassPanel variant="subtle" className="flex items-center gap-3 p-6">
-          <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
-          <div>
+        <GlassPanel variant="subtle" className="flex items-center gap-3 p-4 lg:p-6">
+          <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-violet-300" />
+          <div className="min-w-0">
             <p className="text-sm font-medium">Generating patient_summary_v1…</p>
             <p className="text-xs text-slate-400">Compressing structured data, stripping PHI…</p>
           </div>
@@ -1907,20 +1921,20 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
         <>
           {/* Summary output — monospace box */}
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-medium">patient_summary_v1 (de-identified)</p>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-xs font-medium lg:text-sm">patient_summary_v1 (de-identified)</p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={generate}
                 disabled={generating}
-                className="fx-btn-border-trace btn-press ripple h-7 gap-1.5 text-[11px] text-slate-400"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-7 gap-1.5 text-[11px] text-slate-400 whitespace-nowrap"
               >
                 <RotateCcw className="h-3 w-3" />
                 Regenerate
               </Button>
             </div>
-            <pre className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-white/5 p-4 font-mono text-[12px] leading-relaxed text-slate-100/90 orio-scroll">
+            <pre className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-white/5 p-3 lg:p-4 font-mono text-[11px] leading-relaxed text-slate-100/90 orio-scroll lg:text-xs">
 {summary}
             </pre>
             {summaryId && (
@@ -1932,17 +1946,17 @@ function StepSummary({ patient, onPatientUpdated, onAdvance, triggerSaved }: Ste
 
           {/* Compression ratio */}
           {compressionRatio != null && (
-            <GlassPanel variant="subtle" className="p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Compression ratio</p>
+            <GlassPanel variant="subtle" className="p-3 lg:p-4">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium lg:text-sm">Compression ratio</p>
                   <p className="text-[11px] text-slate-400">
                     Target ≥ 70% (raw JSON vs. de-identified summary)
                   </p>
                 </div>
                 <span
                   className={cn(
-                    'text-2xl font-bold tabular-nums',
+                    'text-xl font-bold tabular-nums lg:text-2xl',
                     compressionRatio >= 0.7 ? 'text-emerald-400' : 'text-amber-400'
                   )}
                 >
@@ -2062,16 +2076,16 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4">
       {/* AI context banner */}
-      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-4 glow-violet">
-        <div className="flex items-start gap-3">
+      <GlassPanel variant="subtle" className="border-violet-500/30 bg-violet-500/5 p-3 glow-violet lg:p-4">
+        <div className="flex items-start gap-2.5 lg:gap-3">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
-            <Sparkles className="h-5 w-5" />
+            <Sparkles className="h-4 w-4 lg:h-5 lg:w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">AI-Assisted Doctor Notification</p>
-            <p className="mt-0.5 text-xs leading-snug text-slate-400">
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-400 lg:text-xs">
               The Orio AI service will receive <strong>only</strong> the de-identified{' '}
               <code className="rounded bg-white/5 px-1 py-0.5 font-mono text-[10px]">patient_summary_v1</code>{' '}
               from Step 8 and produce an enhanced, prioritized notification for the assigned doctor.
@@ -2082,10 +2096,10 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
       </GlassPanel>
 
       {blocked && (
-        <GlassPanel variant="subtle" className="border-red-500/30 bg-red-500/10 p-4">
+        <GlassPanel variant="subtle" className="border-red-500/30 bg-red-500/10 p-3 lg:p-4">
           <div className="flex items-start gap-2">
             <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400" />
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-red-400">AI hard-disabled</p>
               <p className="mt-0.5 text-xs text-red-400/80">{error}</p>
               <p className="mt-1 text-xs text-slate-400">
@@ -2097,9 +2111,9 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
       )}
 
       {loading && (
-        <GlassPanel variant="subtle" className="flex items-center gap-3 p-6">
-          <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
-          <div className="space-y-0.5">
+        <GlassPanel variant="subtle" className="flex items-center gap-3 p-4 lg:p-6">
+          <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-violet-400" />
+          <div className="min-w-0 space-y-0.5">
             <p className="text-sm font-medium">Orio AI is preparing the notification…</p>
             <p className="text-xs text-slate-400">
               Receiving de-identified summary · composing doctor-ready brief
@@ -2109,17 +2123,17 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
       )}
 
       {queued && (
-        <GlassPanel variant="subtle" className="border-amber-500/30 bg-amber-500/10 p-4">
-          <div className="flex items-start gap-3">
+        <GlassPanel variant="subtle" className="border-amber-500/30 bg-amber-500/10 p-3 lg:p-4">
+          <div className="flex items-start gap-2.5 lg:gap-3">
             <WifiOff className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold text-amber-300">Queued locally</p>
-                <Badge className="gap-1 bg-amber-500/20 text-amber-300 hover:bg-amber-500/25">
+                <Badge className="gap-1 bg-amber-500/20 text-amber-300 hover:bg-amber-500/25 text-[10px]">
                   <CloudUpload className="h-3 w-3" /> QUEUED
                 </Badge>
               </div>
-              <p className="mt-0.5 text-xs text-amber-300/80">
+              <p className="mt-0.5 text-[11px] leading-snug text-amber-300/80 lg:text-xs">
                 The notification will be delivered to the assigned doctor automatically when
                 connectivity returns. The patient record has been marked as{' '}
                 <code className="rounded bg-amber-500/20 px-1 py-0.5 font-mono text-[10px]">QUEUED</code>.
@@ -2130,7 +2144,7 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
                 size="sm"
                 onClick={runNotify}
                 disabled={loading}
-                className="fx-btn-border-trace btn-press ripple mt-2 h-7 gap-1.5 text-[11px]"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple mt-2 h-7 gap-1.5 text-[11px] whitespace-nowrap"
               >
                 <RotateCcw className="h-3 w-3" />
                 Retry now
@@ -2148,14 +2162,14 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
           className="space-y-3"
         >
           {/* AI output */}
-          <GlassPanel variant="subtle" className="p-4">
-            <div className="mb-2 flex items-center justify-between">
+          <GlassPanel variant="subtle" className="p-3 lg:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-sm font-semibold">AI-enhanced doctor brief</p>
-              <Badge className="gap-1 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/20">
+              <Badge className="gap-1 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/20 text-[10px]">
                 <Check className="h-3 w-3" /> Sent
               </Badge>
             </div>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-100/90">
+            <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-slate-100/90 lg:text-sm">
               {aiOutput.summary}
             </p>
             {aiOutput.advice && aiOutput.advice.length > 0 && (
@@ -2167,7 +2181,7 @@ function StepNotify({ patient, online, onPatientUpdated, onAdvance, triggerSaved
                   {aiOutput.advice.map((a, i) => (
                     <li key={i} className="flex gap-2 text-xs text-slate-100/80">
                       <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-violet-400" />
-                      {a}
+                      <span className="min-w-0">{a}</span>
                     </li>
                   ))}
                 </ul>
@@ -2339,15 +2353,15 @@ function StepReview({
   }
 
   return (
-    <div className="space-y-4">
-      <GlassPanel variant="subtle" className="p-4">
-        <div className="flex items-start gap-3">
+    <div className="space-y-3 lg:space-y-4">
+      <GlassPanel variant="subtle" className="p-3 lg:p-4">
+        <div className="flex items-start gap-2.5 lg:gap-3">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
-            <ClipboardCheck className="h-5 w-5" />
+            <ClipboardCheck className="h-4 w-4 lg:h-5 lg:w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-semibold">Role-based sign-off checklist</p>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-400 lg:text-xs">
               Your role: <span className="font-medium text-slate-100">{role}</span>. Verify each
               item before final submission. Auto-verified items are locked.
             </p>
@@ -2360,7 +2374,7 @@ function StepReview({
           <label
             key={c.id}
             className={cn(
-              'flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors',
+              'flex min-h-[40px] cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors lg:gap-3 lg:p-3',
               c.verified
                 ? 'border-emerald-500/30 bg-emerald-500/5'
                 : checked[c.id]
@@ -2375,23 +2389,23 @@ function StepReview({
               disabled={c.verified}
               className="mt-0.5"
             />
-            <div className="flex-1">
-              <p className="text-sm font-medium">{c.label}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium lg:text-sm">{c.label}</p>
               {c.verified && (
                 <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-400">
                   Auto-verified from record
                 </p>
               )}
             </div>
-            {c.verified && <Check className="h-4 w-4 text-emerald-500" />}
+            {c.verified && <Check className="h-4 w-4 flex-shrink-0 text-emerald-500" />}
           </label>
         ))}
       </div>
 
       {/* Final summary card */}
-      <GlassPanel variant="subtle" className="p-4">
+      <GlassPanel variant="subtle" className="p-3 lg:p-4">
         <p className="mb-2 text-sm font-semibold">Patient intake summary</p>
-        <div className="grid gap-2 text-xs sm:grid-cols-2">
+        <div className="grid gap-2 text-[11px] sm:grid-cols-2 lg:text-xs">
           <SummaryRow label="Patient" value={patient?.fullName ?? '—'} />
           <SummaryRow label="Local ID" value={patient?.localId ?? '—'} mono />
           <SummaryRow label="Gender" value={patient?.gender ?? '—'} />
@@ -2415,7 +2429,7 @@ function StepReview({
         <Button
           onClick={onSubmit}
           disabled={!allChecked || submitting}
-          className="fx-btn-border-trace btn-press ripple gap-2 sm:w-auto"
+          className="fx-btn-border-trace btn-press ripple h-11 w-full gap-2 whitespace-nowrap sm:w-auto"
           size="lg"
         >
           {submitting ? (
@@ -2450,7 +2464,7 @@ function Field({
   children: ReactNode
 }) {
   return (
-    <div className={cn('space-y-1.5', className)}>
+    <div className={cn('space-y-1.5 [&_input]:h-10 [&_input]:text-sm [&_[data-slot=select-trigger]]:h-10 [&_textarea]:min-h-10', className)}>
       {label && (
         <Label className="text-xs">
           {icon && <span className="text-slate-400">{icon}</span>}
@@ -2466,7 +2480,7 @@ function Field({
 
 function StepFooter({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center justify-end gap-2 border-t border-white/10 pt-4">
+    <div className="flex flex-col gap-2 border-t border-white/10 pt-3 sm:flex-row sm:items-center sm:justify-end sm:gap-2 sm:pt-4">
       {children}
     </div>
   )
@@ -2484,7 +2498,11 @@ function ContinueButton({
   label?: string
 }) {
   return (
-    <Button onClick={onClick} disabled={loading || disabled} className="fx-btn-border-trace btn-press ripple gap-1.5">
+    <Button
+      onClick={onClick}
+      disabled={loading || disabled}
+      className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-10 w-full gap-1.5 whitespace-nowrap sm:w-auto"
+    >
       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
       {label}
       {!loading && <ChevronRight className="h-4 w-4" />}

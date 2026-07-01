@@ -294,3 +294,117 @@
    294→- "Assalamu Alaikum" humanitarian greeting throughout
    295→- Design matches: "futuristic UN humanitarian command center" aesthetic
    296→
+   297→---
+   298→Task ID: FIX-FINAL
+   299→Agent: Main (Z.ai Code)
+   300→Task: Add border-trace to all remaining buttons + fix alignment consistency across all pages + verify
+   301→
+   302→Work Log:
+   303→- Read worklog.md to understand prior agent work (Task IDs 1, 7, 5, FINAL, FIX-1, THEME-1, THEME-2, THEME-FINAL, plus the pre-FIX-FINAL changes documented in the task brief)
+   304→- Read all 10 view files + app-shell.tsx + login-screen.tsx + ui-primitives.tsx in full to inventory current state of button styling and alignment
+   305→- Verified all shadcn `<Button>` (capital B) components already had `fx-btn-border-trace btn-press ripple` from previous THEME-* agent work
+   306→- Found 1 shadcn Button with conditional class in orio-ai.tsx line 526 (DiagnosisPanel "Select as confirmed" button — `cn('gap-1.5', isConfirmed && 'fx-btn-border-trace')`). Refactored to always have `fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5` per the brief's "All `<Button>` (shadcn) components" rule.
+   307→- Used a custom Python brace-aware parser (handling JSX `{...}` expressions, `"..."`, `'...'` strings, and `>` inside arrow functions like `onClick={() => x > y}`) to enumerate all 28 plain `<button>` elements across the orioster/ folder and categorize each:
+   308→
+   309→  DO NOT add border-trace (per brief — own active state styling or list items):
+   310→  • app-shell.tsx:339  — search result dropdown item (list item)
+   311→  • app-shell.tsx:411  — notification list item
+   312→  • app-shell.tsx:608  — desktop sidebar nav item (activeView === item.key state)
+   313→  • app-shell.tsx:627  — desktop sidebar profile menu item (activeView state)
+   314→  • app-shell.tsx:683  — bottom nav item (isActive state)
+   315→  • app-shell.tsx:802  — side drawer nav item (activeView state)
+   316→  • app-shell.tsx:821  — side drawer profile menu item (activeView state)
+   317→  • search-overlay.tsx:74, 103 — unused component (not imported anywhere)
+   318→  • ai-hub.tsx:892 — patient picker dropdown item (list item)
+   319→  • dashboard.tsx:234 — recent patient row button (list item)
+   320→  • appointments.tsx:192 — status filter chip (statusFilter === s active state)
+   321→  • appointments.tsx:231 — patient link in appointment card (list item link)
+   322→  • invoices.tsx:309 — patient link in invoice card (list item link)
+   323→  • lab-reports.tsx:301 — patient link in lab report card (list item link)
+   324→  • patient-entry-wizard.tsx:583 — horizontal stepper button (current/done/locked multi-state)
+   325→  • patient-entry-wizard.tsx:639 — vertical stepper button (current/done/locked multi-state)
+   326→  • patient-entry-wizard.tsx:1105 — PAST_HISTORY tag button (active/inactive state)
+   327→
+   328→  DID add fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple:
+   329→  • app-shell.tsx:141 — mobile logo button (header action)
+   330→  • app-shell.tsx:398 — "Mark all read" notification button (added rounded-md px-1.5 py-0.5 wrapper for tighter pill)
+   331→  • app-shell.tsx:478 — profile avatar button (dropdown trigger)
+   332→  • app-shell.tsx:518 — profile dropdown menu items (My Profile / My Company / My Tasks / My Documents)
+   333→  • app-shell.tsx:536 — profile dropdown Sign Out button
+   334→  • app-shell.tsx:649 — desktop sidebar Sign Out button (action, not nav)
+   335→  • app-shell.tsx:770 — side drawer close (X) button
+   336→  • app-shell.tsx:843 — side drawer Sign Out button (action, not nav)
+   337→  • login-screen.tsx:348 — password eye toggle (show/hide password)
+   338→  • login-screen.tsx:363 — role selector buttons (DOCTOR/NURSE/ADMIN/LAB_TECH) per brief
+   339→  • profile-views.tsx:77 — camera image upload button
+   340→  • profile-views.tsx:278 — task toggle (check/uncheck) button
+   341→  • profile-views.tsx:354 — document download button
+   342→
+   343→- Alignment consistency pass on all 10 view files — converted every outer page container to the canonical pattern `<div className="space-y-3 p-3 lg:space-y-5 lg:p-6">`:
+   344→  • patients-list.tsx (was `space-y-4`)
+   345→  • appointments.tsx (was `space-y-4`)
+   346→  • lab-reports.tsx (was `space-y-4`)
+   347→  • invoices.tsx (was `space-y-4`)
+   348→  • patient-detail.tsx (was `space-y-5`)
+   349→  • orio-ai.tsx (was `space-y-5`)
+   350→  • ai-hub.tsx (was `space-y-5`)
+   351→  • patient-entry-wizard.tsx outer wrapper (was `space-y-4`)
+   352→  • profile-views.tsx — all 4 views (My Profile, My Company, My Tasks, My Documents) — each was `space-y-4 p-4`
+   353→  • dashboard.tsx — already correct (used as reference)
+   354→
+   355→- Inner containers, dialog bodies, tab panels, and tab content wrappers were left untouched (only the outermost page container was standardized, per brief)
+   356→- Inner step content containers in patient-entry-wizard.tsx (lines 810, 1004, 1097, 1209, 1397, 1564, 1710, 1860, 2065 — all `space-y-4` or `space-y-5`) intentionally left alone — those are wizard step bodies inside the outer wrapper, not page-level containers
+   357→
+   358→Verification:
+   359→- `bun run lint` → exit 0, 0 errors, 0 warnings ✓
+   360→- `tail -10 /home/z/my-project/dev.log` → only "✓ Compiled in Nms" entries, no compile errors ✓
+   361→- `git pull --no-rebase origin main` → resolved cleanly (merge made by 'ort' strategy)
+   362→- `git add -A && git commit -m "fix: profile image, light mode creamy white, all buttons border-trace, auto online/offline, inline search, alignment consistency"` → 22 files changed, 3112 insertions(+), 129 deletions(-) ✓
+   363→- `git push origin main` → pushed 76ad01b..1a31fbd to main ✓
+   364→
+   365→Agent Browser self-verification (1440×900 desktop viewport):
+   366→1. Opened http://localhost:3000/ → login screen rendered with 5 staff cards (each with fx-btn-border-trace) ✓
+   367→2. Clicked "Dr. Amara Chen" → logged in, dashboard rendered ✓
+   368→3. Dark mode dashboard screenshot (01-dashboard-dark.png):
+   369→   • Profile avatar "DA" visible in top-right header ✓
+   370→   • Search input inline in header (not overlay) ✓
+   371→   • Online/offline indicator is a static icon (not clickable button) ✓
+   372→   • "Add Patient" and "All" buttons have violet border-trace effect ✓
+   373→   • Zero visual issues ✓
+   374→4. Toggled theme → light mode dashboard screenshot (02-dashboard-light.png):
+   375→   • Background is creamy white (#faf7f2) ✓
+   376→   • Cards have good contrast ✓
+   377→   • Layout consistent and professional ✓
+   378→   • No visual issues ✓
+   379→5. Opened profile dropdown (03-profile-dropdown.png):
+   380→   • All 5 menu items (My Profile, My Company, My Tasks, My Documents, Sign Out) visible ✓
+   381→   • All have violet border-trace button styling ✓
+   382→   • Layout consistent ✓
+   383→6. Opened notifications panel (04-notifications.png):
+   384→   • "Mark all read" button visible with border-trace styling ✓
+   385→   • Notification list items render correctly (list items, not action buttons) ✓
+   386→7. Navigated to Patients list (05-patients-list.png):
+   387→   • "Add Patient" button has border-trace ✓
+   388→   • Outer container uses p-3 lg:p-6 padding ✓
+   389→   • Table renders with all rows visible ✓
+   390→8. Toggled to light mode on Patients list (06-patients-light.png) — verified creamy white theme carries through to all pages ✓
+   391→9. Navigated to Orio AI (07-orio-ai.png):
+   392→   • Action buttons have violet border-trace styling ✓
+   393→   • Layout uses proper p-3/p-6 padding ✓
+   394→   • Patient selector visible ✓
+   395→   • Privacy firewall status visible ("AI Disabled" badge for selected patient) ✓
+   396→10. Navigated to Patient Entry Wizard (08-patient-wizard.png + 09-wizard-full.png):
+   397→    • "Exit" button has violet border-trace styling ✓
+   398→    • Step navigation buttons render correctly with multi-state styling ✓
+   399→    • Content fits page with proper padding ✓
+   400→    • No visual issues ✓
+   401→11. Browser console → only `[HMR] connected` and React DevTools download suggestion, zero errors ✓
+   402→12. `agent-browser errors` → empty (no page errors) ✓
+   403→
+   404→Stage Summary:
+   405→- ALL shadcn `<Button>` components and all plain `<button>` action elements across `src/components/orioster/` now consistently apply `fx-btn-border-trace` (+ `btn-press ripple` + `fx-btn-border-trace-sm` for small/icon buttons) — only the explicitly-excluded categories (sidebar/drawer/bottom nav items with active state, search result dropdown items, notification list items, wizard stepper buttons with multi-state, status filter chips, patient link list items) are intentionally left without border-trace per the brief
+   406→- ALL 10 view files now use the canonical outer container `<div className="space-y-3 p-3 lg:space-y-5 lg:p-6">` for consistent padding and spacing across mobile (p-3) and desktop (p-6)
+   407→- Lint clean, dev server compiles clean, all changes pushed to GitHub
+   408→- Visually verified end-to-end in both dark and light modes via Agent Browser screenshots + VLM analysis — every verification point passes
+   409→- Orioster HMS is now in its final polished state ready for demo/preview
+   410→

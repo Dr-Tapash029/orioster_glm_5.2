@@ -105,7 +105,7 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="wope-bg relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
+    <div className="wope-bg relative flex min-h-screen flex-col items-center justify-center overflow-x-hidden overflow-y-auto p-4">
       {/* Moving violet light rays */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="wope-light-ray absolute -left-1/4 top-0 h-[200%] w-32 bg-gradient-to-b from-transparent via-violet-400/10 to-transparent" style={{ animationDelay: '0s' }} />
@@ -115,8 +115,8 @@ export function LoginScreen() {
 
       {/* Top brand */}
       <div className="relative mb-6 flex flex-col items-center gap-3 text-center">
-        <div className="wope-logo-glow bg-glow-in flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-2xl">
-          <HeartPulse className="h-9 w-9" />
+        <div className="wope-logo-glow bg-glow-in flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-2xl lg:h-16 lg:w-16">
+          <HeartPulse className="h-7 w-7 lg:h-9 lg:w-9" />
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl text-glow-pulse" style={{ fontFamily: 'var(--font-heading)' }}>
@@ -129,7 +129,7 @@ export function LoginScreen() {
       </div>
 
       {/* Auth card with Sign In / Sign Up tabs */}
-      <div className="glass-strong section-slide-up relative w-full max-w-md rounded-2xl p-5 sm:p-6" style={{ animationDelay: '0.4s' }}>
+      <div className="glass-strong section-slide-up relative w-full max-w-md overflow-hidden rounded-2xl p-4 sm:p-5 lg:p-6" style={{ animationDelay: '0.4s' }}>
         {/* Tab switcher */}
         <div className="mb-5 flex gap-1 rounded-xl bg-white/5 p-1">
           <button
@@ -236,11 +236,11 @@ function SignInPanel({
               onClick={() => onLogin(s)}
               disabled={signingIn !== null}
               className={cn(
-                'anim-fade-in-up card-lift btn-press ripple fx-btn-border-trace group flex items-center gap-3 p-3 text-left disabled:opacity-50'
+                'anim-fade-in-up card-lift btn-press ripple fx-btn-border-trace group flex items-center gap-2.5 p-2.5 text-left disabled:opacity-50 sm:gap-3 sm:p-3'
               )}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300 sm:h-9 sm:w-9">
                 {ROLE_ICONS[s.role] ?? <Users className="h-5 w-5" />}
               </div>
               <div className="min-w-0 flex-1">
@@ -249,6 +249,7 @@ function SignInPanel({
                   <RoleBadge role={s.role} />
                 </div>
                 <p className="truncate text-[11px] text-slate-500">{s.email}</p>
+                <p className="mt-0.5 hidden truncate text-[10px] text-slate-600 sm:block">{ROLE_DESCRIPTIONS[s.role]}</p>
               </div>
               {signingIn === s.id && (
                 <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-violet-400" />
@@ -305,50 +306,50 @@ function SignUpPanel({
 
       {/* Name */}
       <div>
-        <label className="mb-1 block text-xs text-slate-400">Full Name *</label>
-        <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-          <User className="h-4 w-4 text-slate-500" />
+        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Full Name *</label>
+        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+          <User className="h-4 w-4 flex-shrink-0 text-slate-500" />
           <input
             type="text"
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Dr. Tapash Roy"
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Email */}
       <div>
-        <label className="mb-1 block text-xs text-slate-400">Email *</label>
-        <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-          <Mail className="h-4 w-4 text-slate-500" />
+        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Email *</label>
+        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+          <Mail className="h-4 w-4 flex-shrink-0 text-slate-500" />
           <input
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             placeholder="you@hospital.health"
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Password */}
       <div>
-        <label className="mb-1 block text-xs text-slate-400">Password *</label>
-        <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-          <Lock className="h-4 w-4 text-slate-500" />
+        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Password *</label>
+        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+          <Lock className="h-4 w-4 flex-shrink-0 text-slate-500" />
           <input
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder="••••••••"
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
           />
           <button
             type="button"
             onClick={onTogglePassword}
-            className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple text-slate-500 hover:text-violet-300"
+            className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 flex-shrink-0 items-center justify-center text-slate-500 hover:text-violet-300"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -357,7 +358,7 @@ function SignUpPanel({
 
       {/* Role */}
       <div>
-        <label className="mb-1 block text-xs text-slate-400">Role *</label>
+        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Role *</label>
         <div className="grid grid-cols-2 gap-2">
           {roles.map((r) => (
             <button
@@ -365,13 +366,13 @@ function SignUpPanel({
               type="button"
               onClick={() => onRoleChange(r)}
               className={cn(
-                'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 rounded-lg border p-2.5 text-left transition-all',
+                'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 rounded-lg border p-2 text-left transition-all',
                 role === r
                   ? 'border-violet-500/40 bg-violet-500/15 text-white'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:border-violet-500/20'
               )}
             >
-              <span className="text-violet-400">{ROLE_ICONS[r]}</span>
+              <span className="flex-shrink-0 text-violet-400">{ROLE_ICONS[r]}</span>
               <span className="text-xs font-medium">{r === 'LAB_TECH' ? 'Lab Tech' : r.charAt(0) + r.slice(1).toLowerCase()}</span>
             </button>
           ))}
@@ -380,22 +381,22 @@ function SignUpPanel({
 
       {/* Company */}
       <div>
-        <label className="mb-1 block text-xs text-slate-400">Company / Hospital</label>
-        <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-          <Building2 className="h-4 w-4 text-slate-500" />
+        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Company / Hospital</label>
+        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+          <Building2 className="h-4 w-4 flex-shrink-0 text-slate-500" />
           <input
             type="text"
             value={company}
             onChange={(e) => onCompanyChange(e.target.value)}
             placeholder="e.g. Riverside Medical Center"
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
           />
         </div>
       </div>
 
       <Button
         type="submit"
-        className="fx-btn-border-trace btn-press ripple w-full gap-2"
+        className="fx-btn-border-trace btn-press ripple h-11 w-full gap-2"
       >
         <Sparkles className="h-4 w-4" />
         Create Account

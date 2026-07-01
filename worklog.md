@@ -407,3 +407,284 @@ Stage Summary:
 - Lint clean, dev server compiles clean, all changes pushed to GitHub
 - Visually verified end-to-end in both dark and light modes via Agent Browser screenshots + VLM analysis — every verification point passes
 - Orioster HMS is now in its final polished state ready for demo/preview
+
+---
+Task ID: MOBILE-1
+Agent: Subagent — Mobile UX Optimizer (Z.ai Code)
+Task: Mobile-optimize 3 view files (dashboard, patients-list, appointments) for 390px viewport
+
+Work Log:
+- Read /home/z/my-project/worklog.md (last entry: FIX-FINAL desktop verification with agent-browser)
+- Read the 3 target view files + ui-primitives.tsx (StatCard component) + globals.css (fx-btn-border-trace-sm definition)
+- Verified StatCard is only used in dashboard.tsx → safe to make it responsive globally
+- Verified dev server is healthy on port 3000 (only "✓ Compiled" entries, no errors)
+
+Files modified (4 total):
+
+1. src/components/orioster/ui-primitives.tsx — StatCard made responsive:
+   • Container: p-3.5 → p-3 lg:p-3.5
+   • Icon container: h-9 w-9 mb-2.5 → h-8 w-8 mb-2 lg:h-9 lg:w-9 lg:mb-2.5
+   • Big number: text-2xl → text-xl lg:text-2xl
+   • Label: text-xs mt-1.5 → text-[11px] mt-1 lg:text-xs lg:mt-1.5
+   • Trend: text-[10px] → text-[9px] lg:text-[10px]
+
+2. src/components/orioster/views/dashboard.tsx:
+   • Added `cn` import from @/lib/utils
+   • Added isMobile state + resize listener (for responsive donut innerRadius/outerRadius)
+   • Welcome panel: p-4 lg:p-6 → p-3 lg:p-6; gap-3 → gap-2 lg:gap-3; greeting text-xl → text-lg lg:text-3xl; subtitle wrapped in `hidden sm:block`; "Add Patient" button now uses fx-btn-border-trace-sm
+   • KPI grid: gap-2.5 → gap-2 (mobile) keeping sm:gap-3 lg:gap-4
+   • Charts: area chart h-44 lg:h-64 → h-40 lg:h-64; donut h-40 lg:h-64 → h-36 lg:h-56; chart panel padding p-3.5 → p-3 lg:p-5; axis tick fontSize 9 → 10 (both XAxis and YAxis); donut innerRadius/outerRadius now responsive: {32,52} on mobile, {38,60} on desktop (via isMobile state)
+   • Recent Activities: panel padding p-3.5 → p-3 lg:p-3.5; row gap space-y-1.5 → space-y-1; row padding p-2 → p-2.5; avatar h-8 w-8 text-[10px] → h-9 w-9 text-[11px]; name text-xs → text-sm; complaint text-[10px] → text-[11px]; only render 5 rows but hide the 5th on mobile via `idx === 4 ? 'hidden lg:flex' : 'flex'` (effectively shows 4 on mobile, 5 on desktop)
+
+3. src/components/orioster/views/patients-list.tsx — table → card list conversion on mobile:
+   • "Add Patient" button: fx-btn-border-trace → fx-btn-border-trace fx-btn-border-trace-sm
+   • Empty-state "Add Patient" button: also upgraded to fx-btn-border-trace-sm
+   • Filters container: flex flex-wrap items-center → flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center (search and select stack vertically on mobile)
+   • Search input: added `h-10 text-sm` (better mobile touch target)
+   • Select trigger: w-[150px] → h-10 w-full text-sm sm:w-[150px] (full-width on mobile)
+   • Search container: min-w-[200px] → min-w-0 (prevents overflow on mobile)
+   • Wrapped the existing `<table>` block in `hidden sm:block` container
+   • Added new mobile card list in `sm:hidden` container with `divide-y divide-white/10`:
+     - Each card is a `<button>` with `min-h-[72px]` (touch target)
+     - Top row: avatar (h-10 w-10) + name (text-sm font-medium) + patient ID (text-[11px]) + ArrowRight
+     - Second line: chief complaint (line-clamp-1 text-xs) — only if present
+     - Bottom row: TriageBadge + StatusPill + SyncStatusBadge (flex flex-wrap)
+     - Card uses flex-col gap-2 p-3
+
+4. src/components/orioster/views/appointments.tsx:
+   • "Schedule" trigger button: fx-btn-border-trace → fx-btn-border-trace fx-btn-border-trace-sm
+   • DialogContent: sm:max-w-md → w-[calc(100vw-1.5rem)] max-w-md sm:w-full (full-width on mobile with viewport margin)
+   • All form SelectTrigger/Input: added h-10 text-sm (better mobile touch targets)
+   • Status filter chips: removed py-1, added h-8 → `h-8 rounded-full border px-3 text-xs font-medium`; gap-2 → gap-1.5 sm:gap-2
+   • Appointment grid: `grid gap-3 md:grid-cols-2 xl:grid-cols-3` → `grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3` (single column on mobile with tighter gap)
+   • Card padding: p-4 → p-3 md:p-4
+   • Patient name: font-semibold → text-sm font-medium
+   • Chief complaint: truncate text-sm → line-clamp-1 text-xs
+   • Date/time row: text-sm → text-[11px]; icon h-4 w-4 → h-3.5 w-3.5 flex-shrink-0; added flex-wrap with gap-y-1 for safety
+   • Doctor name: text-sm → text-xs truncate
+   • Status badge: added flex-shrink-0
+   • Action buttons (Start/Complete/Cancel/View): all upgraded from fx-btn-border-trace → fx-btn-border-trace fx-btn-border-trace-sm
+
+Verification:
+- `bun run lint` → EXIT 0, 0 errors, 0 warnings ✓
+- `tail -15 /home/z/my-project/dev.log` → only "✓ Compiled in Nms" entries, no compile errors, no runtime errors ✓
+- All edits preserve the canonical outer container `<div className="space-y-3 p-3 lg:space-y-5 lg:p-6">` for the 3 view files
+- All edits preserve glassmorphism dark purple theme + existing animation classes (card-enter, stagger-N, row-slide, wope-card-hover)
+- Mobile-first responsive classes verified: p-3 → lg:p-5/p-6, h-8/h-9 mobile → lg:h-9, text-[11px]/text-xs mobile → lg:text-xs/text-sm
+- Touch targets: 44px (h-11) for primary buttons, 36px+ for icon buttons and chips (h-8/h-9/h-10), 72px min for patient cards
+
+Stage Summary:
+- Dashboard: welcome panel compact on mobile, KPI cards now p-3 with h-8 icons and text-xl numbers (vs cramped p-3.5/h-9/text-2xl), charts readable (axis fontSize 10, donut sized to fit h-36 container with innerRadius=32/outerRadius=52 on mobile), recent activities rows now h-9 avatar + text-sm name + text-[11px] complaint + p-2.5 padding, only 4 items on mobile
+- Patients list: table completely replaced with tappable card list on mobile (sm:hidden), each card min-h-[72px] showing avatar+name+ID, complaint, and triage+status+sync badges; desktop keeps the original table (hidden sm:block); search bar h-10 text-sm; status select full-width below search on mobile
+- Appointments: cards now grid-cols-1 gap-2 on mobile with p-3 padding; patient name text-sm font-medium; date/time text-[11px]; doctor name text-xs; all action buttons use fx-btn-border-trace-sm with h-7 text-xs; schedule dialog full-width on mobile with stacked form fields and h-10 inputs; status chips h-8 text-xs wrapping on mobile
+- StatCard component in ui-primitives.tsx made fully responsive (only used in dashboard so change is safe)
+- Lint clean, dev server compiles clean
+- Orioster HMS now optimized for 390px mobile viewports across all 3 target views
+
+---
+Task ID: MOBILE-2
+Agent: Mobile Optimization Subagent (Z.ai Code)
+Task: Mobile-optimize 4 view files (lab-reports, invoices, profile-views, login-screen) for compact mobile layout, proper touch targets, and responsive text/padding
+
+Work Log:
+- Read worklog.md to understand prior work (Tasks 1, 7, 5, FINAL, FIX-1, THEME-2, THEME-1, alignment pass)
+- Read full contents of all 4 target files
+- Confirmed `wope-scroll` exists in globals.css line 452; `orio-scroll` referenced in lab-reports.tsx does NOT exist — fixed by switching to `wope-scroll` per brief
+- Verified all referenced CSS classes (`fx-btn-border-trace`, `fx-btn-border-trace-sm`, `card-lift`, `glass-input`, `wope-logo-glow`, `wope-light-ray`) exist in globals.css
+
+File-by-file changes:
+
+1. **lab-reports.tsx**:
+   - Report cards grid: `grid gap-3 md:grid-cols-2` → `grid grid-cols-1 gap-2 md:grid-cols-2`
+   - Card padding: `p-4` → `p-3 lg:p-4`; icon got `flex-shrink-0`; title got `truncate`
+   - Patient link: `text-sm` → `text-xs lg:text-sm`
+   - Parameter table: `overflow-x-auto orio-scroll` → `overflow-x-auto wope-scroll`; added `min-w-[280px]`; `text-xs` → `text-[11px] lg:text-xs`
+   - Column headers shortened: `Parameter` → `Param`; added `pr-2` spacing
+   - AI feedback block: `p-3` → `p-2.5`; header & summary → `text-[11px] lg:text-xs`
+   - Advice list: flex layout with min-w-0 for proper wrapping
+   - Dialog: `sm:max-w-2xl` → `w-[calc(100vw-2rem)] max-w-2xl p-4 sm:p-6`; title `text-base lg:text-lg`
+   - Parameter input grid: `grid gap-3 sm:grid-cols-2` → `grid grid-cols-1 gap-3 sm:grid-cols-2`
+   - Parameter inputs: replaced cramped `grid-cols-[1fr_120px_100px]` row with per-parameter card layout, full-width `h-10` Input
+   - Generate button: confirmed `w-full`
+
+2. **invoices.tsx**:
+   - Invoice cards grid: `grid gap-3 md:grid-cols-2 xl:grid-cols-3` → `grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3`
+   - Card padding: `p-4` → `p-3 lg:p-4`; icon `flex-shrink-0`; invoice number & patient link `text-sm` → `text-xs lg:text-sm`
+   - Line items preview: `slice(0, 4)` → `slice(0, 3)`; `text-xs` → `text-[11px]`; "+4 more" → "+3 more"
+   - Totals: container `text-xs` → `text-[11px]`; Total value got `text-sm font-bold` (larger emphasis)
+   - Status badge: added `flex-shrink-0`
+   - Print button: `fx-btn-border-trace` → `fx-btn-border-trace fx-btn-border-trace-sm`
+   - Dialog: `sm:max-w-2xl` → `w-[calc(100vw-2rem)] max-w-2xl p-4 sm:p-6`
+   - Line item grid: `grid-cols-[1fr_70px_90px_32px] items-center` → `grid-cols-1 gap-1.5 sm:grid-cols-[1fr_70px_90px_32px] sm:items-center` (stacks on mobile)
+   - Inputs in dialog: `h-8` → `h-9 sm:h-8` (40px touch target on mobile); added placeholders
+   - Trash button: `h-8 w-8` → `h-9 w-9 sm:h-8 sm:w-8` with `fx-btn-border-trace-sm`
+
+3. **profile-views.tsx** (4 views):
+   - **MyProfileView**: Avatar `h-24 w-24` → `h-20 w-20 lg:h-24 lg:w-24`; profile card padding `p-5` → `p-3 lg:p-5`; name `text-lg` → `text-base lg:text-lg`; body text `text-sm` → `text-xs lg:text-sm`; labels `text-xs` → `text-[11px] lg:text-xs`; form inputs `py-2.5` → `h-10` (40px touch); Save Changes button got `h-11` (44px primary); added `min-w-0` to inputs
+   - **MyCompanyView**: Logo `h-16 w-16` → `h-14 w-14 lg:h-16 lg:w-16` with `flex-shrink-0`; company name `text-lg` → `text-base lg:text-lg`; stat grid `grid-cols-2 gap-3` → `grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3`; stat card padding `p-4` → `p-3 lg:p-4`; stat numbers `text-2xl` → `text-xl lg:text-2xl`; stat labels `text-xs` → `text-[11px] lg:text-xs`; company info section `p-5` → `p-3 lg:p-5`
+   - **MyTasksView**: Stat grid `grid-cols-3 gap-3` → `grid-cols-3 gap-2 lg:gap-3` (kept 3 cols since exactly 3 items — 2/4 col pattern would break); task rows got `min-h-12` (48px), `p-3` → `p-2.5 lg:p-3`; toggle button got `h-6 w-6 min-h-6 min-w-6` per brief; task title `text-sm` → `text-xs lg:text-sm`; priority badge got `flex-shrink-0`
+   - **MyDocumentsView**: Doc rows got `min-h-12` (48px), `p-3` → `p-2.5 lg:p-3`; doc icon `h-10 w-10` → `h-9 w-9` with `flex-shrink-0`; doc name `text-sm` → `text-xs lg:text-sm`; download button `h-8 w-8` → `h-9 w-9` (36px touch target) with `flex-shrink-0`
+
+4. **login-screen.tsx**:
+   - Outer container: `overflow-hidden` → `overflow-x-hidden overflow-y-auto` (no horizontal scroll, still allow vertical)
+   - Auth card: `p-5 sm:p-6` → `p-4 sm:p-5 lg:p-6`; added `overflow-hidden` to clamp inner content
+   - Logo: `h-16 w-16` → `h-14 w-14 lg:h-16 lg:w-16`; HeartPulse `h-9 w-9` → `h-7 w-7 lg:h-9 lg:w-9`
+   - Tab buttons: confirmed `py-2 text-sm` with `fx-btn-border-trace fx-btn-border-trace-sm` (already correct)
+   - Staff cards: `gap-3 p-3` → `gap-2.5 p-2.5 sm:gap-3 sm:p-3` (more compact mobile)
+   - Staff card icon: `h-9 w-9` → `h-8 w-8 sm:h-9 sm:w-9`
+   - Staff card description: ADDED `<p className="mt-0.5 hidden truncate text-[10px] text-slate-600 sm:block">{ROLE_DESCRIPTIONS[s.role]}</p>` (hidden on mobile, visible on desktop — more informative on larger screens)
+   - Sign Up form labels: `text-xs` → `text-[11px] lg:text-xs`
+   - All glass-input rows: `py-2.5` → `h-10` (40px touch target); inputs got `min-w-0`
+   - Password eye toggle: bare → `flex h-8 w-8 flex-shrink-0 items-center justify-center`
+   - Role selector buttons: `p-2.5` → `p-2 text-xs` per brief; role icon got `flex-shrink-0`
+   - Create Account button: added `h-11` (44px primary)
+
+General mobile rules applied across all 4 files:
+- Min touch target: `h-9` (36px) for icons, `h-11` (44px) for primary CTAs
+- Body text: `text-xs` (12px) mobile, `text-sm` (14px) desktop
+- Card padding: `p-3` mobile, `lg:p-4`/`lg:p-5` desktop
+- `truncate` for overflow text, `min-w-0` on flex text children
+- `flex-shrink-0` for avatars/badges/icons to prevent squeezing
+
+Verification:
+- `bun run lint` → exit 0, 0 errors, 0 warnings ✓
+- `tail -10 /home/z/my-project/dev.log` → only `✓ Compiled in Nms` entries after my changes; old errors at lines 1 & 55 confirmed to be from before this task ✓
+- HTTP smoke tests: `GET /` → 200 (351ms), `GET /api/auth` → 200 (8ms), `GET /api/lab-reports` → 200 (104ms), `GET /api/invoices` → 200 (123ms) ✓
+
+Stage Summary:
+- All 4 target view files mobile-optimized per the MOBILE-2 brief
+- Lab reports: responsive card grid, scrollable parameter table with shorter headers, full-width parameter inputs on mobile
+- Invoices: responsive 1/2/3-col grid, max 3 line items on mobile, emphasized totals, compact print button
+- All 4 profile views: consistent mobile padding, proper text hierarchy, 40px touch-target form inputs, 48px min-height task/document rows
+- Login screen: more compact staff cards on mobile with role descriptions visible only on desktop, smaller logo on mobile, 40px touch-target inputs, properly contained light rays (overflow-x-hidden)
+- Lint clean, dev server compiles clean, all HTTP endpoints return 200
+
+---
+Task ID: MOBILE-3
+Agent: Mobile Optimization Subagent (Z.ai Code)
+Task: Mobile-optimize 4 view files (patient-entry-wizard, orio-ai, ai-hub, patient-detail) for compact mobile layout with proper touch targets, mobile-friendly steppers/tabs, and card-based table alternatives
+
+Work Log:
+- Read /home/z/my-project/worklog.md (last entries: MOBILE-1 + MOBILE-2 mobile optimizations on dashboard, patients-list, appointments, lab-reports, invoices, profile-views, login-screen)
+- Read all 4 target files in full to inventory existing structure and class usage
+- Verified glass-strong, glass-subtle, fx-btn-border-trace-sm, wope-scroll, glow-violet CSS utilities exist in globals.css
+- Verified shadcn Input default is h-9, SelectTrigger has data-slot="select-trigger" attribute (used for descendant selector targeting)
+
+File-by-file changes:
+
+1. **patient-entry-wizard.tsx** (~2530 lines, 10-step wizard):
+   - Header: h1 text-xl → text-base sm:text-xl lg:text-2xl; subtitle text-sm → text-[11px] sm:text-sm; added overflow-x-hidden + min-w-0 to header div
+   - Step content GlassPanel: p-5 sm:p-6 → p-3 lg:p-5
+   - Step header: icon h-10 w-10 → h-9 w-9 lg:h-10 lg:w-10; title text-base → text-sm sm:text-base lg:text-lg; description text-xs sm:text-sm → text-[11px] leading-snug lg:text-sm
+   - ProgressRail: completely refactored from horizontal pills to vertical circles + labels:
+     * Each step is h-7 w-7 circle with step number (or Check icon when done)
+     * Current step highlighted with violet bg; completed steps emerald
+     * Below circle: max-w-[52px] truncate text-[10px] label
+     * Container: flex gap-2.5 pb-1 in overflow-x-auto wope-scroll (replaced shadcn ScrollArea)
+     * Removed ScrollArea import (no longer used)
+   - Field component: added `[&_input]:h-10 [&_input]:text-sm [&_[data-slot=select-trigger]]:h-10 [&_textarea]:min-h-10` so all wrapped inputs/selects/textareas get 40px touch target automatically
+   - StepFooter: flex items-center justify-end → flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end
+   - ContinueButton: added fx-btn-border-trace-sm + h-10 + w-full sm:w-auto + whitespace-nowrap
+   - Back button: added fx-btn-border-trace-sm + h-9 + whitespace-nowrap
+   - StepGeneral: grid gap-4 → grid gap-3 lg:gap-4; consent panel min-w-0 added
+   - StepComplaint: grid gap-4 → grid gap-3 sm:grid-cols-2 lg:gap-4
+   - StepHistory: tags got whitespace-nowrap; header text-sm → text-xs lg:text-sm
+   - StepMedications: card p-3 → p-2.5 sm:p-3; grid gap-2.5 → grid gap-2 sm:grid-cols-[1.5fr_1fr_1fr_auto]; remove button h-9 w-9 → h-8 w-8 with flex-shrink-0; wrapped in flex justify-end container; add medication button got fx-btn-border-trace-sm + whitespace-nowrap
+   - StepVitals: grid gap-4 sm:grid-cols-2 lg:grid-cols-3 → grid grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-4; added normal-range hints to each Field (Temp 36.5–37.5, BP sys 90–120, BP dia 60–80, HR 60–100, SpO₂ 95–100); triage panel label text-sm → text-xs lg:text-sm
+   - StepAllergies: card p-3 → p-2.5 sm:p-3; remove button h-9 w-9 → h-8 w-8 flex-shrink-0; "No known allergies" button text → "NKA" (more compact); add allergy + NKA buttons got fx-btn-border-trace-sm + whitespace-nowrap; grid gap-2.5 → gap-2
+   - StepDoctor: grid gap-4 → gap-3 sm:grid-cols-2 lg:gap-4; appointment summary text-sm → text-xs lg:text-sm
+   - StepSummary (Step 8): firewall banner p-4 → p-3 lg:p-4; icon h-5 w-5 → h-4 w-4 lg:h-5 lg:w-5; description text-xs → text-[11px] leading-snug lg:text-xs; summary output pre: text-[12px] → text-[11px] lg:text-xs; compression ratio p-4 → p-3 lg:p-4; percent text-2xl → text-xl lg:text-2xl; loading panel p-6 → p-4 lg:p-6; regenerate button got fx-btn-border-trace-sm + whitespace-nowrap; error row wrapped with min-w-0 + flex-1 to prevent overflow
+   - StepNotify (Step 9): AI banner p-4 → p-3 lg:p-4; Sparkles icon h-5 w-5 → h-4 w-4 lg:h-5 lg:w-5; AI output card p-4 → p-3 lg:p-4; summary text-sm → text-[13px] lg:text-sm; advice bullets got min-w-0 + flex-shrink-0; queued panel p-4 → p-3 lg:p-4; queued description text-xs → text-[11px] leading-snug lg:text-xs; retry buttons got fx-btn-border-trace-sm + whitespace-nowrap; blocked panel p-4 → p-3 lg:p-4
+   - StepReview (Step 10): checklist panel p-4 → p-3 lg:p-4; checklist items p-3 → p-2.5 min-h-[40px] lg:p-3 with gap-2.5 lg:gap-3; item label text-sm → text-xs lg:text-sm; summary card p-4 → p-3 lg:p-4; summary rows text-xs → text-[11px] sm:grid-cols-2 lg:text-xs; submit button: added h-11 + w-full + whitespace-nowrap sm:w-auto
+   - SummaryRow helper: value truncate added (prevents overflow)
+
+2. **orio-ai.tsx** (~990 lines):
+   - Header GlassPanel: p-5 sm:p-6 → p-4 lg:p-6; icon h-11 w-11 → h-10 w-10 lg:h-11 lg:w-11; Sparkles h-6 w-6 → h-5 w-5 lg:h-6 lg:w-6; h1 text-xl sm:text-2xl → text-base sm:text-lg lg:text-2xl; subtitle text-sm → text-[11px] lg:text-sm; min-w-0 + flex-shrink-0 added throughout
+   - Patient selector + firewall grid: gap-4 → gap-3 lg:gap-4
+   - Patient info card: p-4 sm:p-5 → p-3 lg:p-4; chief complaint got truncate + min-w-0
+   - Firewall status panel: p-4 sm:p-5 → p-3 lg:p-4; badges got whitespace-nowrap; warning p-3 → p-3 lg:p-4; firewall active text-[11px] → text-[11px] lg:text-xs
+   - AI task panel: p-4 sm:p-5 → p-3 lg:p-5; tabs container min-w-[560px] → min-w-[480px] lg:min-w-0; tab labels added text-xs lg:text-sm; tab descriptions stripped "Differential"/"Plan"/"Generation" to fit ("Differential Diagnosis", "Treatment Plan", "Prescription"); TabsContent mt-4 → mt-3 lg:mt-4
+   - FirewallWarning: p-4 → p-3 lg:p-4; icon h-10 w-10 → h-9 w-9 lg:h-10 lg:w-10; warning text-sm → text-xs; button got fx-btn-border-trace-sm + h-9 + whitespace-nowrap
+   - PatientPicker combobox: trigger got fx-btn-border-trace-sm + h-10; trigger content span got min-w-0 + flex-shrink-0; PopoverContent w-[380px] → w-[min(380px,calc(100vw-1.5rem))]
+   - DiagnosisPanel: action buttons got fx-btn-border-trace-sm + h-9 + whitespace-nowrap; AI summary card p-4 → p-3 lg:p-4; summary text-sm → text-[13px] lg:text-sm; risk/tier badges wrapped with flex-shrink-0 + flex-wrap; diagnosis list spacing space-y-3 → space-y-2.5 lg:space-y-3; diagnosis card p-4 → p-3 lg:p-4; number circle h-8 w-8 → flex-shrink-0; "Select as confirmed" button got w-full sm:w-auto + fx-btn-border-trace-sm; DisclaimerChip wrapped in [&_div]:text-[10px] lg:[&_div]:text-xs override; confirmed diagnosis chip wrapped with items-start + flex-shrink-0
+   - TreatmentPanel: same action button treatment; summary card p-3 lg:p-4; treatment cards grid gap-4 → gap-2.5 md:gap-4
+   - TreatmentCard helper: p-4 → p-2.5 lg:p-4 (glass-subtle panel per spec); title text-sm → text-xs lg:text-sm; list items text-sm → text-[11px] lg:text-sm; icon got flex-shrink-0
+   - PrescriptionPanel: same action button treatment; prescription table converted to mobile cards (lg:hidden) + desktop table (hidden lg:block); mobile card: drug name truncate text-xs + dosage flex-shrink-0 text-[11px]; desktop table cells text-xs with tabular-nums
+   - InlineLoader: p-4 py-10 → p-3 py-8 lg:p-4 lg:py-10; text-sm → text-xs lg:text-sm; loader icon got flex-shrink-0
+   - EmptyTask: p-10 → p-6 lg:p-10; icon h-14 w-14 → h-12 w-12 lg:h-14 lg:w-14; title text-base → text-sm lg:text-base; description text-sm → text-[11px] lg:text-sm
+   - Row helper: label text-xs → text-[11px] lg:text-xs; value text-sm → truncate text-xs lg:text-sm
+   - Footer note text-[11px] → text-[10px] lg:text-[11px]
+
+3. **ai-hub.tsx** (~980 lines):
+   - Header GlassPanel: p-5 sm:p-6 → p-4 lg:p-6; icon h-11 w-11 → h-10 w-10 lg:h-11 lg:w-11; h1 text-xl sm:text-2xl → text-base sm:text-lg lg:text-2xl; subtitle text-sm → text-[11px] lg:text-sm
+   - MiniStat helper: px-3 py-2 → px-2.5 py-1.5 lg:px-3 lg:py-2; label text-[10px] → text-[9px] lg:text-[10px] with truncate; value text-lg → text-base lg:text-lg
+   - Status row: mt-4 grid-cols-2 gap-3 → mt-3 grid-cols-2 gap-2 lg:mt-4 lg:gap-3
+   - Doc cards grid: gap-4 sm:grid-cols-2 xl:grid-cols-4 → grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4 (true 2×2 mobile)
+   - Doc card: p-5 → p-3 lg:p-5; icon h-11 w-11 rounded-xl → h-8 w-8 rounded-lg lg:h-11 lg:w-11 lg:rounded-xl; title text-base → text-xs lg:text-base; description text-sm → text-[10px] leading-snug lg:text-sm; task code text-[11px] → text-[10px] lg:text-[11px]; Generate button: added fx-btn-border-trace-sm + h-9 + w-full + whitespace-nowrap lg:h-auto
+   - Dialog: w-[95vw] max-w-3xl → w-[calc(100vw-1.5rem)] max-w-md lg:max-w-3xl (true mobile sizing)
+   - DialogHeader: px-5 py-4 → px-4 py-3 lg:px-5 lg:py-4; icon h-9 w-9 → h-8 w-8 lg:h-9 lg:w-9; title text-base → text-sm lg:text-base; description text-xs → text-[11px] lg:text-xs
+   - DocWorkflow body: px-5 py-4 → px-4 py-3 lg:px-5 lg:py-4; spacing space-y-4 → space-y-3 lg:space-y-4
+   - Patient info row text-xs → text-[11px] lg:text-xs with min-w-0 + truncate
+   - Firewall check: p-3 text-xs → p-2.5 text-[11px] lg:p-3 lg:text-xs
+   - Generate button: added fx-btn-border-trace-sm + h-10 + w-full + whitespace-nowrap sm:w-auto; Clear button same treatment
+   - Loading inline: p-4 py-10 → p-3 py-8 lg:p-4 lg:py-10; loader icon got flex-shrink-0; text sizes scaled for mobile
+   - Save actions: flex items-center justify-between → flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between; Save button: added w-full lg:w-auto + fx-btn-border-trace-sm + whitespace-nowrap
+   - LabReportConfig: p-4 → p-3 lg:p-4; report type select trigger added h-10; params grid gap-3 sm:grid-cols-2 → grid-cols-1 gap-2 sm:grid-cols-2 lg:gap-3; param input h-8 → h-10; params badge got whitespace-nowrap
+   - ResultDisplay common header: p-4 → p-3 lg:p-4; summary text-sm → text-[13px] lg:text-sm; risk/tier badges wrapped with flex-shrink-0 + flex-wrap
+   - Invoice table: converted to mobile list cards (lg:hidden) + desktop table (hidden lg:block); mobile card shows description + amount prominently with Qty/Unit secondary; mobile totals row included
+   - Lab report table: same mobile list / desktop table split; mobile shows parameter + status header then value/unit/ref
+   - Prescription table: same mobile cards / desktop table split; mobile shows drug + dosage header then freq/duration
+   - Certificate panel: p-5 → p-3 lg:p-5; icon h-5 w-5 → h-4 w-4 lg:h-5 lg:w-5 with flex-shrink-0; title text-sm → text-xs lg:text-sm; body text-sm → text-xs lg:text-sm; subsection headers text-xs → text-[11px] lg:text-xs
+   - Advice lists in tables: text-xs → text-[11px] lg:text-xs
+   - PatientPickerInline: trigger got fx-btn-border-trace-sm + h-10; trigger content span got min-w-0 + flex-shrink-0; search Input h-8 → h-9; patient dropdown items text-sm → text-xs lg:text-sm with sub-text text-[11px] → text-[10px] lg:text-[11px]; Lock/ShieldAlert icons got flex-shrink-0
+   - DisclaimerChip wrapped in [&_div]:text-[10px] lg:[&_div]:text-xs override
+   - Footer note text-[11px] → text-[10px] lg:text-[11px]
+
+4. **patient-detail.tsx** (~1050 lines):
+   - Back button: added fx-btn-border-trace-sm + h-9 + whitespace-nowrap
+   - Header GlassPanel: p-5 sm:p-6 → p-3 lg:p-6
+   - Avatar: h-14 w-14 text-lg → h-12 w-12 text-base lg:h-14 lg:w-14 lg:text-lg
+   - Name: text-xl sm:text-2xl → text-base lg:text-xl lg:text-2xl
+   - ID/age line: text-sm → text-[11px] lg:text-sm with flex-wrap; local ID lost the font-mono text-xs specific class (now inherits from container)
+   - Badges container: added flex-wrap (already had it); badges unchanged but inherited flex-shrink-0 from the Badge component default
+   - Created by info: text-xs → text-[11px] lg:text-xs
+   - Tabs container: min-w-[640px] → min-w-[560px] lg:min-w-0; tab labels text-base → text-xs lg:text-sm; "AI Results" → "AI" (compact for mobile); TabsContent mt-4 → mt-3 lg:mt-4
+   - OverviewTab: grid gap-4 → gap-3 lg:gap-4; demographics grid sm:grid-cols-2 → grid-cols-1 sm:grid-cols-2 lg:gap-4; demographics card p-5 → p-3 lg:col-span-2 lg:p-5; clinical snapshot p-5 → p-3 lg:p-5; section labels text-xs → text-[11px] lg:text-xs; chief complaint text-sm → truncate text-xs lg:text-sm; history badges text-[11px] → text-[10px] lg:text-[11px]; privacy firewall panel p-5 → p-3 lg:p-5; local summary output text-sm font-mono → text-[11px] font-mono break-words lg:text-sm; "Open Patient Entry Wizard" button got fx-btn-border-trace-sm + h-9 + whitespace-nowrap; step-8 incomplete icon h-5 w-5 → h-4 w-4 lg:h-5 lg:w-5
+   - VitalsTab: completely converted to mobile cards (lg:hidden) + desktop table (hidden lg:block):
+     * Mobile card: triage badge + timestamp on top, 2-col grid of Temp/BP/HR/SpO₂/Weight with label/value rows
+     * All values text-[11px] with tabular-nums for alignment
+     * Both mobile and desktop wrapped in GlassPanel p-3 lg:p-5
+   - AiResultsTab: spacing space-y-4 → space-y-3 lg:space-y-4
+   - AiResultCard: p-4 sm:p-5 → p-3 lg:p-5; header items-start gap-3 → min-w-0 items-start gap-2.5 lg:gap-3; task label text-base → text-sm; timestamp text-xs → text-[11px] lg:text-xs; badges wrapped with flex-shrink-0 + flex-wrap; summary text-sm → text-[13px] lg:text-sm; confidence label text-xs → text-[11px] lg:text-xs; rich expanded content space-y-3 → space-y-2.5 lg:space-y-3; diagnosis items text-sm → text-[11px] lg:text-sm; prescription table in rich view also split into mobile cards (lg:hidden) + desktop table (hidden lg:block); lab analysis items text-xs → text-[11px]; DisclaimerChip wrapped in [&_div]:text-[10px] lg:[&_div]:text-xs; Show details button got fx-btn-border-trace-sm + h-8 + whitespace-nowrap; model text-[11px] → text-[10px] lg:text-[11px]
+   - LabReportsTab: spacing space-y-4 → space-y-3 lg:space-y-4; report card p-4 sm:p-5 → p-3 lg:p-5; icon h-5 w-5 → h-4 w-4 lg:h-5 lg:w-5 with flex-shrink-0; title text-base → text-sm; timestamp text-xs → text-[11px] lg:text-xs; status badges got text-[10px] + flex-shrink-0; params table split into mobile list cards (lg:hidden) + desktop table (hidden lg:block); mobile param card: name + status header, value/unit/ref secondary, optional note; AI feedback p-3 → p-2.5 lg:p-3 with text-[11px] lg:text-xs; DisclaimerChip wrapped
+   - InvoicesTab: spacing space-y-4 → space-y-3 lg:space-y-4; invoice card p-4 sm:p-5 → p-3 lg:p-5; icon h-5 w-5 → h-4 w-4 lg:h-5 lg:w-5 with flex-shrink-0; invoice number text-base → text-sm; timestamp text-xs → text-[11px] lg:text-xs; line items table split into mobile list (lg:hidden) + desktop table (hidden lg:block); mobile invoice item: description + amount header, qty/unit secondary; totals text-sm → text-[11px] lg:text-sm with smaller gap on mobile
+   - AppointmentsTab: spacing space-y-4 → space-y-3 lg:space-y-4; appt grid gap-3 sm:grid-cols-2 → gap-2 sm:grid-cols-2 lg:gap-3; appt card p-4 → p-3 lg:p-4; doctor avatar h-10 w-10 text-xs → h-9 w-9 text-[10px] lg:h-10 lg:w-10 lg:text-xs with flex-shrink-0; doctor name text-sm → truncate text-xs lg:text-sm; role text-xs → text-[11px] lg:text-xs; date/time text-sm → text-[11px] lg:text-sm with flex-shrink-0 icon; reason text-xs → text-[10px] lg:text-xs
+   - Demographic helper: label text-xs → text-[11px] lg:text-xs; value text-sm → text-xs lg:text-sm
+   - ListItems helper: text-sm → text-[11px] lg:text-sm
+   - EmptyState helper: p-10 → p-6 lg:p-10; icon h-14 w-14 → h-12 w-12 lg:h-14 lg:w-14; title text-base → text-sm lg:text-base; description text-sm → text-[11px] lg:text-sm
+
+General mobile rules applied across all 4 files:
+- Min touch target: h-8 (32px) for icon buttons, h-9 (36px) for small action buttons, h-10 (40px) for inputs/selects/CTAs, h-11 (44px) for primary submit
+- Body text: text-[11px] (11px) mobile, lg:text-sm (14px) desktop for non-critical text
+- Card padding: p-3 mobile, lg:p-4/lg:p-5/lg:p-6 desktop
+- Section spacing: space-y-3 mobile, lg:space-y-4/lg:space-y-5 desktop
+- truncate for overflow text, min-w-0 on flex text children, flex-shrink-0 for avatars/badges/icons, whitespace-nowrap on buttons
+- All horizontal tab/stepper containers use overflow-x-auto wope-scroll
+- DisclaimerChip text-[10px] mobile override via [&_div]:text-[10px] lg:[&_div]:text-xs wrapper (DisclaimerChip in ui-primitives.tsx stays text-xs globally)
+- Tables converted to mobile card lists (lg:hidden) + desktop tables (hidden lg:block) for prescription, lab parameters, invoice line items, vitals history
+
+Verification:
+- `bun run lint` → EXIT 0, 0 errors, 0 warnings ✓
+- `tail -10 /home/z/my-project/dev.log` → only "✓ Compiled in Nms" entries, no compile errors ✓
+- Cleaned up duplicate Tailwind padding classes (e.g. `lg:p-5 lg:p-6`) that occurred from sequential MultiEdit operations
+- All outer containers preserve canonical `<div className="space-y-3 p-3 lg:space-y-5 lg:p-6">` pattern
+- All glassmorphism theme classes (glass-strong, glass-subtle, glow-violet) preserved
+- All fx-btn-border-trace + btn-press + ripple patterns preserved with fx-btn-border-trace-sm added for mobile-sized buttons
+
+Stage Summary:
+- All 4 target view files mobile-optimized per the MOBILE-3 brief
+- Patient Entry Wizard: 10-step wizard now has circle-based horizontal stepper on mobile, properly sized form fields (h-10 touch targets via cascading selector), all 10 steps have mobile-friendly padding/spacing, navigation buttons are full-width stacked on mobile, submit button is h-11 (44px) full-width on mobile
+- Orio AI: patient selector trigger is h-10, AI task tabs scroll horizontally with text-xs labels, diagnosis/treatment/prescription cards all p-3 mobile, prescription table converts to mobile cards, disclaimer text shrinks to text-[10px] on mobile
+- AI Hub: doc cards in 2×2 grid on mobile with smaller icons + text-xs titles, dialog is properly sized for mobile (max-w-md), all result tables convert to mobile cards, lab report parameters use grid-cols-1 on mobile with h-10 inputs, save button is full-width on mobile
+- Patient Detail: header avatar h-12 w-12 mobile, 6-tab layout scrolls horizontally with text-xs labels and compact tab names, all 6 tabs (Overview/Vitals/AI/Labs/Invoices/Appointments) have mobile-optimized card layouts with p-3 padding, vitals table converted to mobile cards, all other tables split into mobile list + desktop table, back button is fx-btn-border-trace-sm
+- Lint clean, dev server compiles clean, all changes ready for visual verification

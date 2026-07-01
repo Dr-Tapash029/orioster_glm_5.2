@@ -167,29 +167,29 @@ export function OrioAiView() {
   return (
     <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* Header */}
-      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
-              <Sparkles className="h-6 w-6" />
+      <GlassPanel variant="strong" className="overflow-hidden p-4 lg:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 lg:gap-4">
+          <div className="flex min-w-0 items-start gap-2.5 lg:gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300 lg:h-11 lg:w-11">
+              <Sparkles className="h-5 w-5 lg:h-6 lg:w-6" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Orio AI — Clinical Decision Support</h1>
-              <p className="mt-0.5 max-w-2xl text-sm text-slate-400">
+            <div className="min-w-0">
+              <h1 className="text-base font-bold tracking-tight sm:text-lg lg:text-2xl">Orio AI — Clinical Decision Support</h1>
+              <p className="mt-0.5 max-w-2xl text-[11px] text-slate-400 lg:text-sm">
                 Advisory-only clinical intelligence. AI receives only de-identified{' '}
-                <code className="rounded bg-white/5 px-1 py-0.5 text-[11px]">patient_summary_v1</code>. The doctor always has the final say.
+                <code className="rounded bg-white/5 px-1 py-0.5 text-[10px] lg:text-[11px]">patient_summary_v1</code>. The doctor always has the final say.
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300">
+          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300 whitespace-nowrap">
             <ShieldAlert className="h-3 w-3" /> Advisory Mode
           </Badge>
         </div>
       </GlassPanel>
 
       {/* Patient selector + firewall status */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <GlassPanel className="p-4 sm:p-5 lg:col-span-1">
+      <div className="grid gap-3 lg:grid-cols-3 lg:gap-4">
+        <GlassPanel className="p-3 lg:p-4 lg:col-span-1">
           <SectionHeader title="Select Patient" subtitle="Choose a patient for AI assistance" />
           <div className="mt-3">
             <PatientPicker
@@ -199,7 +199,7 @@ export function OrioAiView() {
             />
           </div>
           {selected && (
-            <div className="mt-4 space-y-2.5 border-t border-white/10 pt-3">
+            <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
               <Row label="Local ID" value={selected.localId} />
               <Row label="Age / Sex" value={`${selected.age ?? '?'}y · ${selected.gender.toLowerCase()}`} />
               <Row label="Status" value={selected.status} />
@@ -211,50 +211,50 @@ export function OrioAiView() {
                 <span className="text-xs text-slate-400">Sync</span>
                 <SyncStatusBadge status={selected.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="text-xs text-slate-400">Chief Complaint</span>
-                <p className="mt-0.5 text-sm font-medium">{selected.chiefComplaint ?? '—'}</p>
+                <p className="mt-0.5 truncate text-sm font-medium">{selected.chiefComplaint ?? '—'}</p>
               </div>
             </div>
           )}
         </GlassPanel>
 
         {/* Firewall status panel */}
-        <GlassPanel className="p-4 sm:p-5 lg:col-span-2">
+        <GlassPanel className="p-3 lg:p-4 lg:col-span-2">
           <SectionHeader
             title="Privacy Firewall"
             subtitle="AI is hard-disabled until patient_summary_v1 exists"
             action={
               firewallOk ? (
-                <Badge className="gap-1.5 bg-violet-500/15 text-violet-300 border-violet-500/30 glow-violet">
+                <Badge className="gap-1.5 bg-violet-500/15 text-violet-300 border-violet-500/30 glow-violet whitespace-nowrap">
                   <Lock className="h-3 w-3" /> Firewall Active
                 </Badge>
               ) : (
-                <Badge variant="outline" className="gap-1.5 border-red-500/40 bg-red-500/10 text-red-400">
+                <Badge variant="outline" className="gap-1.5 border-red-500/40 bg-red-500/10 text-red-400 whitespace-nowrap">
                   <ShieldAlert className="h-3 w-3" /> AI Disabled
                 </Badge>
               )
             }
           />
           {!selected ? (
-            <p className="mt-4 text-sm text-slate-400">Select a patient to view firewall status.</p>
+            <p className="mt-3 text-xs text-slate-400 lg:mt-4 lg:text-sm">Select a patient to view firewall status.</p>
           ) : !firewallOk ? (
             <FirewallWarning onGoToWizard={() => {
               setActivePatient(selected.id)
               setView('patient-entry')
             }} />
           ) : (
-            <div className="mt-4 space-y-3">
+            <div className="mt-3 space-y-3 lg:mt-4">
               <div className="rounded-xl border border-violet-500/25 bg-violet-500/5 p-3 glow-violet">
                 <div className="flex items-center gap-2 text-xs font-semibold text-violet-300">
                   <CheckCircle2 className="h-4 w-4" />
                   patient_summary_v1 generated
                 </div>
-                <p className="mt-1.5 line-clamp-3 text-[11px] leading-relaxed text-slate-400">
+                <p className="mt-1.5 line-clamp-3 text-[11px] leading-relaxed text-slate-400 lg:text-xs">
                   {selected.localSummary}
                 </p>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-400 lg:text-xs">
                 Raw PHI never leaves the device. The AI receives only the compressed, de-identified summary above. Outputs are advisory and must be reviewed by a human professional.
               </p>
             </div>
@@ -264,23 +264,23 @@ export function OrioAiView() {
 
       {/* AI task panel — only when firewall active */}
       {selected && firewallOk && (
-        <GlassPanel className="p-4 sm:p-5">
+        <GlassPanel className="p-3 lg:p-5">
           <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-            <div className="overflow-x-auto orio-scroll">
-              <TabsList className="grid w-full min-w-[560px] grid-cols-3">
-                <TabsTrigger value="DIAGNOSIS" className="gap-1.5">
+            <div className="overflow-x-auto wope-scroll">
+              <TabsList className="grid w-full min-w-[480px] grid-cols-3 lg:min-w-0">
+                <TabsTrigger value="DIAGNOSIS" className="gap-1.5 text-xs lg:text-sm">
                   <Stethoscope className="h-3.5 w-3.5" /> Differential Diagnosis
                 </TabsTrigger>
-                <TabsTrigger value="TREATMENT" className="gap-1.5">
+                <TabsTrigger value="TREATMENT" className="gap-1.5 text-xs lg:text-sm">
                   <ClipboardList className="h-3.5 w-3.5" /> Treatment Plan
                 </TabsTrigger>
-                <TabsTrigger value="RX_GENERATION" className="gap-1.5">
+                <TabsTrigger value="RX_GENERATION" className="gap-1.5 text-xs lg:text-sm">
                   <Pill className="h-3.5 w-3.5" /> Prescription
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="DIAGNOSIS" className="mt-4">
+            <TabsContent value="DIAGNOSIS" className="mt-3 lg:mt-4">
               <DiagnosisPanel
                 loading={loadingTask === 'DIAGNOSIS'}
                 result={cache.DIAGNOSIS}
@@ -291,7 +291,7 @@ export function OrioAiView() {
               />
             </TabsContent>
 
-            <TabsContent value="TREATMENT" className="mt-4">
+            <TabsContent value="TREATMENT" className="mt-3 lg:mt-4">
               <TreatmentPanel
                 loading={loadingTask === 'TREATMENT'}
                 result={cache.TREATMENT}
@@ -302,7 +302,7 @@ export function OrioAiView() {
               />
             </TabsContent>
 
-            <TabsContent value="RX_GENERATION" className="mt-4">
+            <TabsContent value="RX_GENERATION" className="mt-3 lg:mt-4">
               <PrescriptionPanel
                 loading={loadingTask === 'RX_GENERATION'}
                 result={cache.RX_GENERATION}
@@ -315,7 +315,7 @@ export function OrioAiView() {
       )}
 
       {/* Footer note */}
-      <p className="px-1 text-center text-[11px] text-slate-400">
+      <p className="px-1 text-center text-[10px] text-slate-400 lg:text-[11px]">
         ORIO AI · 4-tier failover · Privacy firewall enforced server-side · {user?.name ?? 'Doctor'}
       </p>
     </div>
@@ -328,19 +328,19 @@ function FirewallWarning({ onGoToWizard }: { onGoToWizard: () => void }) {
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mt-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4"
+      className="mt-3 rounded-xl border border-red-500/30 bg-red-500/5 p-3 lg:mt-4 lg:p-4"
     >
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-400">
-          <ShieldAlert className="h-5 w-5" />
+      <div className="flex items-start gap-2.5 lg:gap-3">
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-400 lg:h-10 lg:w-10">
+          <ShieldAlert className="h-4 w-4 lg:h-5 lg:w-5" />
         </div>
-        <div className="flex-1">
-          <p className="font-semibold text-red-400">AI is disabled — patient_summary_v1 not generated</p>
-          <p className="mt-1 text-sm text-slate-400">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-red-400">AI is disabled — patient_summary_v1 not generated</p>
+          <p className="mt-1 text-xs text-slate-400">
             Complete the Patient Entry Wizard through <span className="font-medium">Step 8 (Local Summary)</span> first.
             The privacy firewall requires a de-identified summary before any AI task can run.
           </p>
-          <Button size="sm" className="fx-btn-border-trace btn-press ripple mt-3 gap-1.5" onClick={onGoToWizard}>
+          <Button size="sm" className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple mt-3 h-9 gap-1.5 whitespace-nowrap" onClick={onGoToWizard}>
             <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
           </Button>
         </div>
@@ -376,20 +376,20 @@ function PatientPicker({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="fx-btn-border-trace btn-press ripple w-full justify-between font-normal"
+          className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-10 w-full justify-between font-normal"
         >
           {selected ? (
-            <span className="flex items-center gap-2 truncate">
+            <span className="flex min-w-0 items-center gap-2">
               <span className="truncate">{selected.fullName}</span>
-              <span className="text-[11px] text-slate-400">· {selected.localId}</span>
+              <span className="flex-shrink-0 text-[11px] text-slate-400">· {selected.localId}</span>
             </span>
           ) : (
             <span className="text-slate-400">Search patient…</span>
           )}
-          <ChevronRight className={cn('h-4 w-4 opacity-50 transition-transform', open && 'rotate-90')} />
+          <ChevronRight className={cn('h-4 w-4 flex-shrink-0 opacity-50 transition-transform', open && 'rotate-90')} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0" align="start">
+      <PopoverContent className="w-[min(380px,calc(100vw-1.5rem))] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search by name, ID, or complaint…"
@@ -445,21 +445,21 @@ function DiagnosisPanel({
   onReset: () => void
 }) {
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="text-base font-semibold">Differential Diagnosis</h3>
-          <p className="text-sm text-slate-400">
+    <div className="space-y-3 lg:space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold lg:text-base">Differential Diagnosis</h3>
+          <p className="text-[11px] text-slate-400 lg:text-sm">
             AI suggests the 3 most probable diagnoses from the de-identified summary.
           </p>
         </div>
         <div className="flex gap-2">
           {result && (
-            <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace btn-press ripple gap-1.5">
+            <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading} className="fx-btn-border-trace btn-press ripple gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-9 gap-1.5 whitespace-nowrap lg:w-auto">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Run AI'}
           </Button>
@@ -475,16 +475,16 @@ function DiagnosisPanel({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-4"
+            className="space-y-3 lg:space-y-4"
           >
             {/* Summary header */}
-            <GlassPanel variant="subtle" className="p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <GlassPanel variant="subtle" className="p-3 lg:p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-slate-400">AI Summary</p>
-                  <p className="mt-1 text-sm">{result.output.summary}</p>
+                  <p className="text-[11px] font-medium text-slate-400 lg:text-xs">AI Summary</p>
+                  <p className="mt-1 text-[13px] lg:text-sm">{result.output.summary}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-shrink-0 flex-wrap items-center gap-1.5">
                   <RiskBadge level={(result.output.risk_level as RiskLevel) ?? 'moderate'} />
                   <TierBadge tier={result.tierUsed} model={result.modelUsed} />
                 </div>
@@ -499,47 +499,47 @@ function DiagnosisPanel({
             </GlassPanel>
 
             {/* Diagnosis list */}
-            <div className="space-y-3">
+            <div className="space-y-2.5 lg:space-y-3">
               {result.output.diagnosis?.slice(0, 3).map((d, i) => {
                 const isConfirmed = confirmedDx === d.condition
                 return (
                   <GlassPanel
                     key={i}
                     variant={isConfirmed ? 'strong' : 'default'}
-                    className={cn('p-4 transition-all', isConfirmed && 'ring-2 ring-primary/50')}
+                    className={cn('p-3 transition-all lg:p-4', isConfirmed && 'ring-2 ring-primary/50')}
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="flex items-start gap-3">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-start gap-2.5 lg:gap-3">
                         <div className={cn(
                           'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold',
                           isConfirmed ? 'bg-violet-500 text-white' : 'bg-violet-500/15 text-violet-300'
                         )}>
                           {i + 1}
                         </div>
-                        <div>
-                          <p className="font-semibold leading-tight">{d.condition}</p>
-                          <p className="mt-1 text-sm text-slate-400">{d.reasoning}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold leading-tight">{d.condition}</p>
+                          <p className="mt-1 text-[11px] text-slate-400 lg:text-sm">{d.reasoning}</p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex flex-shrink-0 items-center gap-2">
                         <span className="text-sm font-bold tabular-nums">{Math.round(d.probability * 100)}%</span>
-                        <Button
-                          size="sm"
-                          variant={isConfirmed ? 'default' : 'outline'}
-                          className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5"
-                          onClick={() => onConfirm(d.condition)}
-                        >
-                          {isConfirmed ? (
-                            <><CheckCircle2 className="h-3.5 w-3.5" /> Confirmed</>
-                          ) : (
-                            <><Stethoscope className="h-3.5 w-3.5" /> Select as confirmed</>
-                          )}
-                        </Button>
                       </div>
                     </div>
-                    <div className="mt-3">
+                    <div className="mt-2.5">
                       <ProbabilityBar value={d.probability} rank={i} />
                     </div>
+                    <Button
+                      size="sm"
+                      variant={isConfirmed ? 'default' : 'outline'}
+                      className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple mt-3 w-full gap-1.5 sm:w-auto"
+                      onClick={() => onConfirm(d.condition)}
+                    >
+                      {isConfirmed ? (
+                        <><CheckCircle2 className="h-3.5 w-3.5" /> Confirmed</>
+                      ) : (
+                        <><Stethoscope className="h-3.5 w-3.5" /> Select as confirmed</>
+                      )}
+                    </Button>
                   </GlassPanel>
                 )
               })}
@@ -550,12 +550,14 @@ function DiagnosisPanel({
               <LimitationsList items={result.output.limitations} />
             )}
 
-            <DisclaimerChip text={result.disclaimer} />
+            <div className="[&_div]:text-[10px] lg:[&_div]:text-xs">
+              <DisclaimerChip text={result.disclaimer} />
+            </div>
 
             {confirmedDx && (
-              <div className="flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-xs">
-                <CheckCircle2 className="h-4 w-4 text-violet-300" />
-                <span>
+              <div className="flex items-start gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-xs">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-300" />
+                <span className="min-w-0">
                   <span className="font-semibold">{confirmedDx}</span> marked as confirmed diagnosis.
                   Proceed to <span className="font-medium">Treatment Plan</span> to generate a plan based on this selection.
                 </span>
@@ -586,21 +588,21 @@ function TreatmentPanel({
   onGoToDiagnosis: () => void
 }) {
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="text-base font-semibold">Treatment Plan</h3>
-          <p className="text-sm text-slate-400">
+    <div className="space-y-3 lg:space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold lg:text-base">Treatment Plan</h3>
+          <p className="text-[11px] text-slate-400 lg:text-sm">
             Requires a confirmed diagnosis selected from the differential step.
           </p>
         </div>
         <div className="flex gap-2">
           {result && (
-            <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace btn-press ripple gap-1.5">
+            <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
               <RefreshCw className="h-3.5 w-3.5" /> Clear
             </Button>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="fx-btn-border-trace btn-press ripple gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading || !confirmedDx} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-9 gap-1.5 whitespace-nowrap">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ClipboardList className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Generate Plan'}
           </Button>
@@ -609,23 +611,22 @@ function TreatmentPanel({
 
       {/* Confirmed diagnosis chip */}
       {confirmedDx ? (
-        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs">
-          <CheckCircle2 className="h-3.5 w-3.5 text-violet-300" />
-          <span className="text-slate-400">Confirmed diagnosis:</span>
-          <span className="font-semibold">{confirmedDx}</span>
+        <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs">
+          <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-violet-300" />
+          <span className="truncate text-slate-400">Confirmed: <span className="font-semibold text-slate-100">{confirmedDx}</span></span>
         </div>
       ) : (
-        <GlassPanel variant="subtle" className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
-            <div>
+        <GlassPanel variant="subtle" className="flex flex-wrap items-center justify-between gap-2 p-3 lg:p-4">
+          <div className="flex min-w-0 items-start gap-2.5 lg:gap-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500 lg:h-5 lg:w-5" />
+            <div className="min-w-0">
               <p className="text-sm font-medium">No confirmed diagnosis selected</p>
-              <p className="text-xs text-slate-400">
+              <p className="mt-0.5 text-[11px] text-slate-400 lg:text-xs">
                 Run Differential Diagnosis and select a condition first. The treatment plan is contextual to the doctor-confirmed diagnosis.
               </p>
             </div>
           </div>
-          <Button size="sm" variant="outline" onClick={onGoToDiagnosis} className="fx-btn-border-trace btn-press ripple gap-1.5">
+          <Button size="sm" variant="outline" onClick={onGoToDiagnosis} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
             <Stethoscope className="h-3.5 w-3.5" /> Go to Diagnosis
           </Button>
         </GlassPanel>
@@ -640,16 +641,16 @@ function TreatmentPanel({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-4"
+            className="space-y-3 lg:space-y-4"
           >
             {/* Summary */}
-            <GlassPanel variant="subtle" className="p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <GlassPanel variant="subtle" className="p-3 lg:p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-slate-400">AI Summary</p>
-                  <p className="mt-1 text-sm">{result.output.summary}</p>
+                  <p className="text-[11px] font-medium text-slate-400 lg:text-xs">AI Summary</p>
+                  <p className="mt-1 text-[13px] lg:text-sm">{result.output.summary}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-shrink-0 flex-wrap items-center gap-1.5">
                   <RiskBadge level={(result.output.risk_level as RiskLevel) ?? 'moderate'} />
                   <TierBadge tier={result.tierUsed} model={result.modelUsed} />
                 </div>
@@ -663,7 +664,7 @@ function TreatmentPanel({
               </div>
             </GlassPanel>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-2.5 md:grid-cols-2 md:gap-4">
               <TreatmentCard
                 icon={<ClipboardList className="h-4 w-4" />}
                 title="Treatment Steps"
@@ -694,7 +695,9 @@ function TreatmentPanel({
               <LimitationsList items={result.output.limitations} />
             )}
 
-            <DisclaimerChip text={result.disclaimer} />
+            <div className="[&_div]:text-[10px] lg:[&_div]:text-xs">
+              <DisclaimerChip text={result.disclaimer} />
+            </div>
           </motion.div>
         ) : (
           <EmptyTask
@@ -721,31 +724,31 @@ function PrescriptionPanel({
   onReset: () => void
 }) {
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="text-base font-semibold">Prescription Generation</h3>
-          <p className="text-sm text-slate-400">
+    <div className="space-y-3 lg:space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold lg:text-base">Prescription Generation</h3>
+          <p className="text-[11px] text-slate-400 lg:text-sm">
             AI generates an advisory prescription reviewed against allergies and current medications.
           </p>
         </div>
         <div className="flex gap-2">
           {result && (
             <>
-              <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace btn-press ripple gap-1.5">
+              <Button variant="outline" size="sm" onClick={onReset} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap">
                 <RefreshCw className="h-3.5 w-3.5" /> Clear
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => { toast.success('Prescription sent to print queue'); window.print() }}
-                className="fx-btn-border-trace btn-press ripple gap-1.5"
+                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 whitespace-nowrap"
               >
                 <Printer className="h-3.5 w-3.5" /> Print
               </Button>
             </>
           )}
-          <Button size="sm" onClick={onRun} disabled={loading} className="fx-btn-border-trace btn-press ripple gap-1.5">
+          <Button size="sm" onClick={onRun} disabled={loading} className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple h-9 gap-1.5 whitespace-nowrap">
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pill className="h-3.5 w-3.5" />}
             {result ? 'Regenerate' : 'Generate Rx'}
           </Button>
@@ -761,16 +764,16 @@ function PrescriptionPanel({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-4"
+            className="space-y-3 lg:space-y-4"
           >
             {/* Summary */}
-            <GlassPanel variant="subtle" className="p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <GlassPanel variant="subtle" className="p-3 lg:p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-slate-400">AI Summary</p>
-                  <p className="mt-1 text-sm">{result.output.summary}</p>
+                  <p className="text-[11px] font-medium text-slate-400 lg:text-xs">AI Summary</p>
+                  <p className="mt-1 text-[13px] lg:text-sm">{result.output.summary}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-shrink-0 flex-wrap items-center gap-1.5">
                   <RiskBadge level={(result.output.risk_level as RiskLevel) ?? 'moderate'} />
                   <TierBadge tier={result.tierUsed} model={result.modelUsed} />
                 </div>
@@ -784,14 +787,36 @@ function PrescriptionPanel({
               </div>
             </GlassPanel>
 
-            {/* Prescription table */}
+            {/* Prescription table — responsive */}
             <GlassPanel className="overflow-hidden p-0">
-              <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <div className="border-b border-white/10 bg-white/5 px-3 py-2 lg:px-4 lg:py-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:text-xs">
                   Rx · {result.output.prescription?.length ?? 0} item(s)
                 </p>
               </div>
-              <div className="overflow-x-auto orio-scroll">
+              {/* Mobile: cards */}
+              <div className="space-y-2 p-3 lg:hidden">
+                {result.output.prescription?.map((rx, i) => (
+                  <div key={i} className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-xs font-semibold text-slate-100">{rx.drug}</p>
+                      <span className="flex-shrink-0 text-[11px] font-medium tabular-nums text-violet-300">{rx.dosage}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
+                      <span><span className="text-slate-500">Freq:</span> {rx.frequency}</span>
+                      <span><span className="text-slate-500">Duration:</span> {rx.duration}</span>
+                    </div>
+                    {rx.notes && (
+                      <p className="mt-1 text-[11px] text-slate-400">{rx.notes}</p>
+                    )}
+                  </div>
+                ))}
+                {(!result.output.prescription || result.output.prescription.length === 0) && (
+                  <p className="py-4 text-center text-xs text-slate-400">No prescription items returned.</p>
+                )}
+              </div>
+              {/* Desktop: table */}
+              <div className="hidden overflow-x-auto orio-scroll lg:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left text-xs text-slate-400">
@@ -805,11 +830,11 @@ function PrescriptionPanel({
                   <tbody>
                     {result.output.prescription?.map((rx, i) => (
                       <tr key={i} className="border-b border-white/10 last:border-0">
-                        <td className="px-4 py-2.5 font-medium">{rx.drug}</td>
-                        <td className="px-4 py-2.5 tabular-nums">{rx.dosage}</td>
-                        <td className="px-4 py-2.5">{rx.frequency}</td>
-                        <td className="px-4 py-2.5">{rx.duration}</td>
-                        <td className="px-4 py-2.5 text-slate-400">{rx.notes ?? '—'}</td>
+                        <td className="px-4 py-2.5 text-xs font-medium">{rx.drug}</td>
+                        <td className="px-4 py-2.5 text-xs tabular-nums">{rx.dosage}</td>
+                        <td className="px-4 py-2.5 text-xs">{rx.frequency}</td>
+                        <td className="px-4 py-2.5 text-xs">{rx.duration}</td>
+                        <td className="px-4 py-2.5 text-xs text-slate-400">{rx.notes ?? '—'}</td>
                       </tr>
                     ))}
                     {(!result.output.prescription || result.output.prescription.length === 0) && (
@@ -838,7 +863,9 @@ function PrescriptionPanel({
               <LimitationsList items={result.output.limitations} />
             )}
 
-            <DisclaimerChip text={result.disclaimer} />
+            <div className="[&_div]:text-[10px] lg:[&_div]:text-xs">
+              <DisclaimerChip text={result.disclaimer} />
+            </div>
           </motion.div>
         ) : (
           <EmptyTask
@@ -898,26 +925,26 @@ function TreatmentCard({
     red: 'bg-red-500/10 text-red-400',
   }
   return (
-    <GlassPanel className="p-4">
+    <GlassPanel variant="subtle" className="p-2.5 lg:p-4">
       <div className="flex items-center gap-2">
-        <div className={cn('flex h-7 w-7 items-center justify-center rounded-lg', accents[accent])}>
+        <div className={cn('flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg', accents[accent])}>
           {icon}
         </div>
-        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-xs font-semibold lg:text-sm">{title}</p>
         <span className="ml-auto text-[11px] text-slate-400">{items?.length ?? 0}</span>
       </div>
-      <Separator className="my-3" />
+      <Separator className="my-2 lg:my-3" />
       {items && items.length > 0 ? (
-        <ul className="space-y-1.5">
+        <ul className="space-y-1 lg:space-y-1.5">
           {items.map((it, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm">
+            <li key={i} className="flex items-start gap-2 text-[11px] lg:text-sm">
               <span className={cn('mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full', accents[accent].split(' ')[0])} />
-              <span className="text-slate-100/90">{it}</span>
+              <span className="min-w-0 text-slate-100/90">{it}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-slate-400">No items.</p>
+        <p className="text-xs text-slate-400 lg:text-sm">No items.</p>
       )}
     </GlassPanel>
   )
@@ -944,12 +971,12 @@ function InlineLoader({ label }: { label: string }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-10"
+      className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-8 lg:px-4 lg:py-10"
     >
-      <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
-      <div>
-        <p className="text-sm font-medium">{label}</p>
-        <p className="text-[11px] text-slate-400">4-tier failover active · non-blocking</p>
+      <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-violet-300" />
+      <div className="min-w-0">
+        <p className="text-xs font-medium lg:text-sm">{label}</p>
+        <p className="text-[10px] text-slate-400 lg:text-[11px]">4-tier failover active · non-blocking</p>
       </div>
     </motion.div>
   )
@@ -963,15 +990,15 @@ function EmptyTask({
   description: string
 }) {
   return (
-    <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/15 text-violet-300">
+    <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-6 text-center lg:p-10">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/15 text-violet-300 lg:h-14 lg:w-14">
         {icon}
       </div>
-      <div>
-        <p className="font-semibold">{title}</p>
-        <p className="mx-auto mt-1 max-w-md text-sm text-slate-400">{description}</p>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold lg:text-base">{title}</p>
+        <p className="mx-auto mt-1 max-w-md text-[11px] text-slate-400 lg:text-sm">{description}</p>
       </div>
-      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
+      <div className="mt-1 flex items-center gap-1.5 text-[10px] text-slate-400 lg:text-[11px]">
         <Wand2 className="h-3 w-3" /> Outputs are advisory — review before action
       </div>
     </GlassPanel>
@@ -981,8 +1008,8 @@ function EmptyTask({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-xs text-slate-400">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
+      <span className="text-[11px] text-slate-400 lg:text-xs">{label}</span>
+      <span className="truncate text-xs font-medium lg:text-sm">{value}</span>
     </div>
   )
 }

@@ -241,13 +241,13 @@ export function StatCard({
   const numValue = typeof value === 'number' ? value : parseInt(String(value).replace(/[^0-9]/g, '')) || 0
   const hasNumeric = typeof value === 'number' || /^\d+$/.test(String(value).replace(/[^0-9]/g, ''))
   return (
-    <div className={cn('card-lift rounded-xl p-3.5', a.card, className)}>
+    <div className={cn('card-lift rounded-xl p-3 lg:p-3.5', a.card, className)}>
       {/* Icon top-left */}
-      <div className={cn('mb-2.5 flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-300 hover:scale-110', a.iconBg, a.iconColor)}>
+      <div className={cn('mb-2 flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-300 hover:scale-110 lg:mb-2.5 lg:h-9 lg:w-9', a.iconBg, a.iconColor)}>
         {icon}
       </div>
       {/* Big number */}
-      <p className={cn('text-2xl font-bold tracking-tight tabular-nums leading-none', a.valueColor)}>
+      <p className={cn('text-xl font-bold tracking-tight tabular-nums leading-none lg:text-2xl', a.valueColor)}>
         {hasNumeric && numValue > 0 ? (
           <AnimatedCounter value={numValue} format={(n) => Math.round(n).toString()} />
         ) : (
@@ -255,8 +255,8 @@ export function StatCard({
         )}
       </p>
       {/* Label at bottom */}
-      <p className="mt-1.5 truncate text-xs font-medium text-slate-400">{label}</p>
-      {trend && <p className="mt-0.5 text-[10px] text-slate-500">{trend}</p>}
+      <p className="mt-1 truncate text-[11px] font-medium text-slate-400 lg:mt-1.5 lg:text-xs">{label}</p>
+      {trend && <p className="mt-0.5 text-[9px] text-slate-500 lg:text-[10px]">{trend}</p>}
     </div>
   )
 }

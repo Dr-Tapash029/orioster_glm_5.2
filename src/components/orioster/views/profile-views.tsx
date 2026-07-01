@@ -64,13 +64,13 @@ export function MyProfileView() {
       <SectionHeader title="My Profile" subtitle="Manage your personal information" />
 
       {/* Profile card with image upload */}
-      <GlassPanel variant="strong" className="card-lift p-5 text-center">
+      <GlassPanel variant="strong" className="card-lift p-3 text-center lg:p-5">
         <div className="relative mx-auto mb-3 w-fit">
-          <Avatar className="h-24 w-24 border-2 border-violet-500/30">
+          <Avatar className="h-20 w-20 border-2 border-violet-500/30 lg:h-24 lg:w-24">
             {profileImage ? (
               <img src={profileImage} alt={user?.name} className="h-full w-full rounded-full object-cover" />
             ) : null}
-            <AvatarFallback className="bg-violet-500/20 text-2xl font-bold text-violet-300">
+            <AvatarFallback className="bg-violet-500/20 text-xl font-bold text-violet-300 lg:text-2xl">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -88,70 +88,70 @@ export function MyProfileView() {
             className="hidden"
           />
         </div>
-        <h2 className="text-lg font-bold text-white">{user?.name}</h2>
-        <p className="text-sm text-slate-400">{user?.email}</p>
+        <h2 className="text-base font-bold text-white lg:text-lg">{user?.name}</h2>
+        <p className="text-xs text-slate-400 lg:text-sm">{user?.email}</p>
         <div className="mt-2 flex justify-center">
           <RoleBadge role={user?.role ?? 'ADMIN'} />
         </div>
       </GlassPanel>
 
       {/* Edit form */}
-      <GlassPanel className="space-y-4 p-5">
-        <p className="text-sm font-semibold text-white">Personal Information</p>
+      <GlassPanel className="card-lift space-y-4 p-3 lg:p-5">
+        <p className="text-base font-semibold text-white lg:text-lg">Personal Information</p>
 
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Full Name</label>
-          <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-            <User className="h-4 w-4 text-slate-500" />
+          <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Full Name</label>
+          <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+            <User className="h-4 w-4 flex-shrink-0 text-slate-500" />
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-white focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent text-xs text-white focus:outline-none lg:text-sm"
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Email</label>
-          <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-            <Mail className="h-4 w-4 text-slate-500" />
+          <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Email</label>
+          <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+            <Mail className="h-4 w-4 flex-shrink-0 text-slate-500" />
             <input
               type="email"
               value={user?.email ?? ''}
               disabled
-              className="flex-1 bg-transparent text-sm text-slate-400 focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent text-xs text-slate-400 focus:outline-none lg:text-sm"
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Phone</label>
-          <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-            <Phone className="h-4 w-4 text-slate-500" />
+          <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Phone</label>
+          <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+            <Phone className="h-4 w-4 flex-shrink-0 text-slate-500" />
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-white focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent text-xs text-white focus:outline-none lg:text-sm"
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Address</label>
-          <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
-            <MapPin className="h-4 w-4 text-slate-500" />
+          <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Address</label>
+          <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
+            <MapPin className="h-4 w-4 flex-shrink-0 text-slate-500" />
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-white focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent text-xs text-white focus:outline-none lg:text-sm"
             />
           </div>
         </div>
 
-        <Button className="fx-btn-border-trace btn-press ripple w-full gap-2">
+        <Button className="fx-btn-border-trace btn-press ripple h-11 w-full gap-2">
           <CheckCircle2 className="h-4 w-4" />
           Save Changes
         </Button>
@@ -170,44 +170,44 @@ export function MyCompanyView() {
     <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader title="My Company" subtitle="Organization details" />
 
-      <GlassPanel variant="strong" className="card-lift p-5">
+      <GlassPanel variant="strong" className="card-lift p-3 lg:p-5">
         <div className="flex items-center gap-4">
-          <div className="wope-logo-glow flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-            <Building2 className="h-8 w-8" />
+          <div className="wope-logo-glow flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white lg:h-16 lg:w-16">
+            <Building2 className="h-7 w-7 lg:h-8 lg:w-8" />
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-white">Riverside Medical Center</h2>
-            <p className="text-sm text-slate-400">Tenant ID: tenant-default</p>
-            <p className="mt-1 text-xs text-violet-400">Active · Community Clinic</p>
+          <div className="min-w-0">
+            <h2 className="text-base font-bold text-white lg:text-lg">Riverside Medical Center</h2>
+            <p className="text-xs text-slate-400 lg:text-sm">Tenant ID: tenant-default</p>
+            <p className="mt-1 text-[11px] text-violet-400 lg:text-xs">Active · Community Clinic</p>
           </div>
         </div>
       </GlassPanel>
 
-      <div className="grid grid-cols-2 gap-3">
-        <GlassPanel className="card-lift p-4">
-          <Users className="mb-2 h-6 w-6 text-violet-400" />
-          <p className="text-2xl font-bold text-white">5</p>
-          <p className="text-xs text-slate-400">Staff Members</p>
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3">
+        <GlassPanel className="card-lift p-3 lg:p-4">
+          <Users className="mb-2 h-5 w-5 text-violet-400 lg:h-6 lg:w-6" />
+          <p className="text-xl font-bold text-white lg:text-2xl">5</p>
+          <p className="text-[11px] text-slate-400 lg:text-xs">Staff Members</p>
         </GlassPanel>
-        <GlassPanel className="card-lift p-4">
-          <HeartPulse className="mb-2 h-6 w-6 text-emerald-400" />
-          <p className="text-2xl font-bold text-white">9</p>
-          <p className="text-xs text-slate-400">Patients Served</p>
+        <GlassPanel className="card-lift p-3 lg:p-4">
+          <HeartPulse className="mb-2 h-5 w-5 text-emerald-400 lg:h-6 lg:w-6" />
+          <p className="text-xl font-bold text-white lg:text-2xl">9</p>
+          <p className="text-[11px] text-slate-400 lg:text-xs">Patients Served</p>
         </GlassPanel>
-        <GlassPanel className="card-lift p-4">
-          <Stethoscope className="mb-2 h-6 w-6 text-amber-400" />
-          <p className="text-2xl font-bold text-white">2</p>
-          <p className="text-xs text-slate-400">Doctors</p>
+        <GlassPanel className="card-lift p-3 lg:p-4">
+          <Stethoscope className="mb-2 h-5 w-5 text-amber-400 lg:h-6 lg:w-6" />
+          <p className="text-xl font-bold text-white lg:text-2xl">2</p>
+          <p className="text-[11px] text-slate-400 lg:text-xs">Doctors</p>
         </GlassPanel>
-        <GlassPanel className="card-lift p-4">
-          <FlaskConical className="mb-2 h-6 w-6 text-violet-400" />
-          <p className="text-2xl font-bold text-white">12</p>
-          <p className="text-xs text-slate-400">Lab Reports</p>
+        <GlassPanel className="card-lift p-3 lg:p-4">
+          <FlaskConical className="mb-2 h-5 w-5 text-violet-400 lg:h-6 lg:w-6" />
+          <p className="text-xl font-bold text-white lg:text-2xl">12</p>
+          <p className="text-[11px] text-slate-400 lg:text-xs">Lab Reports</p>
         </GlassPanel>
       </div>
 
-      <GlassPanel className="space-y-3 p-5">
-        <p className="text-sm font-semibold text-white">Company Information</p>
+      <GlassPanel className="card-lift space-y-3 p-3 lg:p-5">
+        <p className="text-base font-semibold text-white lg:text-lg">Company Information</p>
         {[
           { label: 'Company Name', value: 'Riverside Medical Center' },
           { label: 'Type', value: 'Community Clinic' },
@@ -216,8 +216,8 @@ export function MyCompanyView() {
           { label: 'Your Role', value: user?.role ?? 'ADMIN' },
         ].map((item) => (
           <div key={item.label} className="flex items-center justify-between border-b border-white/5 pb-2 last:border-0">
-            <span className="text-xs text-slate-400">{item.label}</span>
-            <span className="text-sm font-medium text-white">{item.value}</span>
+            <span className="text-[11px] text-slate-400 lg:text-xs">{item.label}</span>
+            <span className="text-xs font-medium text-white lg:text-sm">{item.value}</span>
           </div>
         ))}
       </GlassPanel>
@@ -257,27 +257,27 @@ export function MyTasksView() {
     <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       <SectionHeader title="My Tasks" subtitle={`${pending.length} pending · ${completed.length} completed`} />
 
-      <div className="grid grid-cols-3 gap-3">
-        <GlassPanel className="p-3 text-center">
-          <p className="text-xl font-bold text-white">{tasks.length}</p>
-          <p className="text-[10px] text-slate-400">Total</p>
+      <div className="grid grid-cols-3 gap-2 lg:gap-3">
+        <GlassPanel className="card-lift p-3 text-center">
+          <p className="text-xl font-bold text-white lg:text-2xl">{tasks.length}</p>
+          <p className="text-[10px] text-slate-400 lg:text-[11px]">Total</p>
         </GlassPanel>
-        <GlassPanel className="p-3 text-center">
-          <p className="text-xl font-bold text-amber-400">{pending.length}</p>
-          <p className="text-[10px] text-slate-400">Pending</p>
+        <GlassPanel className="card-lift p-3 text-center">
+          <p className="text-xl font-bold text-amber-400 lg:text-2xl">{pending.length}</p>
+          <p className="text-[10px] text-slate-400 lg:text-[11px]">Pending</p>
         </GlassPanel>
-        <GlassPanel className="p-3 text-center">
-          <p className="text-xl font-bold text-emerald-400">{completed.length}</p>
-          <p className="text-[10px] text-slate-400">Done</p>
+        <GlassPanel className="card-lift p-3 text-center">
+          <p className="text-xl font-bold text-emerald-400 lg:text-2xl">{completed.length}</p>
+          <p className="text-[10px] text-slate-400 lg:text-[11px]">Done</p>
         </GlassPanel>
       </div>
 
       <div className="space-y-2">
         {tasks.map((task) => (
-          <GlassPanel key={task.id} className={cn('card-lift flex items-center gap-3 p-3', task.done && 'opacity-50')}>
+          <GlassPanel key={task.id} className={cn('card-lift flex min-h-12 items-center gap-3 p-2.5 lg:p-3', task.done && 'opacity-50')}>
             <button
               onClick={() => toggle(task.id)}
-              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex-shrink-0"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-6 w-6 min-h-6 min-w-6 flex-shrink-0 items-center justify-center"
             >
               {task.done ? (
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" />
@@ -286,11 +286,11 @@ export function MyTasksView() {
               )}
             </button>
             <div className="min-w-0 flex-1">
-              <p className={cn('text-sm font-medium', task.done ? 'text-slate-500 line-through' : 'text-white')}>
+              <p className={cn('text-xs font-medium lg:text-sm', task.done ? 'text-slate-500 line-through' : 'text-white')}>
                 {task.title}
               </p>
             </div>
-            <span className={cn('rounded-full border px-2 py-0.5 text-[10px] font-semibold', priorityColors[task.priority])}>
+            <span className={cn('flex-shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold', priorityColors[task.priority])}>
               {task.priority}
             </span>
           </GlassPanel>
@@ -337,12 +337,12 @@ export function MyDocumentsView() {
 
       <div className="space-y-2">
         {documents.map((doc) => (
-          <GlassPanel key={doc.id} className="card-lift flex items-center gap-3 p-3">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white/5">
+          <GlassPanel key={doc.id} className="card-lift flex min-h-12 items-center gap-3 p-2.5 lg:p-3">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/5">
               {typeIcons[doc.type]}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-white">{doc.name}</p>
+              <p className="truncate text-xs font-medium text-white lg:text-sm">{doc.name}</p>
               <div className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-500">
                 <span>{doc.type}</span>
                 <span>·</span>
@@ -351,7 +351,7 @@ export function MyDocumentsView() {
                 <span>{doc.size}</span>
               </div>
             </div>
-            <button className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-violet-500/10 hover:text-violet-300">
+            <button className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-violet-500/10 hover:text-violet-300">
               <Download className="h-4 w-4" />
             </button>
           </GlassPanel>

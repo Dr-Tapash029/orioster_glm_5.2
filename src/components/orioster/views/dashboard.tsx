@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { GlassPanel, StatCard, SectionHeader, TriageBadge, SyncStatusBadge } from '@/components/orioster/ui-primitives'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import {
   Users,
   UserPlus,
@@ -70,12 +71,20 @@ export function DashboardView() {
   const role = (user?.role ?? 'ADMIN') as AppRole
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     fetch('/api/dashboard')
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   if (loading || !data) {
@@ -105,21 +114,21 @@ export function DashboardView() {
   return (
     <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
       {/* ═══ Welcome Panel ══════════════════════════════════════ */}
-      <GlassPanel variant="strong" className="section-slide-up p-4 lg:p-6">
-        <div className="flex items-center justify-between gap-3">
+      <GlassPanel variant="strong" className="section-slide-up p-3 lg:p-6">
+        <div className="flex items-center justify-between gap-2 lg:gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-violet-400 word-reveal lg:text-sm" style={{ animationDelay: '0.1s' }}>{roleGreeting(role)}</p>
-            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-100 text-glow-pulse word-reveal lg:text-3xl" style={{ animationDelay: '0.2s' }}>
+            <h1 className="mt-0.5 text-lg font-bold tracking-tight text-slate-100 text-glow-pulse word-reveal lg:text-3xl" style={{ animationDelay: '0.2s' }}>
               {user?.name}
             </h1>
-            <p className="mt-0.5 text-[11px] text-slate-400 word-reveal lg:text-sm" style={{ animationDelay: '0.35s' }}>
+            <p className="mt-0.5 hidden text-[11px] text-slate-400 word-reveal sm:block lg:text-sm" style={{ animationDelay: '0.35s' }}>
               Here is today&apos;s hospital operations overview.
             </p>
           </div>
           {(role === 'NURSE' || role === 'ADMIN' || role === 'DOCTOR') && (
             <Button
               onClick={() => setView('patient-entry')}
-              className="fx-btn-border-trace btn-press ripple gap-1.5 word-reveal flex-shrink-0 whitespace-nowrap"
+              className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple gap-1.5 word-reveal flex-shrink-0 whitespace-nowrap"
               style={{ animationDelay: '0.5s' }}
             >
               <UserPlus className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
@@ -130,7 +139,7 @@ export function DashboardView() {
       </GlassPanel>
 
       {/* ═══ KPI Cards — responsive grid ════════════════════════ */}
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 lg:gap-4">
         <div className="card-enter stagger-1">
           <StatCard label="Patients Served" value={s.totalPatients} icon={<HeartPulse className="h-4 w-4 lg:h-5 lg:w-5" />} trend={`${s.draftPatients} in draft`} accent="cyan" />
         </div>
@@ -147,9 +156,9 @@ export function DashboardView() {
 
       {/* ═══ Charts — stacked on mobile, side-by-side on desktop ══ */}
       <div className="grid gap-2.5 sm:gap-3 lg:grid-cols-5 lg:gap-4">
-        <GlassPanel className="wope-card-hover card-enter stagger-3 p-3.5 lg:col-span-3 lg:p-5">
+        <GlassPanel className="wope-card-hover card-enter stagger-3 p-3 lg:col-span-3 lg:p-5">
           <SectionHeader title="Patient Trends" subtitle="Patients · Medicine Distribution" />
-          <div className="mt-3 h-44 lg:h-64">
+          <div className="mt-3 h-40 lg:h-64">
             <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <defs>
@@ -163,8 +172,8 @@ export function DashboardView() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#9b96b0' }} stroke="rgba(255,255,255,0.06)" />
-              <YAxis tick={{ fontSize: 9, fill: '#9b96b0' }} stroke="rgba(255,255,255,0.06)" allowDecimals={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#9b96b0' }} stroke="rgba(255,255,255,0.06)" />
+              <YAxis tick={{ fontSize: 10, fill: '#9b96b0' }} stroke="rgba(255,255,255,0.06)" allowDecimals={false} />
               <Tooltip
                 contentStyle={{
                   background: '#140B25',
@@ -181,9 +190,9 @@ export function DashboardView() {
         </div>
       </GlassPanel>
 
-      <GlassPanel className="wope-card-hover card-enter stagger-4 p-3.5 lg:col-span-2 lg:p-5">
+      <GlassPanel className="wope-card-hover card-enter stagger-4 p-3 lg:col-span-2 lg:p-5">
         <SectionHeader title="Triage Distribution" subtitle="Local clinical triage" />
-        <div className="mt-3 h-40 lg:h-64">
+        <div className="mt-3 h-36 lg:h-56">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -192,8 +201,8 @@ export function DashboardView() {
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={38}
-                outerRadius={60}
+                innerRadius={isMobile ? 32 : 38}
+                outerRadius={isMobile ? 52 : 60}
                 paddingAngle={3}
               >
                 {triageData.map((entry, i) => (
@@ -217,7 +226,7 @@ export function DashboardView() {
       </div>
 
       {/* ═══ Recent Activities / Patients ═══════════════════════ */}
-      <GlassPanel className="wope-card-hover card-enter stagger-5 p-3.5">
+      <GlassPanel className="wope-card-hover card-enter stagger-5 p-3 lg:p-3.5">
         <SectionHeader
           title="Recent Activities"
           subtitle="Latest patient entries"
@@ -228,22 +237,25 @@ export function DashboardView() {
             </Button>
           }
         />
-        <div className="mt-3 space-y-1.5">
-          {data.recentPatients.slice(0, 5).map((p) => (
+        <div className="mt-3 space-y-1">
+          {data.recentPatients.slice(0, 5).map((p, idx) => (
             <button
               key={p.id}
               onClick={() => {
                 setActivePatient(p.id)
                 setView('patient-detail')
               }}
-              className="row-slide flex w-full items-center gap-2.5 rounded-lg p-2 text-left hover:bg-violet-500/8"
+              className={cn(
+                'row-slide w-full items-center gap-2.5 rounded-lg p-2.5 text-left hover:bg-violet-500/8',
+                idx === 4 ? 'hidden lg:flex' : 'flex'
+              )}
             >
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-[10px] font-semibold text-violet-300">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-[11px] font-semibold text-violet-300">
                 {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('')}
               </div>
               <div className="min-w-0 flex-1 overflow-hidden">
-                <p className="truncate text-xs font-medium text-slate-100">{p.fullName}</p>
-                <p className="truncate text-[10px] text-slate-500">{p.chiefComplaint ?? '—'}</p>
+                <p className="truncate text-sm font-medium text-slate-100">{p.fullName}</p>
+                <p className="truncate text-[11px] text-slate-500">{p.chiefComplaint ?? '—'}</p>
               </div>
               <TriageBadge level={(p.vitals[0]?.triageLevel as 'GREEN' | 'YELLOW' | 'RED') ?? null} />
               <SyncStatusBadge status={p.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />

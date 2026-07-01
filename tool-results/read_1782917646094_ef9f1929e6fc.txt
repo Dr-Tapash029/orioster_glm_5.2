@@ -1,0 +1,1050 @@
+     1→'use client'
+     2→
+     3→// ─────────────────────────────────────────────────────────────────────────────
+     4→// ORIOSTER — Patient Detail View
+     5→// Comprehensive patient record with 6 tabs:
+     6→// Overview · Vitals · AI Results · Lab Reports · Invoices · Appointments
+     7→// AI outputs shown here are ADVISORY ONLY — review by a human professional.
+     8→// ─────────────────────────────────────────────────────────────────────────────
+     9→
+    10→import { useEffect, useMemo, useState } from 'react'
+    11→import { motion, AnimatePresence } from 'framer-motion'
+    12→import { toast } from 'sonner'
+    13→import { formatDistanceToNow, format } from 'date-fns'
+    14→import {
+    15→  ArrowLeft, User, HeartPulse, Sparkles, FlaskConical, Receipt, CalendarClock,
+    16→  Stethoscope, Pill, ClipboardList, ShieldAlert, Lock, CheckCircle2,
+    17→  AlertTriangle, Activity, FileBadge, UserPlus, Phone, MapPin, Briefcase,
+    18→  GraduationCap, Award, X,
+    19→} from 'lucide-react'
+    20→
+    21→import { useAppStore } from '@/lib/store'
+    22→import {
+    23→  GlassPanel, SectionHeader, TriageBadge, RiskBadge, DisclaimerChip,
+    24→  ConfidenceMeter, SyncStatusBadge, RoleBadge,
+    25→} from '@/components/orioster/ui-primitives'
+    26→import { Button } from '@/components/ui/button'
+    27→import { Badge } from '@/components/ui/badge'
+    28→import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+    29→import { Separator } from '@/components/ui/separator'
+    30→import { ScrollArea } from '@/components/ui/scroll-area'
+    31→import { cn } from '@/lib/utils'
+    32→import {
+    33→  AI_TASK_LABELS, LAB_REPORT_LABELS, type AiOutput, type RiskLevel,
+    34→  type TriageLevel,
+    35→} from '@/lib/types'
+    36→
+    37→// ── Types ────────────────────────────────────────────────────────────────────
+    38→interface VitalsRecord {
+    39→  id: string
+    40→  temperature: number | null
+    41→  bpSystolic: number | null
+    42→  bpDiastolic: number | null
+    43→  heartRate: number | null
+    44→  spo2: number | null
+    45→  weightKg: number | null
+    46→  heightCm: number | null
+    47→  triageLevel: string | null
+    48→  recordedAt: string
+    49→  recordedBy: string
+    50→}
+    51→
+    52→interface AppointmentRecord {
+    53→  id: string
+    54→  scheduledAt: string
+    55→  status: string
+    56→  reason: string | null
+    57→  doctor: { id: string; name: string; role: string }
+    58→}
+    59→
+    60→interface AiResultRecord {
+    61→  id: string
+    62→  taskType: string
+    63→  summary: string
+    64→  riskLevel: string
+    65→  confidence: number
+    66→  limitations: string
+    67→  recommendationType: string
+    68→  disclaimer: string
+    69→  tierUsed: number
+    70→  modelUsed: string | null
+    71→  fullOutput: string
+    72→  createdAt: string
+    73→  createdByStaff?: { name: string }
+    74→}
+    75→
+    76→interface LabReportRecord {
+    77→  id: string
+    78→  reportType: string
+    79→  parameters: string
+    80→  isNormal: boolean | null
+    81→  aiFeedback: string | null
+    82→  status: string
+    83→  createdAt: string
+    84→  createdByStaff?: { name: string }
+    85→}
+    86→
+    87→interface InvoiceRecord {
+    88→  id: string
+    89→  invoiceNo: string
+    90→  items: string
+    91→  subtotal: number
+    92→  tax: number
+    93→  total: number
+    94→  status: string
+    95→  createdAt: string
+    96→}
+    97→
+    98→interface PatientDetail {
+    99→  id: string
+   100→  localId: string
+   101→  fullName: string
+   102→  gender: string
+   103→  dateOfBirth: string
+   104→  age: number | null
+   105→  contact: string | null
+   106→  address: string | null
+   107→  localIdNumber: string | null
+   108→  bloodGroup: string | null
+   109→  heightCm: number | null
+   110→  weightKg: number | null
+   111→  profession: string | null
+   112→  education: string | null
+   113→  consentGiven: boolean
+   114→  syncStatus: string
+   115→  status: string
+   116→  chiefComplaint: string | null
+   117→  pastHistory: string | null
+   118→  ongoingMedications: string | null
+   119→  allergies: string | null
+   120→  localSummary: string | null
+   121→  notificationStatus: string | null
+   122→  createdAt: string
+   123→  vitals: VitalsRecord[]
+   124→  appointments: AppointmentRecord[]
+   125→  aiResults: AiResultRecord[]
+   126→  labReports: LabReportRecord[]
+   127→  invoices: InvoiceRecord[]
+   128→  createdByStaff: { name: string; role: string }
+   129→}
+   130→
+   131→type TabKey = 'overview' | 'vitals' | 'ai' | 'labs' | 'invoices' | 'appointments'
+   132→
+   133→// ── Main View ────────────────────────────────────────────────────────────────
+   134→export function PatientDetailView() {
+   135→  const { activePatientId, setView, setActivePatient } = useAppStore()
+   136→  const [patient, setPatient] = useState<PatientDetail | null>(null)
+   137→  const [loading, setLoading] = useState(true)
+   138→  const [tab, setTab] = useState<TabKey>('overview')
+   139→
+   140→  useEffect(() => {
+   141→    if (!activePatientId) return
+   142→    let cancelled = false
+   143→    fetch(`/api/patients/${activePatientId}`)
+   144→      .then((r) => r.json())
+   145→      .then((d) => {
+   146→        if (cancelled) return
+   147→        if (d.patient) setPatient(d.patient as PatientDetail)
+   148→        else toast.error('Patient not found')
+   149→      })
+   150→      .catch(() => toast.error('Failed to load patient'))
+   151→      .finally(() => { if (!cancelled) setLoading(false) })
+   152→    return () => { cancelled = true }
+   153→  }, [activePatientId])
+   154→
+   155→  if (!activePatientId) {
+   156→    return (
+   157→      <GlassPanel className="flex flex-col items-center justify-center gap-3 p-12 text-center">
+   158→        <User className="h-10 w-10 text-slate-500" />
+   159→        <p className="font-semibold text-slate-100">No patient selected</p>
+   160→        <p className="text-sm text-slate-400">Choose a patient from the list to view their record.</p>
+   161→        <Button onClick={() => setView('patients')} className="fx-btn-border-trace btn-press ripple gap-1.5">
+   162→          <ArrowLeft className="h-4 w-4" /> Go to Patients
+   163→        </Button>
+   164→      </GlassPanel>
+   165→    )
+   166→  }
+   167→
+   168→  if (loading) {
+   169→    return (
+   170→      <div className="flex items-center justify-center py-24">
+   171→        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+   172→      </div>
+   173→    )
+   174→  }
+   175→
+   176→  if (!patient) {
+   177→    return (
+   178→      <GlassPanel className="flex flex-col items-center justify-center gap-3 p-12 text-center">
+   179→        <User className="h-10 w-10 text-slate-500" />
+   180→        <p className="font-semibold text-slate-100">Patient not found</p>
+   181→        <p className="text-sm text-slate-400">The selected patient record could not be loaded.</p>
+   182→        <Button onClick={() => setView('patients')} className="fx-btn-border-trace btn-press ripple gap-1.5">
+   183→          <ArrowLeft className="h-4 w-4" /> Go to Patients
+   184→        </Button>
+   185→      </GlassPanel>
+   186→    )
+   187→  }
+   188→
+   189→  const latestTriage = patient.vitals[0]?.triageLevel as TriageLevel | undefined
+   190→  const firewallOk = !!patient.localSummary
+   191→
+   192→  return (
+   193→    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
+   194→      {/* Back button */}
+   195→      <Button
+   196→        variant="ghost"
+   197→        size="sm"
+   198→        className="fx-btn-border-trace btn-press ripple gap-1.5"
+   199→        onClick={() => { setActivePatient(null); setView('patients') }}
+   200→      >
+   201→        <ArrowLeft className="h-4 w-4" /> Back to Patients
+   202→      </Button>
+   203→
+   204→      {/* Header */}
+   205→      <GlassPanel variant="strong" className="p-5 sm:p-6">
+   206→        <div className="flex flex-wrap items-start justify-between gap-4">
+   207→          <div className="flex items-start gap-3">
+   208→            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-violet-500/15 text-lg font-bold text-violet-300">
+   209→              {patient.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
+   210→            </div>
+   211→            <div>
+   212→              <h1 className="text-xl font-bold tracking-tight text-slate-100 sm:text-2xl">{patient.fullName}</h1>
+   213→              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-400">
+   214→                <span className="font-mono text-xs">{patient.localId}</span>
+   215→                <span>·</span>
+   216→                <span>{patient.age ?? '?'}y · {patient.gender.toLowerCase()}</span>
+   217→                {patient.bloodGroup && <><span>·</span><span>Blood {patient.bloodGroup}</span></>}
+   218→              </div>
+   219→              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+   220→                <StatusBadge status={patient.status} />
+   221→                <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
+   222→                {latestTriage && <TriageBadge level={latestTriage} />}
+   223→                {firewallOk ? (
+   224→                  <Badge className="gap-1 bg-violet-500/15 text-violet-300">
+   225→                    <Lock className="h-3 w-3" /> Firewall Active
+   226→                  </Badge>
+   227→                ) : (
+   228→                  <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-400">
+   229→                    <ShieldAlert className="h-3 w-3" /> AI Disabled
+   230→                  </Badge>
+   231→                )}
+   232→                {patient.notificationStatus && (
+   233→                  <Badge variant="outline" className="gap-1 border-white/10 text-slate-300">
+   234→                    <CalendarClock className="h-3 w-3" /> Notify: {patient.notificationStatus}
+   235→                  </Badge>
+   236→                )}
+   237→              </div>
+   238→            </div>
+   239→          </div>
+   240→          <div className="text-right text-xs text-slate-400">
+   241→            <p>Created {formatDistanceToNow(new Date(patient.createdAt), { addSuffix: true })}</p>
+   242→            <p className="mt-0.5">by {patient.createdByStaff?.name ?? '—'} · <RoleBadge role={patient.createdByStaff?.role ?? 'ADMIN'} /></p>
+   243→          </div>
+   244→        </div>
+   245→      </GlassPanel>
+   246→
+   247→      {/* Tabs */}
+   248→      <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+   249→        <div className="overflow-x-auto orio-scroll">
+   250→          <TabsList className="grid w-full min-w-[640px] grid-cols-6">
+   251→            <TabsTrigger value="overview" className="gap-1.5"><User className="h-3.5 w-3.5" /> Overview</TabsTrigger>
+   252→            <TabsTrigger value="vitals" className="gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Vitals</TabsTrigger>
+   253→            <TabsTrigger value="ai" className="gap-1.5"><Sparkles className="h-3.5 w-3.5" /> AI Results</TabsTrigger>
+   254→            <TabsTrigger value="labs" className="gap-1.5"><FlaskConical className="h-3.5 w-3.5" /> Labs</TabsTrigger>
+   255→            <TabsTrigger value="invoices" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Invoices</TabsTrigger>
+   256→            <TabsTrigger value="appointments" className="gap-1.5"><CalendarClock className="h-3.5 w-3.5" /> Appts</TabsTrigger>
+   257→          </TabsList>
+   258→        </div>
+   259→
+   260→        <TabsContent value="overview" className="mt-4">
+   261→          <OverviewTab patient={patient} onGoToWizard={() => { setView('patient-entry') }} />
+   262→        </TabsContent>
+   263→        <TabsContent value="vitals" className="mt-4">
+   264→          <VitalsTab vitals={patient.vitals} />
+   265→        </TabsContent>
+   266→        <TabsContent value="ai" className="mt-4">
+   267→          <AiResultsTab results={patient.aiResults} />
+   268→        </TabsContent>
+   269→        <TabsContent value="labs" className="mt-4">
+   270→          <LabReportsTab reports={patient.labReports} />
+   271→        </TabsContent>
+   272→        <TabsContent value="invoices" className="mt-4">
+   273→          <InvoicesTab invoices={patient.invoices} />
+   274→        </TabsContent>
+   275→        <TabsContent value="appointments" className="mt-4">
+   276→          <AppointmentsTab appointments={patient.appointments} />
+   277→        </TabsContent>
+   278→      </Tabs>
+   279→    </div>
+   280→  )
+   281→}
+   282→
+   283→// ── Overview Tab ─────────────────────────────────────────────────────────────
+   284→function OverviewTab({
+   285→  patient, onGoToWizard,
+   286→}: {
+   287→  patient: PatientDetail
+   288→  onGoToWizard: () => void
+   289→}) {
+   290→  const pastHistory = safeParse<string[]>(patient.pastHistory, [])
+   291→  const medications = safeParse<Array<Record<string, string>> | string[]>(patient.ongoingMedications, [])
+   292→  const allergies = safeParse<Array<Record<string, string>> | string[]>(patient.allergies, [])
+   293→
+   294→  return (
+   295→    <div className="grid gap-4 lg:grid-cols-3">
+   296→      {/* Demographics */}
+   297→      <GlassPanel className="p-5 lg:col-span-2">
+   298→        <SectionHeader title="Patient Demographics" subtitle="General information captured at intake" />
+   299→        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+   300→          <Demographic icon={<Phone className="h-4 w-4" />} label="Contact" value={patient.contact ?? '—'} />
+   301→          <Demographic icon={<MapPin className="h-4 w-4" />} label="Address" value={patient.address ?? '—'} />
+   302→          <Demographic icon={<Award className="h-4 w-4" />} label="Local ID Number" value={patient.localIdNumber ?? '—'} />
+   303→          <Demographic icon={<Briefcase className="h-4 w-4" />} label="Profession" value={patient.profession ?? '—'} />
+   304→          <Demographic icon={<GraduationCap className="h-4 w-4" />} label="Education" value={patient.education ?? '—'} />
+   305→          <Demographic
+   306→            icon={<CheckCircle2 className="h-4 w-4" />}
+   307→            label="Consent"
+   308→            value={patient.consentGiven ? 'Given' : 'Not given'}
+   309→          />
+   310→        </div>
+   311→        <Separator className="my-4" />
+   312→        <div className="grid gap-4 sm:grid-cols-3">
+   313→          <Demographic icon={<HeartPulse className="h-4 w-4" />} label="Blood Group" value={patient.bloodGroup ?? '—'} />
+   314→          <Demographic icon={<User className="h-4 w-4" />} label="Height" value={patient.heightCm ? `${patient.heightCm} cm` : '—'} />
+   315→          <Demographic icon={<User className="h-4 w-4" />} label="Weight" value={patient.weightKg ? `${patient.weightKg} kg` : '—'} />
+   316→        </div>
+   317→      </GlassPanel>
+   318→
+   319→      {/* Clinical snapshot */}
+   320→      <GlassPanel className="p-5">
+   321→        <SectionHeader title="Clinical Snapshot" />
+   322→        <div className="mt-4 space-y-3">
+   323→          <div>
+   324→            <p className="text-xs font-medium text-slate-400">Chief Complaint</p>
+   325→            <p className="mt-0.5 text-sm font-medium text-slate-100">{patient.chiefComplaint ?? '—'}</p>
+   326→          </div>
+   327→          <div>
+   328→            <p className="text-xs font-medium text-slate-400">Past History</p>
+   329→            {pastHistory.length > 0 ? (
+   330→              <div className="mt-1 flex flex-wrap gap-1.5">
+   331→                {pastHistory.map((h, i) => (
+   332→                  <Badge key={i} variant="outline" className="border-white/10 text-[11px] text-slate-300">{h}</Badge>
+   333→                ))}
+   334→              </div>
+   335→            ) : (
+   336→              <p className="mt-0.5 text-sm text-slate-400">None recorded</p>
+   337→            )}
+   338→          </div>
+   339→          <div>
+   340→            <p className="text-xs font-medium text-slate-400">Allergies</p>
+   341→            <AllergyList items={allergies} />
+   342→          </div>
+   343→          <div>
+   344→            <p className="text-xs font-medium text-slate-400">Ongoing Medications</p>
+   345→            <MedicationList items={medications} />
+   346→          </div>
+   347→        </div>
+   348→      </GlassPanel>
+   349→
+   350→      {/* Privacy firewall / local summary */}
+   351→      <GlassPanel variant={patient.localSummary ? 'strong' : 'default'} className="p-5 lg:col-span-3">
+   352→        <SectionHeader
+   353→          title="patient_summary_v1 — Privacy Firewall Output"
+   354→          subtitle="De-identified, compressed summary that AI receives"
+   355→          action={
+   356→            patient.localSummary ? (
+   357→              <Badge className="gap-1 bg-violet-500/15 text-violet-300">
+   358→                <Lock className="h-3 w-3" /> Generated
+   359→              </Badge>
+   360→            ) : (
+   361→              <Badge variant="outline" className="gap-1 border-red-500/40 bg-red-500/10 text-red-400">
+   362→                <ShieldAlert className="h-3 w-3" /> Step 8 incomplete
+   363→              </Badge>
+   364→            )
+   365→          }
+   366→        />
+   367→        {patient.localSummary ? (
+   368→          <div className="mt-4 rounded-xl border border-violet-500/25 bg-violet-500/5 p-4 glow-violet">
+   369→            <div className="flex items-center gap-2 text-xs font-semibold text-violet-300">
+   370→              <CheckCircle2 className="h-4 w-4" /> Local summary active — AI eligible
+   371→            </div>
+   372→            <p className="mt-2 whitespace-pre-wrap font-mono text-sm leading-relaxed text-slate-100/90">
+   373→              {patient.localSummary}
+   374→            </p>
+   375→            <p className="mt-3 text-[11px] text-slate-400">
+   376→              Raw PHI (name, contact, address, IDs) never leaves the device. The AI receives only this compressed summary.
+   377→            </p>
+   378→          </div>
+   379→        ) : (
+   380→          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+   381→            <div className="flex items-start gap-3">
+   382→              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-400">
+   383→                <ShieldAlert className="h-5 w-5" />
+   384→              </div>
+   385→              <div className="flex-1">
+   386→                <p className="font-semibold text-red-300">Step 8 not completed</p>
+   387→                <p className="mt-1 text-sm text-slate-400">
+   388→                  The local summary (privacy firewall) has not been generated. Orio AI tasks are hard-disabled for this patient until the wizard is completed through Step 8.
+   389→                </p>
+   390→                <Button size="sm" className="mt-3 fx-btn-border-trace btn-press ripple gap-1.5" onClick={onGoToWizard}>
+   391→                  <UserPlus className="h-3.5 w-3.5" /> Open Patient Entry Wizard
+   392→                </Button>
+   393→              </div>
+   394→            </div>
+   395→          </div>
+   396→        )}
+   397→      </GlassPanel>
+   398→    </div>
+   399→  )
+   400→}
+   401→
+   402→// ── Vitals Tab ───────────────────────────────────────────────────────────────
+   403→function VitalsTab({ vitals }: { vitals: VitalsRecord[] }) {
+   404→  if (vitals.length === 0) {
+   405→    return <EmptyState icon={<HeartPulse className="h-7 w-7" />} title="No vitals recorded" description="Vitals captured during the patient entry wizard will appear here." />
+   406→  }
+   407→  return (
+   408→    <GlassPanel className="p-4 sm:p-5">
+   409→      <SectionHeader title="Vitals History" subtitle={`${vitals.length} record(s) · latest first`} />
+   410→      <div className="mt-4 overflow-x-auto orio-scroll">
+   411→        <table className="w-full text-sm">
+   412→          <thead>
+   413→            <tr className="border-b border-white/10 text-left text-xs text-slate-400">
+   414→              <th className="pb-2 pr-3 font-medium">Recorded</th>
+   415→              <th className="pb-2 pr-3 font-medium">Triage</th>
+   416→              <th className="pb-2 pr-3 font-medium">Temp</th>
+   417→              <th className="pb-2 pr-3 font-medium">BP</th>
+   418→              <th className="pb-2 pr-3 font-medium">HR</th>
+   419→              <th className="pb-2 pr-3 font-medium">SpO₂</th>
+   420→              <th className="pb-2 pr-3 font-medium">Weight</th>
+   421→              <th className="pb-2 font-medium">By</th>
+   422→            </tr>
+   423→          </thead>
+   424→          <tbody>
+   425→            {vitals.map((v) => (
+   426→              <tr key={v.id} className="border-b border-white/10 last:border-0">
+   427→                <td className="py-2.5 pr-3 text-xs text-slate-400">
+   428→                  {format(new Date(v.recordedAt), 'dd MMM yyyy, HH:mm')}
+   429→                </td>
+   430→                <td className="py-2.5 pr-3">
+   431→                  <TriageBadge level={(v.triageLevel as TriageLevel) ?? null} />
+   432→                </td>
+   433→                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
+   434→                  {v.temperature != null ? `${v.temperature}°C` : '—'}
+   435→                </td>
+   436→                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
+   437→                  {v.bpSystolic != null && v.bpDiastolic != null ? `${v.bpSystolic}/${v.bpDiastolic}` : '—'}
+   438→                </td>
+   439→                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
+   440→                  {v.heartRate != null ? `${v.heartRate}` : '—'}
+   441→                </td>
+   442→                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
+   443→                  {v.spo2 != null ? `${v.spo2}%` : '—'}
+   444→                </td>
+   445→                <td className="py-2.5 pr-3 tabular-nums text-slate-100">
+   446→                  {v.weightKg != null ? `${v.weightKg} kg` : '—'}
+   447→                </td>
+   448→                <td className="py-2.5 text-xs text-slate-400">
+   449→                  {formatDistanceToNow(new Date(v.recordedAt), { addSuffix: true })}
+   450→                </td>
+   451→              </tr>
+   452→            ))}
+   453→          </tbody>
+   454→        </table>
+   455→      </div>
+   456→    </GlassPanel>
+   457→  )
+   458→}
+   459→
+   460→// ── AI Results Tab ───────────────────────────────────────────────────────────
+   461→function AiResultsTab({ results }: { results: AiResultRecord[] }) {
+   462→  if (results.length === 0) {
+   463→    return (
+   464→      <EmptyState
+   465→        icon={<Sparkles className="h-7 w-7" />}
+   466→        title="No AI results yet"
+   467→        description="Advisory outputs from Orio AI (diagnosis, treatment, prescriptions, etc.) will appear here. Run a task from the Orio AI module."
+   468→      />
+   469→    )
+   470→  }
+   471→  return (
+   472→    <div className="space-y-4">
+   473→      <SectionHeader title="AI Results" subtitle={`${results.length} advisory output(s) · all reviewed by human professional`} />
+   474→      {results.map((r) => (
+   475→        <AiResultCard key={r.id} result={r} />
+   476→      ))}
+   477→    </div>
+   478→  )
+   479→}
+   480→
+   481→function AiResultCard({ result }: { result: AiResultRecord }) {
+   482→  const [expanded, setExpanded] = useState(false)
+   483→  const output = safeParse<AiOutput>(result.fullOutput, {} as AiOutput)
+   484→  const limitations = safeParse<string[]>(result.limitations, [])
+   485→  const taskLabel = AI_TASK_LABELS[result.taskType as keyof typeof AI_TASK_LABELS] ?? result.taskType
+   486→
+   487→  return (
+   488→    <GlassPanel className="p-4 sm:p-5">
+   489→      <div className="flex flex-wrap items-start justify-between gap-3">
+   490→        <div className="flex items-start gap-3">
+   491→          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
+   492→            <TaskIcon taskType={result.taskType} />
+   493→          </div>
+   494→          <div>
+   495→            <p className="font-semibold text-slate-100">{taskLabel}</p>
+   496→            <p className="text-xs text-slate-400">
+   497→              {format(new Date(result.createdAt), 'dd MMM yyyy, HH:mm')} · by {result.createdByStaff?.name ?? '—'}
+   498→            </p>
+   499→          </div>
+   500→        </div>
+   501→        <div className="flex flex-wrap items-center gap-1.5">
+   502→          <RiskBadge level={(result.riskLevel as RiskLevel) ?? 'moderate'} />
+   503→          <Badge variant="outline" className="gap-1 border-violet-500/30 text-[10px] text-violet-300">
+   504→            <Sparkles className="h-2.5 w-2.5" /> Tier {result.tierUsed}
+   505→          </Badge>
+   506→          <Badge variant="outline" className="border-white/10 text-[10px] text-slate-300">{result.recommendationType}</Badge>
+   507→        </div>
+   508→      </div>
+   509→
+   510→      <p className="mt-3 text-sm text-slate-100">{result.summary}</p>
+   511→
+   512→      <div className="mt-3 max-w-xs">
+   513→        <div className="mb-1 flex items-center justify-between text-xs">
+   514→          <span className="text-slate-400">Confidence</span>
+   515→          <span className="font-semibold tabular-nums text-slate-100">{Math.round(result.confidence * 100)}%</span>
+   516→        </div>
+   517→        <ConfidenceMeter value={result.confidence} />
+   518→      </div>
+   519→
+   520→      {/* Rich output */}
+   521→      <AnimatePresence>
+   522→        {expanded && (
+   523→          <motion.div
+   524→            initial={{ opacity: 0, height: 0 }}
+   525→            animate={{ opacity: 1, height: 'auto' }}
+   526→            exit={{ opacity: 0, height: 0 }}
+   527→            className="mt-4 space-y-3 overflow-hidden"
+   528→          >
+   529→            {/* Diagnosis */}
+   530→            {output.diagnosis && output.diagnosis.length > 0 && (
+   531→              <RichBlock title="Differential Diagnosis" icon={<Stethoscope className="h-3.5 w-3.5" />}>
+   532→                <div className="space-y-2">
+   533→                  {output.diagnosis.map((d, i) => (
+   534→                    <div key={i} className="rounded-md bg-white/5 px-3 py-2">
+   535→                      <div className="flex items-center justify-between">
+   536→                        <span className="text-sm font-medium text-slate-100">{i + 1}. {d.condition}</span>
+   537→                        <span className="text-xs font-semibold tabular-nums text-violet-300">{Math.round(d.probability * 100)}%</span>
+   538→                      </div>
+   539→                      <p className="mt-1 text-xs text-slate-400">{d.reasoning}</p>
+   540→                    </div>
+   541→                  ))}
+   542→                </div>
+   543→              </RichBlock>
+   544→            )}
+   545→
+   546→            {/* Treatment plan */}
+   547→            {output.treatment_plan && output.treatment_plan.length > 0 && (
+   548→              <RichBlock title="Treatment Plan" icon={<ClipboardList className="h-3.5 w-3.5" />}>
+   549→                <ListItems items={output.treatment_plan} />
+   550→              </RichBlock>
+   551→            )}
+   552→
+   553→            {/* Prescription */}
+   554→            {output.prescription && output.prescription.length > 0 && (
+   555→              <RichBlock title="Prescription" icon={<Pill className="h-3.5 w-3.5" />}>
+   556→                <div className="overflow-x-auto orio-scroll">
+   557→                  <table className="w-full text-xs">
+   558→                    <thead>
+   559→                      <tr className="border-b border-white/10 text-left text-slate-400">
+   560→                        <th className="py-1 pr-2 font-medium">Drug</th>
+   561→                        <th className="py-1 pr-2 font-medium">Dose</th>
+   562→                        <th className="py-1 pr-2 font-medium">Freq</th>
+   563→                        <th className="py-1 font-medium">Duration</th>
+   564→                      </tr>
+   565→                    </thead>
+   566→                    <tbody>
+   567→                      {output.prescription.map((rx, i) => (
+   568→                        <tr key={i} className="border-b border-white/10 last:border-0">
+   569→                          <td className="py-1.5 pr-2 font-medium text-slate-100">{rx.drug}</td>
+   570→                          <td className="py-1.5 pr-2 tabular-nums text-slate-300">{rx.dosage}</td>
+   571→                          <td className="py-1.5 pr-2 text-slate-300">{rx.frequency}</td>
+   572→                          <td className="py-1.5 text-slate-300">{rx.duration}</td>
+   573→                        </tr>
+   574→                      ))}
+   575→                    </tbody>
+   576→                  </table>
+   577→                </div>
+   578→              </RichBlock>
+   579→            )}
+   580→
+   581→            {/* Advice */}
+   582→            {output.advice && output.advice.length > 0 && (
+   583→              <RichBlock title="Advice" icon={<Activity className="h-3.5 w-3.5" />}>
+   584→                <ListItems items={output.advice} />
+   585→              </RichBlock>
+   586→            )}
+   587→
+   588→            {/* Complications */}
+   589→            {output.complications && output.complications.length > 0 && (
+   590→              <RichBlock title="Possible Complications" icon={<AlertTriangle className="h-3.5 w-3.5" />}>
+   591→                <ListItems items={output.complications} />
+   592→              </RichBlock>
+   593→            )}
+   594→
+   595→            {/* Interactions */}
+   596→            {output.interactions && output.interactions.length > 0 && (
+   597→              <RichBlock title="Drug Interactions" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
+   598→                <ListItems items={output.interactions} />
+   599→              </RichBlock>
+   600→            )}
+   601→
+   602→            {/* Lab analysis */}
+   603→            {output.parameters_analysis && output.parameters_analysis.length > 0 && (
+   604→              <RichBlock title="Lab Analysis" icon={<FlaskConical className="h-3.5 w-3.5" />}>
+   605→                <div className="space-y-1.5">
+   606→                  {output.parameters_analysis.map((p, i) => (
+   607→                    <div key={i} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-1.5 text-xs">
+   608→                      <span className="font-medium text-slate-100">{p.parameter}</span>
+   609→                      <span className="tabular-nums text-slate-400">{p.value}</span>
+   610→                      <span className={cn(
+   611→                        'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase',
+   612→                        p.status === 'normal' && 'bg-emerald-500/15 text-emerald-300',
+   613→                        p.status === 'low' && 'bg-amber-500/15 text-amber-300',
+   614→                        p.status === 'high' && 'bg-red-500/15 text-red-400',
+   615→                      )}>{p.status}</span>
+   616→                    </div>
+   617→                  ))}
+   618→                </div>
+   619→              </RichBlock>
+   620→            )}
+   621→
+   622→            {/* Limitations */}
+   623→            {limitations.length > 0 && (
+   624→              <RichBlock title="Limitations" icon={<AlertTriangle className="h-3.5 w-3.5" />}>
+   625→                <ListItems items={limitations} />
+   626→              </RichBlock>
+   627→            )}
+   628→
+   629→            <DisclaimerChip text={result.disclaimer} />
+   630→          </motion.div>
+   631→        )}
+   632→      </AnimatePresence>
+   633→
+   634→      <div className="mt-3 flex items-center gap-2">
+   635→        <Button variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)} className="fx-btn-border-trace btn-press ripple gap-1 text-xs text-slate-300 hover:text-slate-100">
+   636→          {expanded ? 'Hide details' : 'Show details'}
+   637→        </Button>
+   638→        <span className="text-[11px] text-slate-400">
+   639→          {result.modelUsed ? `Model: ${result.modelUsed}` : ''}
+   640→        </span>
+   641→      </div>
+   642→    </GlassPanel>
+   643→  )
+   644→}
+   645→
+   646→// ── Lab Reports Tab ──────────────────────────────────────────────────────────
+   647→function LabReportsTab({ reports }: { reports: LabReportRecord[] }) {
+   648→  if (reports.length === 0) {
+   649→    return (
+   650→      <EmptyState
+   651→        icon={<FlaskConical className="h-7 w-7" />}
+   652→        title="No lab reports"
+   653→        description="Lab reports generated via the AI Hub or entered by lab technicians will appear here."
+   654→      />
+   655→    )
+   656→  }
+   657→  return (
+   658→    <div className="space-y-4">
+   659→      <SectionHeader title="Lab Reports" subtitle={`${reports.length} report(s)`} />
+   660→      {reports.map((r) => {
+   661→        const params = safeParse<Array<{ name: string; value: string; unit?: string; refRange?: string; status?: string; note?: string }>>(r.parameters, [])
+   662→        const typeLabel = LAB_REPORT_LABELS[r.reportType] ?? r.reportType
+   663→        return (
+   664→          <GlassPanel key={r.id} className="p-4 sm:p-5">
+   665→            <div className="flex flex-wrap items-start justify-between gap-3">
+   666→              <div className="flex items-start gap-3">
+   667→                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
+   668→                  <FlaskConical className="h-5 w-5" />
+   669→                </div>
+   670→                <div>
+   671→                  <p className="font-semibold text-slate-100">{typeLabel}</p>
+   672→                  <p className="text-xs text-slate-400">
+   673→                    {format(new Date(r.createdAt), 'dd MMM yyyy, HH:mm')} · by {r.createdByStaff?.name ?? '—'}
+   674→                  </p>
+   675→                </div>
+   676→              </div>
+   677→              <div className="flex items-center gap-1.5">
+   678→                {r.isNormal === null ? (
+   679→                  <Badge variant="outline" className="border-white/10 text-slate-400">Unknown</Badge>
+   680→                ) : r.isNormal ? (
+   681→                  <Badge className="gap-1 bg-emerald-500/15 text-emerald-300">
+   682→                    <CheckCircle2 className="h-3 w-3" /> All Normal
+   683→                  </Badge>
+   684→                ) : (
+   685→                  <Badge className="gap-1 bg-amber-500/15 text-amber-300">
+   686→                    <AlertTriangle className="h-3 w-3" /> Abnormal
+   687→                  </Badge>
+   688→                )}
+   689→                <Badge variant="outline" className="border-white/10 text-[10px] text-slate-300">{r.status}</Badge>
+   690→              </div>
+   691→            </div>
+   692→
+   693→            {params.length > 0 && (
+   694→              <div className="mt-3 overflow-x-auto orio-scroll">
+   695→                <table className="w-full text-sm">
+   696→                  <thead>
+   697→                    <tr className="border-b border-white/10 text-left text-xs text-slate-400">
+   698→                      <th className="pb-2 pr-3 font-medium">Parameter</th>
+   699→                      <th className="pb-2 pr-3 font-medium">Value</th>
+   700→                      <th className="pb-2 pr-3 font-medium">Unit</th>
+   701→                      <th className="pb-2 pr-3 font-medium">Ref Range</th>
+   702→                      <th className="pb-2 pr-3 font-medium">Status</th>
+   703→                      <th className="pb-2 font-medium">Note</th>
+   704→                    </tr>
+   705→                  </thead>
+   706→                  <tbody>
+   707→                    {params.map((p, i) => (
+   708→                      <tr key={i} className="border-b border-white/10 last:border-0">
+   709→                        <td className="py-2 pr-3 font-medium text-slate-100">{p.name}</td>
+   710→                        <td className="py-2 pr-3 tabular-nums text-slate-100">{p.value || '—'}</td>
+   711→                        <td className="py-2 pr-3 text-slate-400">{p.unit || '—'}</td>
+   712→                        <td className="py-2 pr-3 text-slate-400">{p.refRange || '—'}</td>
+   713→                        <td className="py-2 pr-3">
+   714→                          <LabStatus status={p.status} />
+   715→                        </td>
+   716→                        <td className="py-2 text-xs text-slate-400">{p.note || '—'}</td>
+   717→                      </tr>
+   718→                    ))}
+   719→                  </tbody>
+   720→                </table>
+   721→              </div>
+   722→            )}
+   723→
+   724→            {r.aiFeedback && (
+   725→              <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
+   726→                <p className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
+   727→                  <Sparkles className="h-3.5 w-3.5" /> AI Feedback
+   728→                </p>
+   729→                <p className="mt-1 text-sm text-slate-100/90">{r.aiFeedback}</p>
+   730→                <DisclaimerChip text="AI feedback is advisory and must be reviewed by a human professional." />
+   731→              </div>
+   732→            )}
+   733→          </GlassPanel>
+   734→        )
+   735→      })}
+   736→    </div>
+   737→  )
+   738→}
+   739→
+   740→// ── Invoices Tab ─────────────────────────────────────────────────────────────
+   741→function InvoicesTab({ invoices }: { invoices: InvoiceRecord[] }) {
+   742→  if (invoices.length === 0) {
+   743→    return (
+   744→      <EmptyState
+   745→        icon={<Receipt className="h-7 w-7" />}
+   746→        title="No invoices"
+   747→        description="Invoices generated via the AI Hub or billing workflows will appear here."
+   748→      />
+   749→    )
+   750→  }
+   751→  return (
+   752→    <div className="space-y-4">
+   753→      <SectionHeader title="Invoices" subtitle={`${invoices.length} invoice(s)`} />
+   754→      {invoices.map((inv) => {
+   755→        const items = safeParse<Array<{ description: string; quantity: number; unit_price: number }>>(inv.items, [])
+   756→        return (
+   757→          <GlassPanel key={inv.id} className="p-4 sm:p-5">
+   758→            <div className="flex flex-wrap items-start justify-between gap-3">
+   759→              <div className="flex items-start gap-3">
+   760→                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15 text-amber-300">
+   761→                  <Receipt className="h-5 w-5" />
+   762→                </div>
+   763→                <div>
+   764→                  <p className="font-semibold font-mono text-slate-100">{inv.invoiceNo}</p>
+   765→                  <p className="text-xs text-slate-400">
+   766→                    {format(new Date(inv.createdAt), 'dd MMM yyyy, HH:mm')}
+   767→                  </p>
+   768→                </div>
+   769→              </div>
+   770→              <div className="flex items-center gap-1.5">
+   771→                <InvoiceStatus status={inv.status} />
+   772→              </div>
+   773→            </div>
+   774→
+   775→            {items.length > 0 && (
+   776→              <div className="mt-3 overflow-x-auto orio-scroll">
+   777→                <table className="w-full text-sm">
+   778→                  <thead>
+   779→                    <tr className="border-b border-white/10 text-left text-xs text-slate-400">
+   780→                      <th className="pb-2 pr-3 font-medium">Description</th>
+   781→                      <th className="pb-2 pr-3 text-right font-medium">Qty</th>
+   782→                      <th className="pb-2 pr-3 text-right font-medium">Unit</th>
+   783→                      <th className="pb-2 text-right font-medium">Amount</th>
+   784→                    </tr>
+   785→                  </thead>
+   786→                  <tbody>
+   787→                    {items.map((it, i) => (
+   788→                      <tr key={i} className="border-b border-white/10 last:border-0">
+   789→                        <td className="py-2 pr-3 text-slate-100">{it.description}</td>
+   790→                        <td className="py-2 pr-3 text-right tabular-nums text-slate-300">{it.quantity}</td>
+   791→                        <td className="py-2 pr-3 text-right tabular-nums text-slate-300">{formatCurrency(it.unit_price)}</td>
+   792→                        <td className="py-2 text-right font-medium tabular-nums text-violet-300">
+   793→                          {formatCurrency((it.quantity ?? 0) * (it.unit_price ?? 0))}
+   794→                        </td>
+   795→                      </tr>
+   796→                    ))}
+   797→                  </tbody>
+   798→                </table>
+   799→              </div>
+   800→            )}
+   801→
+   802→            <div className="mt-3 flex flex-wrap justify-end gap-x-6 gap-y-1 text-sm">
+   803→              <span className="text-slate-400">Subtotal: <span className="font-medium text-slate-100 tabular-nums">{formatCurrency(inv.subtotal)}</span></span>
+   804→              <span className="text-slate-400">Tax: <span className="font-medium text-slate-100 tabular-nums">{formatCurrency(inv.tax)}</span></span>
+   805→              <span className="text-slate-400">Total: <span className="font-bold text-violet-300 tabular-nums">{formatCurrency(inv.total)}</span></span>
+   806→            </div>
+   807→          </GlassPanel>
+   808→        )
+   809→      })}
+   810→    </div>
+   811→  )
+   812→}
+   813→
+   814→// ── Appointments Tab ─────────────────────────────────────────────────────────
+   815→function AppointmentsTab({ appointments }: { appointments: AppointmentRecord[] }) {
+   816→  if (appointments.length === 0) {
+   817→    return (
+   818→      <EmptyState
+   819→        icon={<CalendarClock className="h-7 w-7" />}
+   820→        title="No appointments"
+   821→        description="Scheduled appointments with assigned doctors will appear here."
+   822→      />
+   823→    )
+   824→  }
+   825→  return (
+   826→    <div className="space-y-4">
+   827→      <SectionHeader title="Appointments" subtitle={`${appointments.length} appointment(s)`} />
+   828→      <div className="grid gap-3 sm:grid-cols-2">
+   829→        {appointments.map((a) => (
+   830→          <GlassPanel key={a.id} className="p-4">
+   831→            <div className="flex items-start justify-between gap-3">
+   832→              <div className="flex items-start gap-3">
+   833→                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-300">
+   834→                  {a.doctor.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
+   835→                </div>
+   836→                <div>
+   837→                  <p className="font-medium text-slate-100">{a.doctor.name}</p>
+   838→                  <p className="text-xs text-slate-400">
+   839→                    <RoleBadge role={a.doctor.role} />
+   840→                  </p>
+   841→                </div>
+   842→              </div>
+   843→              <ApptStatus status={a.status} />
+   844→            </div>
+   845→            <div className="mt-3 space-y-1 text-sm">
+   846→              <p className="flex items-center gap-1.5 text-slate-400">
+   847→                <CalendarClock className="h-3.5 w-3.5" />
+   848→                {format(new Date(a.scheduledAt), 'dd MMM yyyy, HH:mm')}
+   849→              </p>
+   850→              {a.reason && (
+   851→                <p className="text-xs text-slate-400">Reason: {a.reason}</p>
+   852→              )}
+   853→            </div>
+   854→          </GlassPanel>
+   855→        ))}
+   856→      </div>
+   857→    </div>
+   858→  )
+   859→}
+   860→
+   861→// ── Shared sub-components ────────────────────────────────────────────────────
+   862→function Demographic({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+   863→  return (
+   864→    <div className="flex items-start gap-2.5">
+   865→      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-white/5 text-slate-400">
+   866→        {icon}
+   867→      </div>
+   868→      <div className="min-w-0">
+   869→        <p className="text-xs text-slate-400">{label}</p>
+   870→        <p className="truncate text-sm font-medium text-slate-100">{value}</p>
+   871→      </div>
+   872→    </div>
+   873→  )
+   874→}
+   875→
+   876→function AllergyList({ items }: { items: Array<Record<string, string>> | string[] }) {
+   877→  if (!items || items.length === 0) {
+   878→    return <p className="mt-0.5 text-sm text-slate-400">None recorded</p>
+   879→  }
+   880→  return (
+   881→    <div className="mt-1 flex flex-wrap gap-1.5">
+   882→      {items.map((it, i) => {
+   883→        if (typeof it === 'string') {
+   884→          return <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-300 text-[11px]">{it}</Badge>
+   885→        }
+   886→        return (
+   887→          <Badge key={i} variant="outline" className="gap-1 border-red-500/30 bg-red-500/5 text-red-300 text-[11px]">
+   888→            {it.allergen ?? it.name ?? '?'}
+   889→            {it.severity && <span className="opacity-70">({it.severity})</span>}
+   890→          </Badge>
+   891→        )
+   892→      })}
+   893→    </div>
+   894→  )
+   895→}
+   896→
+   897→function MedicationList({ items }: { items: Array<Record<string, string>> | string[] }) {
+   898→  if (!items || items.length === 0) {
+   899→    return <p className="mt-0.5 text-sm text-slate-400">None recorded</p>
+   900→  }
+   901→  return (
+   902→    <div className="mt-1 space-y-1">
+   903→      {items.map((it, i) => {
+   904→        if (typeof it === 'string') {
+   905→          return <p key={i} className="text-sm text-slate-100">• {it}</p>
+   906→        }
+   907→        const parts = [it.drug ?? it.name, it.dose ?? it.dosage, it.frequency].filter(Boolean)
+   908→        return <p key={i} className="text-sm text-slate-100">• {parts.join(' — ')}</p>
+   909→      })}
+   910→    </div>
+   911→  )
+   912→}
+   913→
+   914→function RichBlock({
+   915→  title, icon, children,
+   916→}: {
+   917→  title: string
+   918→  icon: React.ReactNode
+   919→  children: React.ReactNode
+   920→}) {
+   921→  return (
+   922→    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+   923→      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-violet-300">
+   924→        {icon} {title}
+   925→      </p>
+   926→      {children}
+   927→    </div>
+   928→  )
+   929→}
+   930→
+   931→function ListItems({ items }: { items: string[] }) {
+   932→  return (
+   933→    <ul className="space-y-1">
+   934→      {items.map((it, i) => (
+   935→        <li key={i} className="text-sm text-slate-100/90">• {it}</li>
+   936→      ))}
+   937→    </ul>
+   938→  )
+   939→}
+   940→
+   941→function TaskIcon({ taskType }: { taskType: string }) {
+   942→  const icon = useMemo(() => {
+   943→    switch (taskType) {
+   944→      case 'DIAGNOSIS': return <Stethoscope className="h-5 w-5" />
+   945→      case 'TREATMENT': return <ClipboardList className="h-5 w-5" />
+   946→      case 'RX_GENERATION': return <Pill className="h-5 w-5" />
+   947→      case 'LAB_ANALYSIS': return <FlaskConical className="h-5 w-5" />
+   948→      case 'INVOICE': return <Receipt className="h-5 w-5" />
+   949→      case 'CERTIFICATE': return <FileBadge className="h-5 w-5" />
+   950→      case 'NOTIFY_DOCTOR': return <CalendarClock className="h-5 w-5" />
+   951→      default: return <Sparkles className="h-5 w-5" />
+   952→    }
+   953→  }, [taskType])
+   954→  return <>{icon}</>
+   955→}
+   956→
+   957→function StatusBadge({ status }: { status: string }) {
+   958→  const map: Record<string, string> = {
+   959→    DRAFT: 'bg-white/5 text-slate-400 border-white/10',
+   960→    IN_PROGRESS: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+   961→    COMPLETED: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
+   962→    REVIEWED: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+   963→  }
+   964→  return (
+   965→    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium', map[status] ?? map.DRAFT)}>
+   966→      {status.replace('_', ' ')}
+   967→    </span>
+   968→  )
+   969→}
+   970→
+   971→function LabStatus({ status }: { status?: string }) {
+   972→  if (!status) return <span className="text-xs text-slate-500">—</span>
+   973→  const map: Record<string, string> = {
+   974→    normal: 'bg-emerald-500/15 text-emerald-300',
+   975→    low: 'bg-amber-500/15 text-amber-300',
+   976→    high: 'bg-red-500/15 text-red-400',
+   977→  }
+   978→  return (
+   979→    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase', map[status] ?? 'bg-white/5 text-slate-400')}>
+   980→      {status}
+   981→    </span>
+   982→  )
+   983→}
+   984→
+   985→function InvoiceStatus({ status }: { status: string }) {
+   986→  const map: Record<string, { cls: string; icon: React.ReactNode }> = {
+   987→    PENDING: { cls: 'bg-amber-500/15 text-amber-300', icon: <AlertTriangle className="h-3 w-3" /> },
+   988→    PAID: { cls: 'bg-emerald-500/15 text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
+   989→    CANCELLED: { cls: 'bg-red-500/15 text-red-400', icon: <X className="h-3 w-3" /> },
+   990→  }
+   991→  const c = map[status] ?? map.PENDING
+   992→  return (
+   993→    <Badge variant="outline" className={cn('gap-1 border-white/10', c.cls)}>
+   994→      {c.icon} {status}
+   995→    </Badge>
+   996→  )
+   997→}
+   998→
+   999→function ApptStatus({ status }: { status: string }) {
+  1000→  const map: Record<string, string> = {
+  1001→    SCHEDULED: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
+  1002→    IN_PROGRESS: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  1003→    COMPLETED: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  1004→    CANCELLED: 'bg-red-500/15 text-red-400 border-red-500/30',
+  1005→  }
+  1006→  return (
+  1007→    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', map[status] ?? map.SCHEDULED)}>
+  1008→      {status}
+  1009→    </span>
+  1010→  )
+  1011→}
+  1012→
+  1013→function EmptyState({
+  1014→  icon, title, description,
+  1015→}: {
+  1016→  icon: React.ReactNode
+  1017→  title: string
+  1018→  description: string
+  1019→}) {
+  1020→  return (
+  1021→    <GlassPanel variant="subtle" className="flex flex-col items-center justify-center gap-3 p-10 text-center">
+  1022→      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-slate-500">
+  1023→        {icon}
+  1024→      </div>
+  1025→      <div>
+  1026→        <p className="font-semibold text-slate-100">{title}</p>
+  1027→        <p className="mx-auto mt-1 max-w-md text-sm text-slate-400">{description}</p>
+  1028→      </div>
+  1029→    </GlassPanel>
+  1030→  )
+  1031→}
+  1032→
+  1033→// ── Helpers ──────────────────────────────────────────────────────────────────
+  1034→function safeParse<T>(s: string | null | undefined, fallback: T): T {
+  1035→  if (!s) return fallback
+  1036→  try {
+  1037→    return JSON.parse(s) as T
+  1038→  } catch {
+  1039→    return fallback
+  1040→  }
+  1041→}
+  1042→
+  1043→function formatCurrency(n: number): string {
+  1044→  return new Intl.NumberFormat('en-IN', {
+  1045→    style: 'currency',
+  1046→    currency: 'INR',
+  1047→    maximumFractionDigits: 2,
+  1048→  }).format(n ?? 0)
+  1049→}
+  1050→

@@ -1,0 +1,979 @@
+     1→'use client'
+     2→
+     3→// ─────────────────────────────────────────────────────────────────────────────
+     4→// ORIOSTER — AI Hub (Document Generation Center)
+     5→// Central command module for generating documents through fixed templates.
+     6→// All AI outputs are ADVISORY ONLY — doctor/admin must review before action.
+     7→// Privacy firewall enforced: patient must have patient_summary_v1.
+     8→// ─────────────────────────────────────────────────────────────────────────────
+     9→
+    10→import { useCallback, useEffect, useMemo, useState } from 'react'
+    11→import { motion, AnimatePresence } from 'framer-motion'
+    12→import { toast } from 'sonner'
+    13→import {
+    14→  LayoutGrid, Receipt, FlaskConical, Pill, FileBadge, Sparkles, Loader2,
+    15→  ChevronRight, Lock, ShieldAlert, CheckCircle2, RefreshCw, Save,
+    16→  AlertTriangle, Activity, FileText,
+    17→} from 'lucide-react'
+    18→
+    19→import { useAppStore } from '@/lib/store'
+    20→import {
+    21→  GlassPanel, RiskBadge, DisclaimerChip, ConfidenceMeter,
+    22→  TriageBadge, SyncStatusBadge,
+    23→} from '@/components/orioster/ui-primitives'
+    24→import { Button } from '@/components/ui/button'
+    25→import { Badge } from '@/components/ui/badge'
+    26→import { Input } from '@/components/ui/input'
+    27→import { Label } from '@/components/ui/label'
+    28→import {
+    29→  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+    30→} from '@/components/ui/dialog'
+    31→import {
+    32→  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+    33→} from '@/components/ui/select'
+    34→import { Separator } from '@/components/ui/separator'
+    35→import { ScrollArea } from '@/components/ui/scroll-area'
+    36→import { cn } from '@/lib/utils'
+    37→import {
+    38→  MANDATORY_DISCLAIMER, type AiOutput, type RiskLevel, type TriageLevel,
+    39→  LAB_REPORT_TYPES, LAB_REPORT_LABELS, type AiTaskType, AI_TASK_LABELS,
+    40→} from '@/lib/types'
+    41→
+    42→// ── Patient type (minimal) ───────────────────────────────────────────────────
+    43→interface HubPatient {
+    44→  id: string
+    45→  localId: string
+    46→  fullName: string
+    47→  gender: string
+    48→  age: number | null
+    49→  chiefComplaint: string | null
+    50→  localSummary: string | null
+    51→  status: string
+    52→  syncStatus: string
+    53→  vitals: Array<{ triageLevel: string | null }>
+    54→}
+    55→
+    56→interface AiCallResult {
+    57→  output: AiOutput
+    58→  tierUsed: number
+    59→  modelUsed: string
+    60→  disclaimer: string
+    61→}
+    62→
+    63→type DocType = 'INVOICE' | 'LAB_REPORT' | 'PRESCRIPTION' | 'CERTIFICATE'
+    64→
+    65→// ── Lab parameter templates ──────────────────────────────────────────────────
+    66→interface ParamTemplate { name: string; unit: string; refRange: string }
+    67→const LAB_PARAMETER_TEMPLATES: Record<string, ParamTemplate[]> = {
+    68→  CBC: [
+    69→    { name: 'Hemoglobin', unit: 'g/dL', refRange: '13.0-17.0' },
+    70→    { name: 'WBC Count', unit: '10³/µL', refRange: '4.0-11.0' },
+    71→    { name: 'Platelet Count', unit: '10³/µL', refRange: '150-450' },
+    72→    { name: 'RBC Count', unit: '10⁶/µL', refRange: '4.5-5.5' },
+    73→    { name: 'Hematocrit', unit: '%', refRange: '40-50' },
+    74→  ],
+    75→  LIPID_PANEL: [
+    76→    { name: 'Total Cholesterol', unit: 'mg/dL', refRange: '<200' },
+    77→    { name: 'LDL', unit: 'mg/dL', refRange: '<100' },
+    78→    { name: 'HDL', unit: 'mg/dL', refRange: '>40' },
+    79→    { name: 'Triglycerides', unit: 'mg/dL', refRange: '<150' },
+    80→  ],
+    81→  LFT: [
+    82→    { name: 'ALT', unit: 'U/L', refRange: '7-56' },
+    83→    { name: 'AST', unit: 'U/L', refRange: '10-40' },
+    84→    { name: 'Bilirubin Total', unit: 'mg/dL', refRange: '0.1-1.2' },
+    85→    { name: 'Albumin', unit: 'g/dL', refRange: '3.5-5.0' },
+    86→  ],
+    87→  RFT: [
+    88→    { name: 'Urea', unit: 'mg/dL', refRange: '7-20' },
+    89→    { name: 'Creatinine', unit: 'mg/dL', refRange: '0.6-1.2' },
+    90→    { name: 'Sodium', unit: 'mmol/L', refRange: '135-145' },
+    91→    { name: 'Potassium', unit: 'mmol/L', refRange: '3.5-5.0' },
+    92→  ],
+    93→  BLOOD_GLUCOSE: [
+    94→    { name: 'Fasting Glucose', unit: 'mg/dL', refRange: '70-100' },
+    95→    { name: 'Postprandial Glucose', unit: 'mg/dL', refRange: '<140' },
+    96→    { name: 'HbA1c', unit: '%', refRange: '<5.7' },
+    97→  ],
+    98→  URINALYSIS: [
+    99→    { name: 'pH', unit: '', refRange: '5-8' },
+   100→    { name: 'Specific Gravity', unit: '', refRange: '1.005-1.030' },
+   101→    { name: 'Protein', unit: '', refRange: 'Negative' },
+   102→    { name: 'Glucose', unit: '', refRange: 'Negative' },
+   103→  ],
+   104→  THYROID: [
+   105→    { name: 'TSH', unit: 'mIU/L', refRange: '0.4-4.0' },
+   106→    { name: 'Free T3', unit: 'pg/mL', refRange: '2.3-4.2' },
+   107→    { name: 'Free T4', unit: 'ng/dL', refRange: '0.8-1.8' },
+   108→  ],
+   109→}
+   110→
+   111→// ── Document type cards config ───────────────────────────────────────────────
+   112→const DOC_CARDS: Array<{
+   113→  type: DocType
+   114→  title: string
+   115→  description: string
+   116→  icon: React.ReactNode
+   117→  accent: string
+   118→  task: AiTaskType
+   119→}> = [
+   120→  {
+   121→    type: 'INVOICE',
+   122→    title: 'Invoice',
+   123→    description: 'AI-generated itemized billing from service summary. Save to patient record.',
+   124→    icon: <Receipt className="h-5 w-5" />,
+   125→    accent: 'bg-amber-500/15 text-amber-300',
+   126→    task: 'INVOICE',
+   127→  },
+   128→  {
+   129→    type: 'LAB_REPORT',
+   130→    title: 'Lab Report',
+   131→    description: 'Enter parameters, AI analyzes normal/abnormal values, save report to patient.',
+   132→    icon: <FlaskConical className="h-5 w-5" />,
+   133→    accent: 'bg-violet-500/15 text-violet-300',
+   134→    task: 'LAB_ANALYSIS',
+   135→  },
+   136→  {
+   137→    type: 'PRESCRIPTION',
+   138→    title: 'Prescription',
+   139→    description: 'AI generates an advisory prescription with dosage, frequency, and notes.',
+   140→    icon: <Pill className="h-5 w-5" />,
+   141→    accent: 'bg-violet-500/15 text-violet-300',
+   142→    task: 'RX_GENERATION',
+   143→  },
+   144→  {
+   145→    type: 'CERTIFICATE',
+   146→    title: 'Medical Certificate',
+   147→    description: 'AI drafts certificate content — doctor reviews and finalizes before signing.',
+   148→    icon: <FileBadge className="h-5 w-5" />,
+   149→    accent: 'bg-emerald-500/15 text-emerald-300',
+   150→    task: 'CERTIFICATE',
+   151→  },
+   152→]
+   153→
+   154→// ── Main View ────────────────────────────────────────────────────────────────
+   155→export function AiHubView() {
+   156→  const { user } = useAppStore()
+   157→  const [patients, setPatients] = useState<HubPatient[]>([])
+   158→  const [loadingPatients, setLoadingPatients] = useState(true)
+   159→  const [activeDoc, setActiveDoc] = useState<DocType | null>(null)
+   160→
+   161→  useEffect(() => {
+   162→    let cancelled = false
+   163→    fetch('/api/patients?limit=200')
+   164→      .then((r) => r.json())
+   165→      .then((d) => {
+   166→        if (cancelled) return
+   167→        setPatients((d.patients ?? []).map((p: HubPatient) => ({
+   168→          id: p.id, localId: p.localId, fullName: p.fullName, gender: p.gender,
+   169→          age: p.age, chiefComplaint: p.chiefComplaint, localSummary: p.localSummary,
+   170→          status: p.status, syncStatus: p.syncStatus, vitals: p.vitals ?? [],
+   171→        })))
+   172→      })
+   173→      .catch(() => toast.error('Failed to load patients'))
+   174→      .finally(() => { if (!cancelled) setLoadingPatients(false) })
+   175→    return () => { cancelled = true }
+   176→  }, [])
+   177→
+   178→  const aiDisabledCount = useMemo(
+   179→    () => patients.filter((p) => !p.localSummary).length,
+   180→    [patients]
+   181→  )
+   182→
+   183→  return (
+   184→    <div className="space-y-3 p-3 lg:space-y-5 lg:p-6">
+   185→      {/* Header */}
+   186→      <GlassPanel variant="strong" className="overflow-hidden p-5 sm:p-6">
+   187→        <div className="flex flex-wrap items-start justify-between gap-4">
+   188→          <div className="flex items-start gap-3">
+   189→            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+   190→              <LayoutGrid className="h-6 w-6" />
+   191→            </div>
+   192→            <div>
+   193→              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">AI Hub — Document Generation Center</h1>
+   194→              <p className="mt-0.5 max-w-2xl text-sm text-slate-400">
+   195→                Generate documents through fixed AI templates. Every output is advisory — review before saving or dispensing.
+   196→              </p>
+   197→            </div>
+   198→          </div>
+   199→          <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-300">
+   200→            <ShieldAlert className="h-3 w-3" /> Advisory Templates
+   201→          </Badge>
+   202→        </div>
+   203→        {/* Status row */}
+   204→        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+   205→          <MiniStat label="Patients" value={patients.length} icon={<FileText className="h-3.5 w-3.5" />} />
+   206→          <MiniStat label="Firewall Active" value={patients.length - aiDisabledCount} icon={<Lock className="h-3.5 w-3.5" />} accent="emerald" />
+   207→          <MiniStat label="AI Disabled" value={aiDisabledCount} icon={<ShieldAlert className="h-3.5 w-3.5" />} accent="red" />
+   208→          <MiniStat label="Templates" value={DOC_CARDS.length} icon={<LayoutGrid className="h-3.5 w-3.5" />} />
+   209→        </div>
+   210→      </GlassPanel>
+   211→
+   212→      {/* Document cards grid */}
+   213→      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+   214→        {DOC_CARDS.map((card) => (
+   215→          <motion.div
+   216→            key={card.type}
+   217→            initial={{ opacity: 0, y: 8 }}
+   218→            animate={{ opacity: 1, y: 0 }}
+   219→            transition={{ duration: 0.2 }}
+   220→          >
+   221→            <GlassPanel className="group flex h-full flex-col p-5 transition-all hover:shadow-lg">
+   222→              <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl', card.accent)}>
+   223→                {card.icon}
+   224→              </div>
+   225→              <h3 className="mt-3 text-base font-semibold">{card.title}</h3>
+   226→              <p className="mt-1 flex-1 text-sm text-slate-400">{card.description}</p>
+   227→              <div className="mt-3 flex items-center justify-between">
+   228→                <span className="text-[11px] text-slate-400">
+   229→                  Task: <code className="rounded bg-white/5 px-1 py-0.5">{card.task}</code>
+   230→                </span>
+   231→              </div>
+   232→              <Button
+   233→                className="fx-btn-border-trace btn-press ripple mt-4 w-full gap-1.5"
+   234→                onClick={() => setActiveDoc(card.type)}
+   235→                disabled={loadingPatients}
+   236→              >
+   237→                <Sparkles className="h-3.5 w-3.5" />
+   238→                Generate
+   239→                <ChevronRight className="h-3.5 w-3.5" />
+   240→              </Button>
+   241→            </GlassPanel>
+   242→          </motion.div>
+   243→        ))}
+   244→      </div>
+   245→
+   246→      {/* Footer note */}
+   247→      <p className="px-1 text-center text-[11px] text-slate-400">
+   248→        AI Hub · {user?.name ?? 'User'} · All outputs include the mandatory disclaimer · Privacy firewall enforced server-side
+   249→      </p>
+   250→
+   251→      {/* Workflow dialog */}
+   252→      <Dialog open={!!activeDoc} onOpenChange={(o) => !o && setActiveDoc(null)}>
+   253→        <DialogContent className="max-h-[90vh] w-[95vw] max-w-3xl overflow-hidden p-0">
+   254→          {activeDoc && (
+   255→            <DocWorkflow
+   256→              docType={activeDoc}
+   257→              patients={patients}
+   258→              onClose={() => setActiveDoc(null)}
+   259→            />
+   260→          )}
+   261→        </DialogContent>
+   262→      </Dialog>
+   263→    </div>
+   264→  )
+   265→}
+   266→
+   267→// ── Document workflow (dialog body) ──────────────────────────────────────────
+   268→function DocWorkflow({
+   269→  docType, patients, onClose,
+   270→}: {
+   271→  docType: DocType
+   272→  patients: HubPatient[]
+   273→  onClose: () => void
+   274→}) {
+   275→  const { user } = useAppStore()
+   276→  const [patientId, setPatientId] = useState<string | null>(null)
+   277→  const [labReportType, setLabReportType] = useState<string>(LAB_REPORT_TYPES[0])
+   278→  const [paramValues, setParamValues] = useState<Record<string, string>>({})
+   279→  const [loading, setLoading] = useState(false)
+   280→  const [result, setResult] = useState<AiCallResult | null>(null)
+   281→  const [saving, setSaving] = useState(false)
+   282→  const [saved, setSaved] = useState(false)
+   283→
+   284→  const patient = useMemo(
+   285→    () => patients.find((p) => p.id === patientId) ?? null,
+   286→    [patients, patientId]
+   287→  )
+   288→  const firewallOk = !!patient?.localSummary
+   289→
+   290→  const card = DOC_CARDS.find((c) => c.type === docType)!
+   291→
+   292→  // Reset state when docType changes
+   293→  useEffect(() => {
+   294→    setPatientId(null)
+   295→    setResult(null)
+   296→    setSaved(false)
+   297→    setParamValues({})
+   298→    setLabReportType(LAB_REPORT_TYPES[0])
+   299→  }, [docType])
+   300→
+   301→  // ── Run AI ──
+   302→  const runAi = useCallback(async () => {
+   303→    if (!patientId) { toast.error('Select a patient first'); return }
+   304→    setLoading(true)
+   305→    setResult(null)
+   306→    try {
+   307→      let customSummary: string | undefined
+   308→      if (docType === 'LAB_REPORT') {
+   309→        const template = LAB_PARAMETER_TEMPLATES[labReportType] ?? []
+   310→        const lines = template.map((t) => {
+   311→          const v = paramValues[t.name] ?? ''
+   312→          return `${t.name}: ${v} ${t.unit} (ref ${t.refRange})`
+   313→        })
+   314→        customSummary = `Lab report type: ${LAB_REPORT_LABELS[labReportType]}. Parameters: ${lines.join('; ')}.`
+   315→      }
+   316→      const res = await fetch('/api/orio-ai', {
+   317→        method: 'POST',
+   318→        headers: { 'Content-Type': 'application/json' },
+   319→        body: JSON.stringify({ patientId, task: card.task, customSummary }),
+   320→      })
+   321→      const data = await res.json()
+   322→      if (data.blocked) {
+   323→        toast.error('AI disabled — patient_summary_v1 not generated.')
+   324→        return
+   325→      }
+   326→      if (!res.ok) throw new Error(data.error ?? 'AI request failed')
+   327→      setResult({
+   328→        output: data.output,
+   329→        tierUsed: data.tierUsed,
+   330→        modelUsed: data.modelUsed,
+   331→        disclaimer: data.disclaimer ?? MANDATORY_DISCLAIMER,
+   332→      })
+   333→      toast.success(`${card.title} generated — Tier ${data.tierUsed}`)
+   334→    } catch (e) {
+   335→      toast.error((e as Error).message)
+   336→    } finally {
+   337→      setLoading(false)
+   338→    }
+   339→  }, [patientId, docType, labReportType, paramValues, card])
+   340→
+   341→  // ── Save invoice ──
+   342→  const saveInvoice = async () => {
+   343→    if (!patientId || !user) return
+   344→    const items = result?.output.line_items ?? []
+   345→    if (items.length === 0) { toast.error('No line items to save'); return }
+   346→    const subtotal = items.reduce((s, it) => s + (it.quantity ?? 0) * (it.unit_price ?? 0), 0)
+   347→    const tax = Math.round(subtotal * 0.05 * 100) / 100
+   348→    const total = subtotal + tax
+   349→    setSaving(true)
+   350→    try {
+   351→      const res = await fetch('/api/invoices', {
+   352→        method: 'POST',
+   353→        headers: { 'Content-Type': 'application/json' },
+   354→        body: JSON.stringify({ patientId, items, subtotal, tax, total, createdBy: user.id }),
+   355→      })
+   356→      if (!res.ok) throw new Error('Failed to save invoice')
+   357→      const d = await res.json()
+   358→      toast.success(`Invoice ${d.invoice?.invoiceNo ?? ''} saved`)
+   359→      setSaved(true)
+   360→    } catch (e) {
+   361→      toast.error((e as Error).message)
+   362→    } finally {
+   363→      setSaving(false)
+   364→    }
+   365→  }
+   366→
+   367→  // ── Save lab report ──
+   368→  const saveLabReport = async () => {
+   369→    if (!patientId || !user) return
+   370→    const template = LAB_PARAMETER_TEMPLATES[labReportType] ?? []
+   371→    const analysisMap = new Map(
+   372→      (result?.output.parameters_analysis ?? []).map((a) => [a.parameter.toLowerCase(), a])
+   373→    )
+   374→    const parameters = template.map((t) => {
+   375→      const val = paramValues[t.name] ?? ''
+   376→      const ai = analysisMap.get(t.name.toLowerCase())
+   377→      return {
+   378→        name: t.name,
+   379→        value: val,
+   380→        unit: t.unit,
+   381→        refRange: t.refRange,
+   382→        status: ai?.status ?? 'normal',
+   383→        note: ai?.note ?? '',
+   384→      }
+   385→    })
+   386→    setSaving(true)
+   387→    try {
+   388→      const res = await fetch('/api/lab-reports', {
+   389→        method: 'POST',
+   390→        headers: { 'Content-Type': 'application/json' },
+   391→        body: JSON.stringify({
+   392→          patientId,
+   393→          reportType: labReportType,
+   394→          parameters,
+   395→          createdBy: user.id,
+   396→        }),
+   397→      })
+   398→      if (!res.ok) throw new Error('Failed to save lab report')
+   399→      toast.success('Lab report saved')
+   400→      setSaved(true)
+   401→    } catch (e) {
+   402→      toast.error((e as Error).message)
+   403→    } finally {
+   404→      setSaving(false)
+   405→    }
+   406→  }
+   407→
+   408→  return (
+   409→    <>
+   410→      <DialogHeader className="border-b border-white/10 px-5 py-4">
+   411→        <div className="flex items-center gap-3">
+   412→          <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', card.accent)}>
+   413→            {card.icon}
+   414→          </div>
+   415→          <div>
+   416→            <DialogTitle className="text-base">{card.title} Generation</DialogTitle>
+   417→            <DialogDescription className="text-xs">
+   418→              AI task: {AI_TASK_LABELS[card.task]} · Advisory output
+   419→            </DialogDescription>
+   420→          </div>
+   421→        </div>
+   422→      </DialogHeader>
+   423→
+   424→      <ScrollArea className="max-h-[calc(90vh-72px)]">
+   425→        <div className="space-y-4 px-5 py-4">
+   426→          {/* Patient selection */}
+   427→          <div>
+   428→            <Label className="text-xs font-medium text-slate-400">Patient</Label>
+   429→            <div className="mt-1.5">
+   430→              <PatientPickerInline
+   431→                patients={patients}
+   432→                value={patientId}
+   433→                onChange={(id) => { setPatientId(id); setResult(null); setSaved(false) }}
+   434→              />
+   435→            </div>
+   436→            {patient && (
+   437→              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+   438→                <TriageBadge level={(patient.vitals[0]?.triageLevel as TriageLevel) ?? null} />
+   439→                <SyncStatusBadge status={patient.syncStatus as 'DRAFT' | 'QUEUED' | 'SYNCED' | 'CONFLICT'} />
+   440→                <span className="text-slate-400">· {patient.age ?? '?'}y {patient.gender.toLowerCase()}</span>
+   441→                <span className="text-slate-400">· {patient.chiefComplaint ?? 'No complaint'}</span>
+   442→              </div>
+   443→            )}
+   444→          </div>
+   445→
+   446→          {/* Firewall check */}
+   447→          {patient && !firewallOk && (
+   448→            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-xs">
+   449→              <p className="flex items-center gap-1.5 font-semibold text-red-400">
+   450→                <ShieldAlert className="h-3.5 w-3.5" /> AI disabled for this patient
+   451→              </p>
+   452→              <p className="mt-1 text-slate-400">
+   453→                patient_summary_v1 not generated. Complete Step 8 of the Patient Entry Wizard first.
+   454→              </p>
+   455→            </div>
+   456→          )}
+   457→
+   458→          {/* Lab report config */}
+   459→          {docType === 'LAB_REPORT' && firewallOk && (
+   460→            <LabReportConfig
+   461→              reportType={labReportType}
+   462→              onReportTypeChange={(t) => { setLabReportType(t); setParamValues({}); setResult(null) }}
+   463→              paramValues={paramValues}
+   464→              onParamChange={(name, v) => setParamValues((s) => ({ ...s, [name]: v }))}
+   465→            />
+   466→          )}
+   467→
+   468→          {/* Generate button */}
+   469→          {firewallOk && (
+   470→            <div className="flex flex-wrap items-center gap-2">
+   471→              <Button onClick={runAi} disabled={loading} className="fx-btn-border-trace btn-press ripple gap-1.5">
+   472→                {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+   473→                {result ? 'Regenerate' : 'Generate with AI'}
+   474→              </Button>
+   475→              {result && (
+   476→                <Button variant="outline" size="sm" onClick={() => setResult(null)} className="fx-btn-border-trace btn-press ripple gap-1.5">
+   477→                  <RefreshCw className="h-3.5 w-3.5" /> Clear
+   478→                </Button>
+   479→              )}
+   480→              <span className="ml-auto text-[11px] text-slate-400">
+   481→                {loading ? '4-tier failover active…' : 'Non-blocking'}
+   482→              </span>
+   483→            </div>
+   484→          )}
+   485→
+   486→          {/* Loading inline */}
+   487→          {loading && !result && (
+   488→            <div className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-10">
+   489→              <Loader2 className="h-5 w-5 animate-spin text-violet-300" />
+   490→              <div>
+   491→                <p className="text-sm font-medium">Generating {card.title.toLowerCase()}…</p>
+   492→                <p className="text-[11px] text-slate-400">AI is processing the de-identified summary</p>
+   493→              </div>
+   494→            </div>
+   495→          )}
+   496→
+   497→          {/* Result display */}
+   498→          <AnimatePresence>
+   499→            {result && (
+   500→              <motion.div
+   501→                initial={{ opacity: 0, y: 6 }}
+   502→                animate={{ opacity: 1, y: 0 }}
+   503→                exit={{ opacity: 0 }}
+   504→                className="space-y-3"
+   505→              >
+   506→                <ResultDisplay docType={docType} result={result} labReportType={labReportType} />
+   507→
+   508→                {/* Save actions */}
+   509→                {(docType === 'INVOICE' || docType === 'LAB_REPORT') && (
+   510→                  <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+   511→                    <div className="text-xs">
+   512→                      <p className="font-medium">
+   513→                        {saved
+   514→                          ? (docType === 'INVOICE' ? 'Invoice saved to patient record' : 'Lab report saved to patient record')
+   515→                          : (docType === 'INVOICE' ? 'Save this invoice to the patient record?' : 'Save this lab report?')}
+   516→                      </p>
+   517→                      <p className="text-slate-400">
+   518→                        {saved ? 'You can view it under Patient Detail → Invoices / Lab Reports.' : 'Records the generated document with the AI advisory attached.'}
+   519→                      </p>
+   520→                    </div>
+   521→                    <Button
+   522→                      size="sm"
+   523→                      onClick={docType === 'INVOICE' ? saveInvoice : saveLabReport}
+   524→                      disabled={saving || saved}
+   525→                      className="fx-btn-border-trace btn-press ripple gap-1.5"
+   526→                    >
+   527→                      {saved ? <CheckCircle2 className="h-3.5 w-3.5" /> : saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+   528→                      {saved ? 'Saved' : saving ? 'Saving…' : 'Save'}
+   529→                    </Button>
+   530→                  </div>
+   531→                )}
+   532→
+   533→                <DisclaimerChip text={result.disclaimer} />
+   534→              </motion.div>
+   535→            )}
+   536→          </AnimatePresence>
+   537→        </div>
+   538→      </ScrollArea>
+   539→    </>
+   540→  )
+   541→}
+   542→
+   543→// ── Lab report config ────────────────────────────────────────────────────────
+   544→function LabReportConfig({
+   545→  reportType, onReportTypeChange, paramValues, onParamChange,
+   546→}: {
+   547→  reportType: string
+   548→  onReportTypeChange: (t: string) => void
+   549→  paramValues: Record<string, string>
+   550→  onParamChange: (name: string, value: string) => void
+   551→}) {
+   552→  const template = LAB_PARAMETER_TEMPLATES[reportType] ?? []
+   553→  return (
+   554→    <GlassPanel variant="subtle" className="p-4">
+   555→      <div className="flex flex-wrap items-end justify-between gap-3">
+   556→        <div className="min-w-[200px] flex-1">
+   557→          <Label className="text-xs font-medium text-slate-400">Report Type</Label>
+   558→          <Select value={reportType} onValueChange={onReportTypeChange}>
+   559→            <SelectTrigger className="mt-1.5">
+   560→              <SelectValue />
+   561→            </SelectTrigger>
+   562→            <SelectContent>
+   563→              {LAB_REPORT_TYPES.map((t) => (
+   564→                <SelectItem key={t} value={t}>{LAB_REPORT_LABELS[t]}</SelectItem>
+   565→              ))}
+   566→            </SelectContent>
+   567→          </Select>
+   568→        </div>
+   569→        <Badge variant="outline" className="gap-1">
+   570→          <FlaskConical className="h-3 w-3" /> {template.length} parameters
+   571→        </Badge>
+   572→      </div>
+   573→      <Separator className="my-3" />
+   574→      <div className="grid gap-3 sm:grid-cols-2">
+   575→        {template.map((t) => (
+   576→          <div key={t.name} className="space-y-1">
+   577→            <Label className="text-xs">
+   578→              {t.name}
+   579→              <span className="ml-1 text-[10px] text-slate-400">
+   580→                {t.unit && `(${t.unit})`} · ref {t.refRange}
+   581→              </span>
+   582→            </Label>
+   583→            <Input
+   584→              type="text"
+   585→              inputMode="decimal"
+   586→              placeholder={`e.g. ${t.refRange}`}
+   587→              value={paramValues[t.name] ?? ''}
+   588→              onChange={(e) => onParamChange(t.name, e.target.value)}
+   589→              className="h-8 text-sm"
+   590→            />
+   591→          </div>
+   592→        ))}
+   593→      </div>
+   594→      <p className="mt-2 text-[11px] text-slate-400">
+   595→        Leave blank if not measured. AI will analyze entered values against reference ranges.
+   596→      </p>
+   597→    </GlassPanel>
+   598→  )
+   599→}
+   600→
+   601→// ── Result display (per doc type) ────────────────────────────────────────────
+   602→function ResultDisplay({
+   603→  docType, result, labReportType,
+   604→}: {
+   605→  docType: DocType
+   606→  result: AiCallResult
+   607→  labReportType: string
+   608→}) {
+   609→  const o = result.output
+   610→  return (
+   611→    <div className="space-y-3">
+   612→      {/* Common header */}
+   613→      <GlassPanel variant="subtle" className="p-4">
+   614→        <div className="flex flex-wrap items-start justify-between gap-3">
+   615→          <div className="min-w-0 flex-1">
+   616→            <p className="text-xs font-medium text-slate-400">AI Summary</p>
+   617→            <p className="mt-1 text-sm">{o.summary}</p>
+   618→          </div>
+   619→          <div className="flex flex-col items-end gap-1.5">
+   620→            <RiskBadge level={(o.risk_level as RiskLevel) ?? 'low'} />
+   621→            <TierBadge tier={result.tierUsed} />
+   622→          </div>
+   623→        </div>
+   624→        <div className="mt-3">
+   625→          <div className="mb-1 flex items-center justify-between text-xs">
+   626→            <span className="text-slate-400">Confidence</span>
+   627→            <span className="font-semibold tabular-nums">{Math.round(o.confidence * 100)}%</span>
+   628→          </div>
+   629→          <ConfidenceMeter value={o.confidence} />
+   630→        </div>
+   631→      </GlassPanel>
+   632→
+   633→      {/* Invoice */}
+   634→      {docType === 'INVOICE' && (
+   635→        <GlassPanel className="overflow-hidden p-0">
+   636→          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+   637→            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+   638→              Line Items · {o.line_items?.length ?? 0}
+   639→            </p>
+   640→          </div>
+   641→          <div className="overflow-x-auto orio-scroll">
+   642→            <table className="w-full text-sm">
+   643→              <thead>
+   644→                <tr className="border-b text-left text-xs text-slate-400">
+   645→                  <th className="px-4 py-2 font-medium">Description</th>
+   646→                  <th className="px-4 py-2 text-right font-medium">Qty</th>
+   647→                  <th className="px-4 py-2 text-right font-medium">Unit Price</th>
+   648→                  <th className="px-4 py-2 text-right font-medium">Amount</th>
+   649→                </tr>
+   650→              </thead>
+   651→              <tbody>
+   652→                {o.line_items?.map((it, i) => (
+   653→                  <tr key={i} className="border-b border-white/10 last:border-0">
+   654→                    <td className="px-4 py-2.5">{it.description}</td>
+   655→                    <td className="px-4 py-2.5 text-right tabular-nums">{it.quantity}</td>
+   656→                    <td className="px-4 py-2.5 text-right tabular-nums">{formatCurrency(it.unit_price)}</td>
+   657→                    <td className="px-4 py-2.5 text-right font-medium tabular-nums">
+   658→                      {formatCurrency((it.quantity ?? 0) * (it.unit_price ?? 0))}
+   659→                    </td>
+   660→                  </tr>
+   661→                ))}
+   662→                {(!o.line_items || o.line_items.length === 0) && (
+   663→                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-slate-400">No items.</td></tr>
+   664→                )}
+   665→              </tbody>
+   666→              {o.line_items && o.line_items.length > 0 && (
+   667→                <tfoot>
+   668→                  <tr className="border-t bg-white/5">
+   669→                    <td colSpan={3} className="px-4 py-2.5 text-right text-xs text-slate-400">
+   670→                      Subtotal · Tax (5%) · Total
+   671→                    </td>
+   672→                    <td className="px-4 py-2.5 text-right text-sm font-bold tabular-nums">
+   673→                      {formatCurrency(
+   674→                        o.line_items.reduce((s, it) => s + (it.quantity ?? 0) * (it.unit_price ?? 0), 0)
+   675→                      )}
+   676→                      <span className="block text-[11px] font-normal text-slate-400">
+   677→                        +5% tax on save
+   678→                      </span>
+   679→                    </td>
+   680→                  </tr>
+   681→                </tfoot>
+   682→              )}
+   683→            </table>
+   684→          </div>
+   685→        </GlassPanel>
+   686→      )}
+   687→
+   688→      {/* Lab report */}
+   689→      {docType === 'LAB_REPORT' && (
+   690→        <GlassPanel className="overflow-hidden p-0">
+   691→          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+   692→            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+   693→              {LAB_REPORT_LABELS[labReportType]} · AI Parameter Analysis
+   694→            </p>
+   695→          </div>
+   696→          <div className="overflow-x-auto orio-scroll">
+   697→            <table className="w-full text-sm">
+   698→              <thead>
+   699→                <tr className="border-b text-left text-xs text-slate-400">
+   700→                  <th className="px-4 py-2 font-medium">Parameter</th>
+   701→                  <th className="px-4 py-2 font-medium">Value</th>
+   702→                  <th className="px-4 py-2 font-medium">Status</th>
+   703→                  <th className="px-4 py-2 font-medium">AI Note</th>
+   704→                </tr>
+   705→              </thead>
+   706→              <tbody>
+   707→                {o.parameters_analysis?.map((p, i) => (
+   708→                  <tr key={i} className="border-b border-white/10 last:border-0">
+   709→                    <td className="px-4 py-2.5 font-medium">{p.parameter}</td>
+   710→                    <td className="px-4 py-2.5 tabular-nums">{p.value}</td>
+   711→                    <td className="px-4 py-2.5"><ParamStatus status={p.status} /></td>
+   712→                    <td className="px-4 py-2.5 text-slate-400">{p.note}</td>
+   713→                  </tr>
+   714→                ))}
+   715→                {(!o.parameters_analysis || o.parameters_analysis.length === 0) && (
+   716→                  <tr><td colSpan={4} className="px-4 py-6 text-center text-sm text-slate-400">No analysis.</td></tr>
+   717→                )}
+   718→              </tbody>
+   719→            </table>
+   720→          </div>
+   721→          {o.advice && o.advice.length > 0 && (
+   722→            <div className="border-t border-white/10 px-4 py-3">
+   723→              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+   724→                <Activity className="h-3.5 w-3.5" /> Advisory
+   725→              </p>
+   726→              <ul className="space-y-1">
+   727→                {o.advice.map((a, i) => (
+   728→                  <li key={i} className="text-xs text-slate-100/90">• {a}</li>
+   729→                ))}
+   730→              </ul>
+   731→            </div>
+   732→          )}
+   733→        </GlassPanel>
+   734→      )}
+   735→
+   736→      {/* Prescription */}
+   737→      {docType === 'PRESCRIPTION' && (
+   738→        <GlassPanel className="overflow-hidden p-0">
+   739→          <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+   740→            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+   741→              Rx · {o.prescription?.length ?? 0} item(s)
+   742→            </p>
+   743→          </div>
+   744→          <div className="overflow-x-auto orio-scroll">
+   745→            <table className="w-full text-sm">
+   746→              <thead>
+   747→                <tr className="border-b text-left text-xs text-slate-400">
+   748→                  <th className="px-4 py-2 font-medium">Drug</th>
+   749→                  <th className="px-4 py-2 font-medium">Dosage</th>
+   750→                  <th className="px-4 py-2 font-medium">Frequency</th>
+   751→                  <th className="px-4 py-2 font-medium">Duration</th>
+   752→                  <th className="px-4 py-2 font-medium">Notes</th>
+   753→                </tr>
+   754→              </thead>
+   755→              <tbody>
+   756→                {o.prescription?.map((rx, i) => (
+   757→                  <tr key={i} className="border-b border-white/10 last:border-0">
+   758→                    <td className="px-4 py-2.5 font-medium">{rx.drug}</td>
+   759→                    <td className="px-4 py-2.5 tabular-nums">{rx.dosage}</td>
+   760→                    <td className="px-4 py-2.5">{rx.frequency}</td>
+   761→                    <td className="px-4 py-2.5">{rx.duration}</td>
+   762→                    <td className="px-4 py-2.5 text-slate-400">{rx.notes ?? '—'}</td>
+   763→                  </tr>
+   764→                ))}
+   765→                {(!o.prescription || o.prescription.length === 0) && (
+   766→                  <tr><td colSpan={5} className="px-4 py-6 text-center text-sm text-slate-400">No prescription items.</td></tr>
+   767→                )}
+   768→              </tbody>
+   769→            </table>
+   770→          </div>
+   771→          {o.advice && o.advice.length > 0 && (
+   772→            <div className="border-t border-white/10 px-4 py-3">
+   773→              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+   774→                <Activity className="h-3.5 w-3.5" /> Patient Advice
+   775→              </p>
+   776→              <ul className="space-y-1">
+   777→                {o.advice.map((a, i) => (
+   778→                  <li key={i} className="text-xs text-slate-100/90">• {a}</li>
+   779→                ))}
+   780→              </ul>
+   781→            </div>
+   782→          )}
+   783→        </GlassPanel>
+   784→      )}
+   785→
+   786→      {/* Certificate */}
+   787→      {docType === 'CERTIFICATE' && (
+   788→        <GlassPanel className="p-5">
+   789→          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+   790→            <FileBadge className="h-5 w-5 text-violet-300" />
+   791→            <p className="text-sm font-semibold">Medical Certificate — Draft</p>
+   792→            <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
+   793→              <AlertTriangle className="h-2.5 w-2.5" /> Requires doctor signature
+   794→            </Badge>
+   795→          </div>
+   796→          <div className="mt-3 space-y-3 text-sm">
+   797→            <p className="text-slate-100/90">{o.summary}</p>
+   798→            {o.treatment_plan && o.treatment_plan.length > 0 && (
+   799→              <div>
+   800→                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Recommended Rest / Recovery</p>
+   801→                <ul className="mt-1 space-y-1">
+   802→                  {o.treatment_plan.map((p, i) => (
+   803→                    <li key={i} className="text-sm">• {p}</li>
+   804→                  ))}
+   805→                </ul>
+   806→              </div>
+   807→            )}
+   808→            {o.advice && o.advice.length > 0 && (
+   809→              <div>
+   810→                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Certificate Recommendation</p>
+   811→                <ul className="mt-1 space-y-1">
+   812→                  {o.advice.map((a, i) => (
+   813→                    <li key={i} className="text-sm">• {a}</li>
+   814→                  ))}
+   815→                </ul>
+   816→              </div>
+   817→            )}
+   818→          </div>
+   819→        </GlassPanel>
+   820→      )}
+   821→
+   822→      {/* Limitations */}
+   823→      {o.limitations && o.limitations.length > 0 && (
+   824→        <GlassPanel variant="subtle" className="p-3">
+   825→          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+   826→            <AlertTriangle className="h-3.5 w-3.5" /> AI Limitations
+   827→          </p>
+   828→          <ul className="space-y-1">
+   829→            {o.limitations.map((it, i) => (
+   830→              <li key={i} className="text-xs text-slate-400">• {it}</li>
+   831→            ))}
+   832→          </ul>
+   833→        </GlassPanel>
+   834→      )}
+   835→    </div>
+   836→  )
+   837→}
+   838→
+   839→// ── Sub-components ───────────────────────────────────────────────────────────
+   840→function PatientPickerInline({
+   841→  patients, value, onChange,
+   842→}: {
+   843→  patients: HubPatient[]
+   844→  value: string | null
+   845→  onChange: (id: string) => void
+   846→}) {
+   847→  const [search, setSearch] = useState('')
+   848→  const selected = patients.find((p) => p.id === value) ?? null
+   849→  const [open, setOpen] = useState(false)
+   850→  const filtered = patients.filter((p) => {
+   851→    const q = search.toLowerCase()
+   852→    return (
+   853→      p.fullName.toLowerCase().includes(q) ||
+   854→      p.localId.toLowerCase().includes(q) ||
+   855→      (p.chiefComplaint ?? '').toLowerCase().includes(q)
+   856→    )
+   857→  })
+   858→  return (
+   859→    <div className="relative">
+   860→      <Button
+   861→        variant="outline"
+   862→        role="combobox"
+   863→        className="fx-btn-border-trace btn-press ripple w-full justify-between font-normal"
+   864→        onClick={() => setOpen((o) => !o)}
+   865→      >
+   866→        {selected ? (
+   867→          <span className="flex items-center gap-2 truncate">
+   868→            <span className="truncate">{selected.fullName}</span>
+   869→            <span className="text-[11px] text-slate-400">· {selected.localId}</span>
+   870→          </span>
+   871→        ) : (
+   872→          <span className="text-slate-400">Select patient…</span>
+   873→        )}
+   874→        <ChevronRight className={cn('h-4 w-4 opacity-50 transition-transform', open && 'rotate-90')} />
+   875→      </Button>
+   876→      {open && (
+   877→        <>
+   878→          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+   879→          <div className="absolute z-50 mt-1 w-full rounded-lg border border-white/10 bg-popover p-2 shadow-lg">
+   880→            <Input
+   881→              autoFocus
+   882→              placeholder="Search patient…"
+   883→              value={search}
+   884→              onChange={(e) => setSearch(e.target.value)}
+   885→              className="h-8 text-sm"
+   886→            />
+   887→            <div className="mt-2 max-h-60 overflow-y-auto orio-scroll">
+   888→              {filtered.length === 0 ? (
+   889→                <p className="py-4 text-center text-xs text-slate-400">No patient found.</p>
+   890→              ) : (
+   891→                filtered.map((p) => (
+   892→                  <button
+   893→                    key={p.id}
+   894→                    onClick={() => { onChange(p.id); setOpen(false); setSearch('') }}
+   895→                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/5"
+   896→                  >
+   897→                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-[10px] font-semibold text-violet-300">
+   898→                      {p.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
+   899→                    </div>
+   900→                    <div className="min-w-0 flex-1">
+   901→                      <p className="truncate text-sm font-medium">{p.fullName}</p>
+   902→                      <p className="truncate text-[11px] text-slate-400">
+   903→                        {p.localId} · {p.age ?? '?'}y · {p.chiefComplaint ?? 'No complaint'}
+   904→                      </p>
+   905→                    </div>
+   906→                    {p.localSummary ? (
+   907→                      <Lock className="h-3 w-3 text-emerald-500" />
+   908→                    ) : (
+   909→                      <ShieldAlert className="h-3 w-3 text-red-500" />
+   910→                    )}
+   911→                  </button>
+   912→                ))
+   913→              )}
+   914→            </div>
+   915→          </div>
+   916→        </>
+   917→      )}
+   918→    </div>
+   919→  )
+   920→}
+   921→
+   922→function TierBadge({ tier }: { tier: number }) {
+   923→  const cls = tier === 1
+   924→    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+   925→    : tier === 2
+   926→      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+   927→      : 'bg-red-500/15 text-red-400 border-red-500/30'
+   928→  return (
+   929→    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', cls)}>
+   930→      <Sparkles className="h-2.5 w-2.5" />
+   931→      Tier {tier} {tier === 1 ? '— Success' : `— Failover ${tier}`}
+   932→    </span>
+   933→  )
+   934→}
+   935→
+   936→function ParamStatus({ status }: { status: string }) {
+   937→  const map: Record<string, string> = {
+   938→    normal: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+   939→    low: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+   940→    high: 'bg-red-500/15 text-red-400 border-red-500/30',
+   941→  }
+   942→  return (
+   943→    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase', map[status] ?? map.normal)}>
+   944→      {status}
+   945→    </span>
+   946→  )
+   947→}
+   948→
+   949→function MiniStat({
+   950→  label, value, icon, accent = 'default',
+   951→}: {
+   952→  label: string
+   953→  value: number
+   954→  icon: React.ReactNode
+   955→  accent?: 'default' | 'emerald' | 'red'
+   956→}) {
+   957→  const cls = accent === 'emerald'
+   958→    ? 'text-emerald-400'
+   959→    : accent === 'red'
+   960→      ? 'text-red-400'
+   961→      : 'text-slate-400'
+   962→  return (
+   963→    <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+   964→      <p className={cn('flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide', cls)}>
+   965→        {icon} {label}
+   966→      </p>
+   967→      <p className="mt-0.5 text-lg font-bold tabular-nums">{value}</p>
+   968→    </div>
+   969→  )
+   970→}
+   971→
+   972→function formatCurrency(n: number): string {
+   973→  return new Intl.NumberFormat('en-IN', {
+   974→    style: 'currency',
+   975→    currency: 'INR',
+   976→    maximumFractionDigits: 2,
+   977→  }).format(n ?? 0)
+   978→}
+   979→
