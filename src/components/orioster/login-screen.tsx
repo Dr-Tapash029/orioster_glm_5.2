@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { RoleBadge } from '@/components/orioster/ui-primitives'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   HeartPulse,
   ShieldCheck,
-  WifiOff,
   Loader2,
   Stethoscope,
   Users,
@@ -16,96 +15,93 @@ import {
   Mail,
   Lock,
   User,
-  Building2,
-  Sparkles,
   Eye,
   EyeOff,
+  Building2,
+  type LucideIcon,
 } from 'lucide-react'
 import type { AppRole } from '@/lib/types'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { WordReveal } from '@/components/orioster/word-reveal'
 
-interface StaffMember {
-  id: string
-  name: string
-  email: string
-  role: AppRole
-}
-
-const ROLE_ICONS: Record<string, React.ReactNode> = {
-  DOCTOR: <Stethoscope className="h-5 w-5" />,
-  NURSE: <Users className="h-5 w-5" />,
-  ADMIN: <FileText className="h-5 w-5" />,
-  LAB_TECH: <FlaskConical className="h-5 w-5" />,
-}
-
-const ROLE_DESCRIPTIONS: Record<string, string> = {
-  DOCTOR: 'Clinical decisions, diagnosis confirmation, AI review',
-  NURSE: 'Patient intake, vitals recording, entry wizard',
-  ADMIN: 'Scheduling, invoicing, staff management, AI Hub',
-  LAB_TECH: 'Lab report parameter entry, AI analysis',
-}
+const ROLE_OPTIONS: { value: AppRole; label: string; icon: LucideIcon; desc: string }[] = [
+  { value: 'DOCTOR', label: 'Doctor', icon: Stethoscope, desc: 'Clinical decisions & AI review' },
+  { value: 'NURSE', label: 'Nurse', icon: Users, desc: 'Patient intake & vitals' },
+  { value: 'ADMIN', label: 'Admin', icon: FileText, desc: 'Scheduling & invoicing' },
+  { value: 'LAB_TECH', label: 'Lab Tech', icon: FlaskConical, desc: 'Lab reports & analysis' },
+]
 
 export function LoginScreen() {
   const setUser = useAppStore((s) => s.setUser)
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [staff, setStaff] = useState<StaffMember[]>([])
-  const [loading, setLoading] = useState(true)
-  const [signingIn, setSigningIn] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
-  // Sign up form state
-  const [signUpName, setSignUpName] = useState('')
-  const [signUpEmail, setSignUpEmail] = useState('')
-  const [signUpPassword, setSignUpPassword] = useState('')
-  const [signUpRole, setSignUpRole] = useState<AppRole>('DOCTOR')
-  const [signUpCompany, setSignUpCompany] = useState('')
+  // Form state
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [role, setRole] = useState<AppRole>('DOCTOR')
   const [showPassword, setShowPassword] = useState(false)
 
-  useEffect(() => {
-    fetch('/api/auth')
-      .then((r) => r.json())
-      .then((d) => setStaff(d.staff ?? []))
-      .catch(() => toast.error('Failed to load staff accounts'))
-      .finally(() => setLoading(false))
-  }, [])
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email || !password) {
+      toast.error('Please enter email and password')
+      return
+    }
+    if (mode === 'signup' && !name) {
+      toast.error('Please enter your name')
+      return
+    }
 
-  async function handleLogin(s: StaffMember) {
-    setSigningIn(s.id)
+    setLoading(true)
     try {
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: s.email }),
+        body: JSON.stringify({
+          email,
+          password,
+          name: mode === 'signup' ? name : undefined,
+          role: mode === 'signup' ? role : undefined,
+        }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Login failed')
+      if (!res.ok) throw new Error(data.error ?? 'Authentication failed')
       toast.success(`Welcome, ${data.user.name}`)
       setUser(data.user)
     } catch (e) {
       toast.error((e as Error).message)
-      setSigningIn(null)
+    } finally {
+      setLoading(false)
     }
   }
 
-  function handleSignUp(e: React.FormEvent) {
-    e.preventDefault()
-    if (!signUpName || !signUpEmail || !signUpPassword) {
-      toast.error('Please fill all required fields')
-      return
+  async function handleGoogleSignIn() {
+    setGoogleLoading(true)
+    try {
+      // Simulate Google OAuth — in production, use NextAuth.js or @react-oauth/google
+      // For now, use a demo Google account
+      const googleEmail = 'doctor@orioster.health'
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: googleEmail, provider: 'google' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Google sign-in failed')
+      toast.success(`Welcome, ${data.user.name}`)
+      setUser(data.user)
+    } catch (e) {
+      toast.error((e as Error).message)
+    } finally {
+      setGoogleLoading(false)
     }
-    // Simulate signup — create user session
-    toast.success('Account created! Welcome to Orioster.')
-    setUser({
-      id: `new-${Date.now()}`,
-      name: signUpName,
-      email: signUpEmail,
-      role: signUpRole,
-    })
   }
 
   return (
-    <div className="wope-bg relative flex min-h-screen flex-col items-center justify-center overflow-x-hidden overflow-y-auto p-4">
+    <div className="wope-bg relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
       {/* Moving violet light rays */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="wope-light-ray absolute -left-1/4 top-0 h-[200%] w-32 bg-gradient-to-b from-transparent via-violet-400/10 to-transparent" style={{ animationDelay: '0s' }} />
@@ -113,30 +109,27 @@ export function LoginScreen() {
         <div className="wope-light-ray absolute -left-1/4 top-0 h-[200%] w-40 bg-gradient-to-b from-transparent via-violet-500/6 to-transparent" style={{ animationDelay: '5s' }} />
       </div>
 
-      {/* Top brand */}
-      <div className="relative mb-6 flex flex-col items-center gap-3 text-center">
-        <div className="wope-logo-glow bg-glow-in flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-2xl lg:h-16 lg:w-16">
-          <HeartPulse className="h-7 w-7 lg:h-9 lg:w-9" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl text-glow-pulse" style={{ fontFamily: 'var(--font-heading)' }}>
-            <WordReveal text="ORIOSTER" delay={0.2} wordDelay={0.12} />
-          </h1>
-          <p className="mt-1 text-xs font-medium tracking-wider text-violet-400 word-reveal" style={{ animationDelay: '0.6s' }}>
-            AI-POWERED HOSPITAL MANAGEMENT SYSTEM
-          </p>
-        </div>
+      {/* Official Logo */}
+      <div className="relative mb-5 flex flex-col items-center gap-1">
+        <img
+          src="/orioster-logo.jpeg"
+          alt="Orioster Logo"
+          className="anim-scale-in h-28 w-28 rounded-2xl object-contain shadow-2xl sm:h-32 sm:w-32"
+          style={{ filter: 'drop-shadow(0 0 20px rgba(113,61,255,0.3))' }}
+        />
       </div>
 
-      {/* Auth card with Sign In / Sign Up tabs */}
-      <div className="glass-strong section-slide-up relative w-full max-w-md overflow-hidden rounded-2xl p-4 sm:p-5 lg:p-6" style={{ animationDelay: '0.4s' }}>
+      {/* Auth Card */}
+      <div className="glass-strong anim-fade-in-up relative w-full max-w-md rounded-2xl p-5 sm:p-6">
         {/* Tab switcher */}
         <div className="mb-5 flex gap-1 rounded-xl bg-white/5 p-1">
           <button
             onClick={() => setMode('signin')}
             className={cn(
-              'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex-1 py-2 text-sm font-medium',
-              mode === 'signin' && 'fx-btn-border-trace-active'
+              'btn-press flex-1 rounded-lg py-2.5 text-sm font-semibold transition-all',
+              mode === 'signin'
+                ? 'bg-violet-500/20 text-white shadow-[0_0_15px_rgba(113,61,255,0.2)]'
+                : 'text-slate-400 hover:text-white'
             )}
           >
             Sign In
@@ -144,263 +137,162 @@ export function LoginScreen() {
           <button
             onClick={() => setMode('signup')}
             className={cn(
-              'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex-1 py-2 text-sm font-medium',
-              mode === 'signup' && 'fx-btn-border-trace-active'
+              'btn-press flex-1 rounded-lg py-2.5 text-sm font-semibold transition-all',
+              mode === 'signup'
+                ? 'bg-violet-500/20 text-white shadow-[0_0_15px_rgba(113,61,255,0.2)]'
+                : 'text-slate-400 hover:text-white'
             )}
           >
             Sign Up
           </button>
         </div>
 
-        {mode === 'signin' ? (
-          <SignInPanel
-            staff={staff}
-            loading={loading}
-            signingIn={signingIn}
-            onLogin={handleLogin}
-          />
-        ) : (
-          <SignUpPanel
-            name={signUpName}
-            email={signUpEmail}
-            password={signUpPassword}
-            role={signUpRole}
-            company={signUpCompany}
-            showPassword={showPassword}
-            onNameChange={setSignUpName}
-            onEmailChange={setSignUpEmail}
-            onPasswordChange={setSignUpPassword}
-            onRoleChange={setSignUpRole}
-            onCompanyChange={setSignUpCompany}
-            onTogglePassword={() => setShowPassword(!showPassword)}
-            onSubmit={handleSignUp}
-          />
-        )}
+        {/* Google Sign-In Button */}
+        <button
+          onClick={handleGoogleSignIn}
+          disabled={googleLoading || loading}
+          className="btn-press mb-4 flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50"
+        >
+          {googleLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-violet-400" />
+          ) : (
+            <svg className="h-5 w-5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+          )}
+          Continue with Google
+        </button>
 
-        <div className="mt-5 flex items-center gap-2 rounded-lg border border-violet-500/10 bg-violet-500/5 px-3 py-2 text-[11px] text-slate-400">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-          Offline-first · Local SQLite is runtime authority · AI is advisory only
+        {/* Divider */}
+        <div className="mb-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-[11px] text-slate-500">or</span>
+          <div className="h-px flex-1 bg-white/10" />
         </div>
-      </div>
 
-      {/* AI orb decoration */}
-      <div className="pointer-events-none mt-6 flex flex-col items-center gap-2">
-        <div className="relative flex h-10 w-10 items-center justify-center">
-          <div className="wope-orb-ring absolute inset-0 rounded-full bg-violet-400/20" />
-          <div className="wope-orb-ring absolute inset-1 rounded-full bg-violet-400/30" style={{ animationDelay: '0.5s' }} />
-          <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-400 to-violet-600 shadow-[0_0_25px_rgba(113,61,255,0.4)]">
-            <Sparkles className="h-3.5 w-3.5 text-white" />
+        {/* Email/Password Form */}
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {mode === 'signup' && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-400">Full Name</label>
+              <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
+                <User className="h-4 w-4 text-slate-500" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Dr. Tapash Roy"
+                  className="h-10 w-full bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-400">Email</label>
+            <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
+              <Mail className="h-4 w-4 text-slate-500" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@hospital.health"
+                className="h-10 w-full bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+              />
+            </div>
           </div>
-        </div>
-        <p className="text-[10px] font-medium tracking-wider text-violet-400/60">ORIO AI</p>
-      </div>
 
-      <footer className="mt-auto pt-6 text-center text-[11px] text-slate-600">
-        Orioster · AI-Powered HMS · &copy; {new Date().getFullYear()}
-      </footer>
-    </div>
-  )
-}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-400">Password</label>
+            <div className="glass-input flex items-center gap-2 rounded-lg px-3 py-2.5">
+              <Lock className="h-4 w-4 text-slate-500" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-10 w-full bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-slate-500 hover:text-violet-300"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
 
-// ═══════════════════════════════════════════════════════════════
-// SIGN IN PANEL — Quick role selection
-// ═══════════════════════════════════════════════════════════════
-
-function SignInPanel({
-  staff,
-  loading,
-  signingIn,
-  onLogin,
-}: {
-  staff: StaffMember[]
-  loading: boolean
-  signingIn: string | null
-  onLogin: (s: StaffMember) => void
-}) {
-  return (
-    <div>
-      <div className="mb-4">
-        <h2 className="text-base font-semibold text-white">Select your role</h2>
-        <p className="text-xs text-slate-400">Quick sign in — no password required</p>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {staff.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => onLogin(s)}
-              disabled={signingIn !== null}
-              className={cn(
-                'anim-fade-in-up card-lift btn-press ripple fx-btn-border-trace group flex items-center gap-2.5 p-2.5 text-left disabled:opacity-50 sm:gap-3 sm:p-3'
-              )}
-              style={{ animationDelay: `${i * 0.06}s` }}
-            >
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300 sm:h-9 sm:w-9">
-                {ROLE_ICONS[s.role] ?? <Users className="h-5 w-5" />}
+          {/* Role Selection (sign up only) */}
+          {mode === 'signup' && (
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Select Role</label>
+              <div className="grid grid-cols-2 gap-2">
+                {ROLE_OPTIONS.map((opt) => {
+                  const Icon = opt.icon
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setRole(opt.value)}
+                      className={cn(
+                        'btn-press flex items-center gap-2 rounded-lg border p-2.5 text-left transition-all',
+                        role === opt.value
+                          ? 'border-violet-500/40 bg-violet-500/15 text-white'
+                          : 'border-white/10 bg-white/5 text-slate-400 hover:border-violet-500/20'
+                      )}
+                    >
+                      <Icon className="h-4 w-4 text-violet-400" />
+                      <div>
+                        <p className="text-xs font-semibold">{opt.label}</p>
+                        <p className="text-[9px] text-slate-500">{opt.desc}</p>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-semibold text-white">{s.name}</p>
-                  <RoleBadge role={s.role} />
-                </div>
-                <p className="truncate text-[11px] text-slate-500">{s.email}</p>
-                <p className="mt-0.5 hidden truncate text-[10px] text-slate-600 sm:block">{ROLE_DESCRIPTIONS[s.role]}</p>
-              </div>
-              {signingIn === s.id && (
-                <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-violet-400" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+            </div>
+          )}
 
-// ═══════════════════════════════════════════════════════════════
-// SIGN UP PANEL — Registration form
-// ═══════════════════════════════════════════════════════════════
-
-function SignUpPanel({
-  name,
-  email,
-  password,
-  role,
-  company,
-  showPassword,
-  onNameChange,
-  onEmailChange,
-  onPasswordChange,
-  onRoleChange,
-  onCompanyChange,
-  onTogglePassword,
-  onSubmit,
-}: {
-  name: string
-  email: string
-  password: string
-  role: AppRole
-  company: string
-  showPassword: boolean
-  onNameChange: (v: string) => void
-  onEmailChange: (v: string) => void
-  onPasswordChange: (v: string) => void
-  onRoleChange: (v: AppRole) => void
-  onCompanyChange: (v: string) => void
-  onTogglePassword: () => void
-  onSubmit: (e: React.FormEvent) => void
-}) {
-  const roles: AppRole[] = ['DOCTOR', 'NURSE', 'ADMIN', 'LAB_TECH']
-
-  return (
-    <form onSubmit={onSubmit} className="space-y-3">
-      <div className="mb-4">
-        <h2 className="text-base font-semibold text-white">Create your account</h2>
-        <p className="text-xs text-slate-400">Join Orioster to get started</p>
-      </div>
-
-      {/* Name */}
-      <div>
-        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Full Name *</label>
-        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
-          <User className="h-4 w-4 flex-shrink-0 text-slate-500" />
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-            placeholder="e.g. Dr. Tapash Roy"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Email */}
-      <div>
-        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Email *</label>
-        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
-          <Mail className="h-4 w-4 flex-shrink-0 text-slate-500" />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="you@hospital.health"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Password */}
-      <div>
-        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Password *</label>
-        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
-          <Lock className="h-4 w-4 flex-shrink-0 text-slate-500" />
-          <input
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            placeholder="••••••••"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={onTogglePassword}
-            className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex h-8 w-8 flex-shrink-0 items-center justify-center text-slate-500 hover:text-violet-300"
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={loading || googleLoading}
+            className="fx-btn-border-trace btn-press ripple w-full gap-2"
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-4 w-4" />
+            )}
+            {mode === 'signin' ? 'Sign In' : 'Create Account'}
+          </Button>
+        </form>
+
+        {/* Demo accounts hint */}
+        {mode === 'signin' && (
+          <div className="mt-4 rounded-lg border border-violet-500/10 bg-violet-500/5 px-3 py-2 text-[11px] text-slate-400">
+            <p className="font-medium text-violet-300">Demo accounts:</p>
+            <p className="mt-0.5">doctor@orioster.health · nurse@orioster.health</p>
+            <p>admin@orioster.health · lab@orioster.health</p>
+            <p className="mt-0.5 text-slate-500">Any password works for demo accounts.</p>
+          </div>
+        )}
       </div>
 
-      {/* Role */}
-      <div>
-        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Role *</label>
-        <div className="grid grid-cols-2 gap-2">
-          {roles.map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => onRoleChange(r)}
-              className={cn(
-                'fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple flex items-center gap-2 rounded-lg border p-2 text-left transition-all',
-                role === r
-                  ? 'border-violet-500/40 bg-violet-500/15 text-white'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:border-violet-500/20'
-              )}
-            >
-              <span className="flex-shrink-0 text-violet-400">{ROLE_ICONS[r]}</span>
-              <span className="text-xs font-medium">{r === 'LAB_TECH' ? 'Lab Tech' : r.charAt(0) + r.slice(1).toLowerCase()}</span>
-            </button>
-          ))}
+      {/* Footer */}
+      <div className="mt-6 flex flex-col items-center gap-1">
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+          Offline-first · Local SQLite · AI is advisory only
         </div>
+        <p className="text-[10px] text-slate-600">
+          Orioster · AI-Powered HMS · © {new Date().getFullYear()}
+        </p>
       </div>
-
-      {/* Company */}
-      <div>
-        <label className="mb-1 block text-[11px] text-slate-400 lg:text-xs">Company / Hospital</label>
-        <div className="glass-input flex h-10 items-center gap-2 rounded-lg px-3">
-          <Building2 className="h-4 w-4 flex-shrink-0 text-slate-500" />
-          <input
-            type="text"
-            value={company}
-            onChange={(e) => onCompanyChange(e.target.value)}
-            placeholder="e.g. Riverside Medical Center"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
-          />
-        </div>
-      </div>
-
-      <Button
-        type="submit"
-        className="fx-btn-border-trace btn-press ripple h-11 w-full gap-2"
-      >
-        <Sparkles className="h-4 w-4" />
-        Create Account
-      </Button>
-    </form>
+    </div>
   )
 }

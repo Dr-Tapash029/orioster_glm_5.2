@@ -6,7 +6,6 @@ import { useTheme } from 'next-themes'
 import { OnlineIndicator, OfflineBanner, RoleBadge } from '@/components/orioster/ui-primitives'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  HeartPulse,
   LayoutDashboard,
   Users,
   UserPlus,
@@ -142,9 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => navigate('dashboard')}
                 className="btn-press flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-white/5 lg:hidden"
               >
-                <div className="wope-logo-glow flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-                  <HeartPulse className="h-4 w-4" />
-                </div>
+                <img src="/orioster-logo.jpeg" alt="Orioster" className="h-8 w-8 rounded-lg object-cover" />
               </button>
 
               {/* Search — hidden on mobile (use search icon instead), inline on tablet+ */}
@@ -406,19 +403,19 @@ function NotificationButton() {
       </button>
 
       {open && (
-        <div className="anim-fade-in-up absolute right-0 top-10 z-50 w-80 max-w-[calc(100vw-1.5rem)] glass-panel-solid rounded-xl p-3 shadow-2xl">
+        <div className="anim-fade-in-up glass-panel-solid fixed left-2 right-2 top-14 z-50 max-h-[70vh] overflow-hidden rounded-xl p-3 shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-10 sm:w-80 sm:max-w-[calc(100vw-1.5rem)]">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-white">Notifications</p>
             {unreadCount > 0 && (
               <button
                 onClick={markAllNotificationsRead}
-                className="fx-btn-border-trace fx-btn-border-trace-sm btn-press ripple rounded-md px-1.5 py-0.5 text-[11px] text-violet-400 hover:text-violet-300"
+                className="btn-press rounded-md px-2 py-1 text-[11px] text-violet-400 transition-colors hover:bg-violet-500/10 hover:text-violet-300"
               >
                 Mark all read
               </button>
             )}
           </div>
-          <div className="max-h-80 space-y-1.5 overflow-y-auto wope-scroll">
+          <div className="max-h-[60vh] space-y-1.5 overflow-y-auto wope-scroll sm:max-h-80">
             {notifications.length === 0 ? (
               <p className="py-6 text-center text-xs text-slate-500">No notifications</p>
             ) : (
@@ -432,7 +429,7 @@ function NotificationButton() {
                   )}
                 >
                   <div className={cn(
-                    'mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg',
+                    'mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg',
                     n.type === 'critical' ? 'bg-red-500/15 text-red-400' :
                     n.type === 'success' ? 'bg-emerald-500/15 text-emerald-400' :
                     n.type === 'warning' ? 'bg-amber-500/15 text-amber-400' :
@@ -588,9 +585,7 @@ function DesktopSidebar({
     <aside className="hidden w-60 flex-shrink-0 border-r border-white/5 bg-[#0a0118]/60 backdrop-blur-xl lg:flex lg:flex-col">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-white/5 px-5">
-        <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-          <HeartPulse className="h-5 w-5" />
-        </div>
+        <img src="/orioster-logo.jpeg" alt="Orioster" className="h-9 w-9 rounded-xl object-cover" />
         <div>
           <p className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>Orioster</p>
           <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
@@ -774,9 +769,7 @@ function SideDrawer({
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/5 p-4">
             <div className="flex items-center gap-2.5">
-              <div className="wope-logo-glow flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white">
-                <HeartPulse className="h-5 w-5" />
-              </div>
+              <img src="/orioster-logo.jpeg" alt="Orioster" className="h-9 w-9 rounded-xl object-cover" />
               <div>
                 <p className="text-sm font-bold text-white">Orioster</p>
                 <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
