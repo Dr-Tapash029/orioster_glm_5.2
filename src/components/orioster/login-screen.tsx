@@ -112,7 +112,7 @@ export function LoginScreen() {
       {/* Official Logo */}
       <div className="relative mb-5 flex flex-col items-center gap-1">
         <img
-          src="/orioster-logo.jpeg"
+          src="/orioster-logo.png"
           alt="Orioster Logo"
           className="anim-scale-in h-28 w-28 rounded-2xl object-contain shadow-2xl sm:h-32 sm:w-32"
           style={{ filter: 'drop-shadow(0 0 20px rgba(113,61,255,0.3))' }}

@@ -141,7 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => navigate('dashboard')}
                 className="btn-press flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-white/5 lg:hidden"
               >
-                <img src="/orioster-logo.jpeg" alt="Orioster" className="h-8 w-8 rounded-lg object-cover" />
+                <img src="/orioster-logo.png" alt="Orioster" className="h-8 w-8 rounded-lg object-cover" />
               </button>
 
               {/* Search — hidden on mobile (use search icon instead), inline on tablet+ */}
@@ -582,10 +582,10 @@ function DesktopSidebar({
   onLogout: () => void
 }) {
   return (
-    <aside className="hidden w-60 flex-shrink-0 border-r border-white/5 bg-[#0a0118]/60 backdrop-blur-xl lg:flex lg:flex-col">
+    <aside className="hidden w-[216px] flex-shrink-0 border-r border-white/5 bg-[#0a0118]/60 backdrop-blur-xl lg:flex lg:flex-col">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-white/5 px-5">
-        <img src="/orioster-logo.jpeg" alt="Orioster" className="h-9 w-9 rounded-xl object-cover" />
+        <img src="/orioster-logo.png" alt="Orioster" className="h-9 w-9 rounded-xl object-cover" />
         <div>
           <p className="text-sm font-bold tracking-tight text-white-gradient" style={{ fontFamily: 'var(--font-heading)' }}>Orioster</p>
           <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
@@ -685,7 +685,7 @@ function BottomNav({
 }) {
   return (
     <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 lg:hidden">
-      <div className="glass-strong mx-2 mb-2 flex items-center justify-around rounded-2xl px-2 py-2 shadow-2xl">
+      <div className="glass-strong mx-2 mb-2 flex items-center justify-around rounded-2xl px-2 py-1.5 shadow-2xl">
         {items.map((item, idx) => {
           const isMenu = item.label === 'Menu'
           const isActive = isMenu ? drawerOpen : activeView === item.key
@@ -696,7 +696,7 @@ function BottomNav({
               className={cn(
                 'btn-press ripple flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all',
                 isMenu
-                  ? 'relative -mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-[0_0_20px_rgba(113,61,255,0.4)]'
+                  ? 'relative -mt-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-[0_0_20px_rgba(113,61,255,0.4)]'
                   : isActive
                     ? 'text-violet-300'
                     : 'text-slate-500 hover:text-slate-300'
@@ -761,7 +761,7 @@ function SideDrawer({
       {/* Drawer */}
       <div
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] transition-transform duration-300 ease-out',
+          'fixed left-0 top-0 z-50 h-full w-[259px] max-w-[85vw] transition-transform duration-300 ease-out',
           open ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -769,7 +769,7 @@ function SideDrawer({
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/5 p-4">
             <div className="flex items-center gap-2.5">
-              <img src="/orioster-logo.jpeg" alt="Orioster" className="h-9 w-9 rounded-xl object-cover" />
+              <img src="/orioster-logo.png" alt="Orioster" className="h-9 w-9 rounded-xl object-cover" />
               <div>
                 <p className="text-sm font-bold text-white">Orioster</p>
                 <p className="text-[10px] text-violet-400">AI-Powered HMS</p>
